@@ -23,7 +23,7 @@ export default async function handler(req) {
     }
 
     // API anahtarlarını burada veya Vercel Ortam Değişkenlerinde saklayın
-    const COINANK_API_KEY = "LWIzMWUtYzU0Ny1kMjk5LWI2ZDA3Yjc2MzFhYmEyYzkwM2NjfDI4NjYzNDA4MTkxNTEzNDc=";
+    const COINANK_API_KEY = "LWIzMWUtYzU0Ny1kMjk5LWI2ZDA3Yjc2MzFhYmEyYzkwM2NjfDI4NjYzNDIzMDAwOTUzNDc=";
     const COINANK_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMjMwOGVkNTc3ZWQ0YjAyOGQxZTdlN2I3ZjE0ZTdiYiIsImlhdCI6MTc1NTIyMDExMn0.afXUrcg3aoNslxZpOOsxOqLmgsvQA1Mor59ri1boJasq32JZgiLN6pZoj0ohIHDtCWpO7EjzLu1m9qSm3JFz9Q";
 
     // Gelen isteğin URL'sinden sorgu parametrelerini al
