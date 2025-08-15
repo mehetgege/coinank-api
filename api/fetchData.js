@@ -1,42 +1,43 @@
 // Dosya Adı: api/fetchData.js
 
-const fetch = require('node-fetch');
+// Bu dosyanın en üstüne bu satırı ekleyerek Vercel'e bu fonksiyonun
+// Edge ortamında çalışmasını söyleyebiliriz, bu genellikle daha hızlıdır.
+export const config = {
+  runtime: 'edge',
+};
 
-export default async function (req, res) {
+// Vercel Edge fonksiyonu tanımı
+export default async function handler(req) {
     
-    // --- ÖNEMLİ: CORS İzinleri ---
-    // Bu başlıklar, tarayıcının bu API'den gelen veriyi okumasına izin verir.
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', '*'); // Herhangi bir kaynaktan gelen isteklere izin ver
-    // VEYA daha güvenli bir yaklaşım:
-    // res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
-    
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
-
-    // Tarayıcılar, asıl istekten önce bir "preflight" (ön kontrol) isteği (OPTIONS metoduyla) gönderir.
-    // Bu isteğe 204 (No Content) ile cevap vererek CORS kontrolünü geçmesini sağlamalıyız.
+    // Tarayıcının 'preflight' (OPTIONS) isteğini otomatik olarak yönet
+    // Edge ortamı genellikle bunu daha iyi yapar, ancak manuel eklemek garanti sağlar.
     if (req.method === 'OPTIONS') {
-        res.status(204).end();
-        return;
+        return new Response(null, {
+            status: 204,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET',
+                'Access-Control-Allow-Headers': 'Content-Type',
+            },
+        });
     }
-    
-    // API anahtarınızı ve token'ınızı buraya veya ortam değişkenlerine girin
+
+    // API anahtarlarını burada veya Vercel Ortam Değişkenlerinde saklayın
     const COINANK_API_KEY = "LWIzMWUtYzU0Ny1kMjk5LWI2ZDA3Yjc2MzFhYmEyYzkwM2NjfDI4NjYzNDA4MTkxNTEzNDc=";
     const COINANK_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMjMwOGVkNTc3ZWQ0YjAyOGQxZTdlN2I3ZjE0ZTdiYiIsImlhdCI6MTc1NTIyMDExMn0.afXUrcg3aoNslxZpOOsxOqLmgsvQA1Mor59ri1boJasq32JZgiLN6pZoj0ohIHDtCWpO7EjzLu1m9qSm3JFz9Q";
 
-    const { 
-        symbol = 'BTCUSDT', 
-        interval = '1d', 
-        exchange = 'Binance' 
-    } = req.query;
+    // Gelen isteğin URL'sinden sorgu parametrelerini al
+    const { searchParams } = new URL(req.url);
+    const symbol = searchParams.get('symbol') || 'BTCUSDT';
+    const interval = searchParams.get('interval') || '1d';
+    const exchange = searchParams.get('exchange') || 'Binance';
 
     const coinankUrl = `https://api.coinank.com/api/liqMap/getLiqMap?exchange=${exchange}&symbol=${symbol}&interval=${interval}`;
 
     const options = {
         method: 'GET',
         headers: {
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             'Accept': 'application/json, text/plain, */*',
             'coinank-apikey': COINANK_API_KEY,
             'token': COINANK_TOKEN,
@@ -54,12 +55,24 @@ export default async function (req, res) {
         }
 
         const data = await response.json();
-        
-        // Gelen veriyi frontend'e (HTML dosyanıza) JSON olarak gönder
-        res.status(200).json(data);
+
+        // JSON cevabını oluştur ve gerekli CORS başlıklarını ekle
+        return new Response(JSON.stringify(data), {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+            },
+        });
 
     } catch (error) {
         console.error("Vercel Fonksiyon Hatası:", error);
-        res.status(500).json({ error: 'Internal Server Error', details: error.message });
+        return new Response(JSON.stringify({ error: 'Internal Server Error', details: error.message }), {
+            status: 500,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+            },
+        });
     }
 }
