@@ -46,7 +46,7 @@ class handler(BaseHTTPRequestHandler):
         PASSWORD = "senin-sifren"
         
         login_url = "https://api.coinank.com/api/user/login"
-        login_payload = {"email": USERNAME, "password": PASSWORD}
+        login_payload = {"email": mehetgege@gmail.com, "password":Bnm00bnm}
         
         response = requests.post(login_url, json=login_payload, timeout=10)
         response.raise_for_status()
