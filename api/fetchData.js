@@ -11,7 +11,7 @@ module.exports = async (req, res) => {
     'Accept': 'application/json, text/plain, */*',
     'Accept-Encoding': 'gzip, deflate, br, zstd',
     'sec-ch-ua-platform': '"Android"',
-    'coinank-apikey': 'LWIzMWUtYzU0Ny1kMjk5LWI2ZDA3Yjc2MzFhYmEyYzkwM2NjfDI4NjYzMzE4ODAzMzEzNDc=',
+    'coinank-apikey': 'LWIzMWUtYzU0Ny1kMjk5LWI2ZDA3Yjc2MzFhYmEyYzkwM2NjfDI4NjYzNDA4MTkxNTEzNDc=',
     'sec-ch-ua': '"Not;A=Brand";v="99", "Google Chrome";v="139", "Chromium";v="139"',
     'sec-ch-ua-mobile': '?1',
     'client': 'web',
@@ -25,7 +25,8 @@ module.exports = async (req, res) => {
     'referer': 'https://coinank.com/',
     'accept-language': 'tr',
     'priority': 'u=1, i'
-  };
+  }
+};
 
   try {
     const response = await fetch(url, { method: 'GET', headers });
