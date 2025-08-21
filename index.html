@@ -1655,6 +1655,125 @@
             });
         }
         
+        // MOBİL VERSİYONLARI İÇİN EVENT LİSTENERLARI
+        // Mobil bildirimler butonu
+        const mobileNotificationsBtn = document.getElementById('mobile-notifications-btn');
+        if(mobileNotificationsBtn) {
+            const notificationsContainer = document.getElementById('notifications-container');
+            
+            // Bildirimler menüsü oluştur (mobil için)
+            const mobileNotificationMenu = document.createElement('div');
+            mobileNotificationMenu.className = 'mobile-notification-menu';
+            mobileNotificationMenu.style.display = 'none';
+            mobileNotificationMenu.style.position = 'fixed';
+            mobileNotificationMenu.style.right = '10px';
+            mobileNotificationMenu.style.top = '40px';
+            mobileNotificationMenu.style.background = 'var(--panel-bg)';
+            mobileNotificationMenu.style.border = '1px solid var(--border-color)';
+            mobileNotificationMenu.style.borderRadius = '8px';
+            mobileNotificationMenu.style.zIndex = '2100';
+            mobileNotificationMenu.style.padding = '10px';
+            mobileNotificationMenu.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
+            mobileNotificationMenu.style.minWidth = '250px';
+            
+            mobileNotificationMenu.innerHTML = `
+                <div class="notification-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-weight: bold; color: var(--primary);">BİLDİRİMLER</span>
+                    <div style="display: flex; gap: 5px;">
+                        <button id="mobile-notification-history-btn" class="btn btn-tiny" title="Bildirim Geçmişi">📋</button>
+                        <button id="mobile-clear-notifications" class="btn btn-tiny" title="Bildirimleri Temizle">🗑️</button>
+                        <button id="mobile-toggle-notification-sound" class="btn btn-tiny" title="Sesi Aç/Kapat">🔊</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(mobileNotificationMenu);
+            
+            // Mobil bildirim butonuna tıklandığında menüyü göster/gizle
+            mobileNotificationsBtn.addEventListener('click', function() {
+                const isMenuVisible = mobileNotificationMenu.style.display !== 'none';
+                mobileNotificationMenu.style.display = isMenuVisible ? 'none' : 'block';
+                mobileNotificationsBtn.classList.toggle('active', !isMenuVisible);
+            });
+            
+            // Mobil menüdeki butonlar için olay dinleyicileri
+            document.getElementById('mobile-notification-history-btn')?.addEventListener('click', function() {
+                if (window.app && window.app.notificationManager) {
+                    window.app.notificationManager.showHistory();
+                }
+            });
+            
+            document.getElementById('mobile-clear-notifications')?.addEventListener('click', function() {
+                if (window.app && window.app.notificationManager) {
+                    window.app.notificationManager.clearAll();
+                }
+            });
+            
+            document.getElementById('mobile-toggle-notification-sound')?.addEventListener('click', function() {
+                if (window.app && window.app.notificationManager) {
+                    const notificationManager = window.app.notificationManager;
+                    notificationManager.soundEnabled = !notificationManager.soundEnabled;
+                    this.innerHTML = notificationManager.soundEnabled ? '🔊' : '🔇';
+                    notificationManager.notify('Bildirim sesleri ' + (notificationManager.soundEnabled ? 'açıldı' : 'kapatıldı'), 'system', 1);
+                }
+            });
+            
+            // Sayfa dışına tıklandığında mobil menüyü kapat
+            document.addEventListener('click', function(event) {
+                if (!mobileNotificationsBtn.contains(event.target) && 
+                    !mobileNotificationMenu.contains(event.target) && 
+                    mobileNotificationMenu.style.display !== 'none') {
+                    mobileNotificationMenu.style.display = 'none';
+                    mobileNotificationsBtn.classList.remove('active');
+                }
+            });
+        }
+        
+        // Mobil pantheon toggle butonu
+        const mobilePantheonToggleBtn = document.getElementById('mobile-pantheon-toggle-btn');
+        if(mobilePantheonToggleBtn && pantheonUI) {
+            mobilePantheonToggleBtn.addEventListener('click', function() {
+                // Mobil cihazlarda
+                if(window.innerWidth <= 768) {
+                    pantheonUI.classList.toggle('mobile-visible');
+                } else {
+                    // Masaüstü cihazlarda
+                    pantheonUI.style.display = pantheonUI.style.display === 'none' ? 'block' : 'none';
+                }
+                mobilePantheonToggleBtn.classList.toggle('active');
+            });
+        }
+        
+        // Mobil hızlı ayarlar butonu
+        const mobileQuickSettingsBtn = document.getElementById('mobile-quick-settings-btn');
+        if(mobileQuickSettingsBtn) {
+            mobileQuickSettingsBtn.addEventListener('click', function() {
+                document.getElementById('settings-modal-overlay').classList.add('visible');
+                mobileQuickSettingsBtn.classList.add('active');
+                setTimeout(() => mobileQuickSettingsBtn.classList.remove('active'), 500);
+            });
+        }
+        
+        // Mobil istatistikler butonu
+        const mobileVerticalStatsBtn = document.getElementById('mobile-vertical-stats-btn');
+        if(mobileVerticalStatsBtn) {
+            mobileVerticalStatsBtn.addEventListener('click', function() {
+                document.getElementById('honor-modal-overlay').style.display = 'flex';
+                mobileVerticalStatsBtn.classList.add('active');
+                setTimeout(() => mobileVerticalStatsBtn.classList.remove('active'), 500);
+            });
+        }
+        
+        // Mobil log butonu
+        const mobileVerticalLogBtn = document.getElementById('mobile-vertical-log-btn');
+        if(mobileVerticalLogBtn) {
+            mobileVerticalLogBtn.addEventListener('click', function() {
+                document.getElementById('log-modal-overlay').classList.add('visible');
+                mobileVerticalLogBtn.classList.add('active');
+                setTimeout(() => mobileVerticalLogBtn.classList.remove('active'), 500);
+            });
+        }
+        
         // Pantheon kapatma butonu
         const pantheonCloseBtn = document.querySelector('.pantheon-close');
         if(pantheonCloseBtn && pantheonUI) {
@@ -2111,12 +2230,7 @@
         /* Mobil cihazlar için Pantheon UI stilleri - Sabit Boyutlu */
         @media screen and (max-width: 768px) {
             .vertical-icon-panel {
-                top: auto;
-                bottom: 70px;
-                right: 0;
-                transform: none;
-                border-radius: 10px 0 0 10px;
-                padding: 10px 5px;
+                display: none; /* Sol taraftaki dikey panel mobilde gizlenir */
             }
             
             .pantheon-ui {
@@ -2745,6 +2859,12 @@
             <!-- DÜZELTME: Yeni Log butonu eklendi -->
             <button id="mobile-open-log-modal-btn" class="btn btn-tiny">📜 Log</button>
             <button id="mobile-open-settings-modal-btn" class="btn btn-tiny btn-success">Ayarlar</button>
+            <!-- Dikey panel butonlarının mobil versiyonları -->
+            <button id="mobile-notifications-btn" class="btn btn-tiny" title="Bildirimler">📢</button>
+            <button id="mobile-pantheon-toggle-btn" class="btn btn-tiny" title="Panteon Sistemi">👑</button>
+            <button id="mobile-quick-settings-btn" class="btn btn-tiny" title="Hızlı Ayarlar">⚙️</button>
+            <button id="mobile-vertical-stats-btn" class="btn btn-tiny" title="İstatistikler">📊</button>
+            <button id="mobile-vertical-log-btn" class="btn btn-tiny" title="Log">📜</button>
         </div>
 
     </div>
