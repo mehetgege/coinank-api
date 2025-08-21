@@ -1628,7 +1628,66 @@
             });
         }
         
-        // Hızlı ayarlar butonu
+        // ESC tuşu ile modal kapatma (masaüstü)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                // Tüm açık modalları kapat
+                const modals = document.querySelectorAll('.modal-overlay.visible');
+                modals.forEach(modal => {
+                    modal.classList.remove('visible');
+                });
+                
+                // Pantheon UI'yı kapat (mobilde)
+                const pantheonUI = document.getElementById('pantheon-ui');
+                if (pantheonUI && pantheonUI.classList.contains('mobile-visible')) {
+                    pantheonUI.classList.remove('mobile-visible');
+                    const overlay = document.getElementById('pantheon-overlay');
+                    if (overlay) overlay.classList.remove('visible');
+                }
+            }
+        });
+        
+        // Overlay tıklamasıyla modal kapatma (tüm cihazlar)
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('visible');
+                
+                // Honor modal özel durumu (style.display kullanıyor)
+                if (e.target.id === 'honor-modal-overlay') {
+                    e.target.style.display = 'none';
+                }
+            }
+        });
+
+        // Pantheon toggle butonu için özel işlev
+        function togglePantheonUI() {
+            const pantheonUI = document.getElementById('pantheon-ui');
+            const overlay = document.getElementById('pantheon-overlay');
+            
+            if (window.innerWidth <= 768) {
+                // Mobilde overlay ile göster
+                if (pantheonUI && overlay) {
+                    const isVisible = pantheonUI.classList.contains('mobile-visible');
+                    
+                    if (isVisible) {
+                        pantheonUI.classList.remove('mobile-visible');
+                        overlay.classList.remove('visible');
+                    } else {
+                        pantheonUI.classList.add('mobile-visible');
+                        overlay.classList.add('visible');
+                    }
+                }
+            } else {
+                // Masaüstünde normal gösterim
+                if (pantheonUI) {
+                    const isVisible = pantheonUI.style.display !== 'none';
+                    pantheonUI.style.display = isVisible ? 'none' : 'block';
+                    localStorage.setItem('pantheonUIVisible', (!isVisible).toString());
+                }
+            }
+        }
+
+        // Buton olay dinleyicileri güncelleme
         if(quickSettingsBtn) {
             quickSettingsBtn.addEventListener('click', function() {
                 document.getElementById('settings-modal-overlay').classList.add('visible');
@@ -1637,10 +1696,10 @@
             });
         }
         
-        // İstatistikler butonu
+        // İstatistikler butonu - honor modal için güncelleme
         if(verticalStatsBtn) {
             verticalStatsBtn.addEventListener('click', function() {
-                document.getElementById('honor-modal-overlay').style.display = 'flex';
+                document.getElementById('honor-modal-overlay').classList.add('visible');
                 verticalStatsBtn.classList.add('active');
                 setTimeout(() => verticalStatsBtn.classList.remove('active'), 500);
             });
@@ -1655,7 +1714,27 @@
             });
         }
         
-        // Pantheon kapatma butonu
+        // Pantheon butonu - yeni toggle işlevi ile
+        if(pantheonToggleBtn) {
+            pantheonToggleBtn.addEventListener('click', function() {
+                togglePantheonUI();
+                pantheonToggleBtn.classList.add('active');
+                setTimeout(() => pantheonToggleBtn.classList.remove('active'), 500);
+            });
+        }
+        
+        // Modal kapatma butonları
+        document.getElementById('close-settings-modal-btn')?.addEventListener('click', function() {
+            document.getElementById('settings-modal-overlay').classList.remove('visible');
+        });
+        
+        document.getElementById('close-honor-modal')?.addEventListener('click', function() {
+            document.getElementById('honor-modal-overlay').classList.remove('visible');
+        });
+        
+        document.getElementById('close-log-modal-btn')?.addEventListener('click', function() {
+            document.getElementById('log-modal-overlay').classList.remove('visible');
+        });
         const pantheonCloseBtn = document.querySelector('.pantheon-close');
         if(pantheonCloseBtn && pantheonUI) {
             pantheonCloseBtn.addEventListener('click', function() {
@@ -1992,13 +2071,113 @@
         aside#settings-panel, aside#analytics-panel { display: none !important; }
         .hidden-view { display: none !important; } 
 
-        /* YENİ LOG PANELİ STİLLERİ */
-        #log-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 2550; }
-        #log-modal-overlay.visible { display: flex; }
-        .log-modal-content { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; width: 95%; max-width: 1000px; height: 90%; display: flex; flex-direction: column; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
-        .log-modal-header { padding: 10px 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 14px; color: var(--primary); }
-        .log-modal-header .close-btn { background: none; border: none; font-size: 20px; color: var(--text-secondary); cursor: pointer; padding: 0 5px; line-height: 1; }
-        .log-modal-body { padding: 0; overflow-y: auto; flex-grow: 1; }
+        /* MODAL VE OVERLAY ORTAK STİLLERİ */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(3px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2500;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* PANTEON OVERLAY STİLLERİ */
+        #pantheon-overlay {
+            z-index: 2100;
+        }
+        
+        .pantheon-overlay-content {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            width: 90%;
+            max-width: 380px;
+            max-height: 80vh;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow-y: auto;
+        }
+        
+        #pantheon-overlay.visible .pantheon-overlay-content {
+            transform: scale(1) translateY(0);
+        }
+        
+        /* LOG MODAL STİLLERİ */
+        #log-modal-overlay { 
+            z-index: 2550; 
+        }
+        .log-modal-content { 
+            background: var(--panel-bg); 
+            border: 1px solid var(--border-color); 
+            border-radius: 15px; 
+            width: 95%; 
+            max-width: 1000px; 
+            height: 90%; 
+            display: flex; 
+            flex-direction: column; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4); 
+            transform: scale(0.9) translateY(20px); 
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        #log-modal-overlay.visible .log-modal-content { 
+            transform: scale(1) translateY(0); 
+        }
+        
+        .log-modal-header { 
+            padding: 20px 25px 15px; 
+            border-bottom: 1px solid var(--border-color); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-weight: 700; 
+            font-size: 18px; 
+            color: var(--primary); 
+        }
+        
+        .log-modal-header .close-btn { 
+            background: rgba(220, 53, 69, 0.1); 
+            border: 1px solid rgba(220, 53, 69, 0.2); 
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 22px; 
+            color: var(--negative); 
+            cursor: pointer; 
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .log-modal-header .close-btn:hover { 
+            background: var(--negative);
+            color: white; 
+            transform: scale(1.1);
+        }
+        
+        .log-modal-body { 
+            padding: 0; 
+            overflow-y: auto; 
+            flex-grow: 1; 
+        }
         #log-output { font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--text-secondary); padding: 10px; margin: 0; white-space: pre-wrap; word-break: break-all; }
         #log-output .log-error { color: var(--negative); }
         #log-output .log-warn { color: var(--neutral); }
@@ -2008,15 +2187,77 @@
         aside#settings-panel, aside#analytics-panel { display: none !important; }
         .hidden-view { display: none !important; } 
 
-        #settings-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 2500; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
-        #settings-modal-overlay.visible { opacity: 1; visibility: visible; }
-        .settings-modal-content { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; width: 90%; max-width: 900px; max-height: 90%; display: flex; flex-direction: column; box-shadow: 0 8px 30px rgba(0,0,0,0.4); transform: translateY(20px); transition: transform 0.3s ease; }
-        #settings-modal-overlay.visible .settings-modal-content { transform: translateY(0); }
-        .settings-modal-header { padding: 12px 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 15px; color: var(--primary); }
-        .settings-modal-header .close-btn { background: none; border: none; font-size: 20px; color: var(--text-secondary); cursor: pointer; padding: 0 5px; line-height: 1; }
-        .settings-modal-header .close-btn:hover { color: var(--negative); }
-        .settings-modal-body { padding: 15px; overflow-y: auto; flex-grow: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .settings-modal-footer { padding: 12px 15px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; }
+        #settings-modal-overlay { 
+            z-index: 2500; 
+        }
+        .settings-modal-content { 
+            background: var(--panel-bg); 
+            border: 1px solid var(--border-color); 
+            border-radius: 15px; 
+            width: 90%; 
+            max-width: 900px; 
+            max-height: 90%; 
+            display: flex; 
+            flex-direction: column; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4); 
+            transform: scale(0.9) translateY(20px); 
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+        
+        #settings-modal-overlay.visible .settings-modal-content { 
+            transform: scale(1) translateY(0); 
+        }
+        
+        .settings-modal-header { 
+            padding: 20px 25px 15px; 
+            border-bottom: 1px solid var(--border-color); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-weight: 700; 
+            font-size: 18px; 
+            color: var(--primary); 
+        }
+        
+        .settings-modal-header .close-btn { 
+            background: rgba(220, 53, 69, 0.1); 
+            border: 1px solid rgba(220, 53, 69, 0.2); 
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 22px; 
+            color: var(--negative); 
+            cursor: pointer; 
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .settings-modal-header .close-btn:hover { 
+            background: var(--negative);
+            color: white; 
+            transform: scale(1.1);
+        }
+        
+        .settings-modal-body { 
+            padding: 20px; 
+            overflow-y: auto; 
+            flex-grow: 1; 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 25px; 
+        }
+        
+        .settings-modal-footer { 
+            padding: 15px 25px; 
+            border-top: 1px solid var(--border-color); 
+            display: flex; 
+            justify-content: flex-end; 
+            gap: 15px; 
+        }
 
         /* Yeni Sinyal Barı */
         #signal-progress-bar-container {
@@ -2108,45 +2349,239 @@
             overflow: hidden;
         }
         
-        /* Mobil cihazlar için Pantheon UI stilleri - Sabit Boyutlu */
+        /* Mobil cihazlar için responsive tasarım */
         @media screen and (max-width: 768px) {
+            /* Dikey ikon paneli mobilde üste yatay olarak taşı */
             .vertical-icon-panel {
-                top: auto;
-                bottom: 70px;
+                position: fixed;
+                top: calc(var(--ticker-height) + var(--signal-bar-height));
+                left: 0;
                 right: 0;
+                bottom: auto;
                 transform: none;
-                border-radius: 10px 0 0 10px;
-                padding: 10px 5px;
+                border-radius: 0;
+                border: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: 8px;
+                flex-direction: row;
+                justify-content: space-around;
+                gap: 5px;
+                background: var(--panel-bg);
+                backdrop-filter: blur(8px);
+                z-index: 1050;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             }
             
+            /* Mobilde ikon butonları sadece emoji/ikon gösterecek */
+            .vertical-icon-btn {
+                width: 45px;
+                height: 45px;
+                border-radius: 10px;
+                font-size: 22px;
+                background: rgba(22, 27, 34, 0.8);
+                border: 1px solid var(--border-color);
+                backdrop-filter: blur(4px);
+                transition: all 0.3s ease;
+            }
+            
+            .vertical-icon-btn:hover,
+            .vertical-icon-btn:active {
+                background: var(--primary);
+                color: white;
+                transform: scale(1.05);
+                box-shadow: 0 4px 15px rgba(88, 166, 255, 0.3);
+            }
+            
+            /* Pantheon UI mobilde modal benzeri gösterim */
             .pantheon-ui {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 90%;
+                max-width: 380px;
+                max-height: 80vh;
+                background: var(--panel-bg);
+                border: 1px solid var(--border-color);
+                border-radius: 15px;
+                padding: 20px;
+                z-index: 2100;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                backdrop-filter: blur(10px);
                 opacity: 0;
                 visibility: hidden;
-                transform: translateY(20px);
-                width: 240px;
-                height: auto;
-                max-height: 450px;
-                right: 15px;
-                bottom: 60px;
-                transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
-            }
-            
-            .pantheon-content {
-                max-height: 350px;
+                transform: translate(-50%, -50%) scale(0.9);
+                transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             }
             
             .pantheon-ui.mobile-visible {
                 opacity: 1;
                 visibility: visible;
-                transform: translateY(0);
+                transform: translate(-50%, -50%) scale(1);
             }
             
+            /* Mobilde pantheon içeriği scrollable */
+            .pantheon-content {
+                max-height: calc(80vh - 120px);
+                overflow-y: auto;
+                padding-right: 5px;
+            }
+            
+            /* Mobilde tanrı kartları daha büyük */
             .god {
-                height: 55px;
+                height: 70px;
+                padding: 12px;
+                margin-bottom: 8px;
+                border-radius: 10px;
+                background: rgba(22, 27, 34, 0.8);
+                border: 1px solid var(--border-color);
             }
             
+            .god-icon {
+                font-size: 24px;
+                width: 40px;
+                height: 40px;
+                background: rgba(255, 255, 255, 0.1);
+            }
+            
+            .god-name {
+                font-size: 16px;
+                font-weight: 600;
+            }
+            
+            .god-power {
+                font-size: 14px;
+                font-weight: 700;
+            }
+            
+            /* Mobilde yetenek butonları daha büyük */
             .ability {
-                height: 45px;
+                height: 60px;
+                padding: 12px;
+                border-radius: 10px;
+                background: rgba(22, 27, 34, 0.8);
+                border: 1px solid var(--border-color);
+                margin-bottom: 8px;
+            }
+            
+            .ability-icon {
+                font-size: 20px;
+                width: 35px;
+                height: 35px;
+                background: rgba(255, 255, 255, 0.1);
+            }
+            
+            .ability-name {
+                font-size: 15px;
+                font-weight: 600;
+            }
+            
+            .ability-status {
+                font-size: 13px;
+                font-weight: 600;
+            }
+            
+            /* Mobilde panteon başlığı daha büyük */
+            .pantheon-title {
+                font-size: 16px;
+                font-weight: 700;
+            }
+            
+            /* Mobilde kapatma butonu daha büyük */
+            .pantheon-close {
+                width: 32px;
+                height: 32px;
+                font-size: 20px;
+                background: rgba(220, 53, 69, 0.2);
+                border: 1px solid rgba(220, 53, 69, 0.3);
+                border-radius: 50%;
+                color: var(--negative);
+            }
+            
+            .pantheon-close:hover {
+                background: var(--negative);
+                color: white;
+                transform: scale(1.1);
+            }
+            
+            /* Container mobilde icon panel için yer açılması */
+            .container {
+                padding-top: calc(var(--ticker-height) + var(--signal-bar-height) + 60px);
+            }
+            
+            /* Mobilde modal ve panel iyileştirmeleri */
+            .modal-overlay .settings-modal-content,
+            .modal-overlay .log-modal-content { 
+                width: 95%; 
+                margin: 20px; 
+                border-radius: 20px;
+                max-height: 85vh;
+            }
+            
+            .settings-modal-header,
+            .log-modal-header {
+                padding: 25px 20px 20px;
+                font-size: 20px;
+            }
+            
+            .settings-modal-header .close-btn,
+            .log-modal-header .close-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 26px;
+            }
+            
+            .settings-modal-body { 
+                grid-template-columns: 1fr; 
+                gap: 20px; 
+                padding: 20px;
+            }
+            
+            .settings-modal-footer {
+                padding: 20px;
+            }
+            
+            /* Mobilde butonlar daha büyük */
+            .btn {
+                padding: 12px 20px;
+                font-size: 16px;
+                min-height: 48px;
+                border-radius: 10px;
+            }
+            
+            .btn-tiny {
+                padding: 8px 12px;
+                font-size: 14px;
+                min-height: 40px;
+            }
+            
+            /* Form kontrolleri mobilde daha büyük */
+            .form-control {
+                padding: 12px 15px;
+                font-size: 16px;
+                min-height: 48px;
+                border-radius: 10px;
+            }
+            
+            /* Checkbox etiketleri daha büyük */
+            .checkbox-label {
+                font-size: 16px;
+                padding: 12px 0;
+            }
+            
+            /* Panel başlıkları daha büyük */
+            .panel-title {
+                font-size: 18px;
+                padding: 15px;
+            }
+            
+            /* Form grupları arası boşluk */
+            .form-group {
+                margin-bottom: 20px;
+            }
+            
+            .settings-group {
+                margin-bottom: 25px;
             }
         }
         
@@ -2627,6 +3062,13 @@
     <!-- Canvas for visual effects -->
     <canvas id="effects-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></canvas> 
     
+    <!-- Pantheon Overlay for Mobile -->
+    <div id="pantheon-overlay" class="modal-overlay">
+        <div class="pantheon-overlay-content">
+            <!-- Pantheon content will be moved here on mobile -->
+        </div>
+    </div>
+
     <!-- Ultra Kompakt Panteon Sistemi UI -->
     <div id="pantheon-ui" class="pantheon-ui">
         <div class="pantheon-header">
@@ -2848,7 +3290,7 @@
     </div>
 
     <!-- AYARLAR MODAL -->
-    <div id="settings-modal-overlay">
+    <div id="settings-modal-overlay" class="modal-overlay">
         <div class="settings-modal-content">
             <div class="settings-modal-header">
                 <span>AYARLAR & OPTİMİZASYON</span>
@@ -2965,13 +3407,15 @@
    
 
     <!-- ŞEREF TABLOSU MODAL -->
-    <div id="honor-modal-overlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; z-index:2600; align-items:center; justify-content:center;">
-      <div style="background:var(--panel-bg); border:1px solid var(--border-color); border-radius:8px; width:90%; max-width:900px; max-height:90%; overflow:auto;">
-        <div style="padding:10px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
-          <div style="font-weight:700; color:var(--primary)">Şeref Tablosu</div>
-          <button id="close-honor-modal" class="btn btn-tiny">Kapat</button>
+    <div id="honor-modal-overlay" class="modal-overlay">
+      <div class="settings-modal-content">
+        <div class="settings-modal-header">
+          <span>🏆 ŞEREF TABLOSU</span>
+          <button class="close-btn" id="close-honor-modal">&times;</button>
         </div>
-        <div id="honor-modal-body" style="padding:12px;"></div>
+        <div class="settings-modal-body" id="honor-modal-body" style="grid-template-columns: 1fr; padding: 20px;">
+          <!-- Honor content will be populated by JavaScript -->
+        </div>
       </div>
     </div>
 
@@ -5874,8 +6318,17 @@
             window.dispatchEvent(new Event('resize'));
         }
 
-        openSettingsModal() { this.updateSettingsModalUI(); document.getElementById('settings-modal-overlay').classList.add('visible'); }
-        closeSettingsModal() { document.getElementById('settings-modal-overlay').classList.remove('visible'); this.updateActiveStrategies(); this.calculateAllIndicators(); window.dispatchEvent(new Event('resize')); }
+        openSettingsModal() { 
+            this.updateSettingsModalUI(); 
+            document.getElementById('settings-modal-overlay').classList.add('visible'); 
+        }
+        
+        closeSettingsModal() { 
+            document.getElementById('settings-modal-overlay').classList.remove('visible'); 
+            this.updateActiveStrategies(); 
+            this.calculateAllIndicators(); 
+            window.dispatchEvent(new Event('resize')); 
+        }
 
         resetAllSettings() {
             if (confirm('Tüm ayarları ve sinyal geçmişini sıfırlamak istediğinizden emin misiniz? Bu işlem geri alınamaz.')) {
@@ -7304,11 +7757,13 @@
             }
 
             el.innerHTML = html;
-            document.getElementById('honor-modal-overlay').style.display = 'flex';
+            document.getElementById('honor-modal-overlay').classList.add('visible');
             this.lastHonorModalFilter = filter;
         }
 
-        closeHonorModal() { document.getElementById('honor-modal-overlay').style.display = 'none'; }
+        closeHonorModal() { 
+            document.getElementById('honor-modal-overlay').classList.remove('visible'); 
+        }
 
         toggleShadow(key) {
             const cur = !!this.settings.statusMaps.shadowBanned[key];
@@ -8572,13 +9027,13 @@
 <div id="notifications-container" class="notifications"></div>
 
 <!-- Notification History Modal -->
-<div id="notification-history-modal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
+<div id="notification-history-modal" class="modal-overlay">
+    <div class="settings-modal-content">
+        <div class="settings-modal-header">
             <h3>Bildirim Geçmişi</h3>
-            <span class="close-modal">&times;</span>
+            <button class="close-btn close-modal">&times;</button>
         </div>
-        <div class="modal-body">
+        <div class="settings-modal-body" style="grid-template-columns: 1fr;">
             <div class="notification-filters">
                 <button class="filter active" data-filter="all">Tümü</button>
                 <button class="filter" data-filter="trade">İşlem</button>
@@ -8589,7 +9044,7 @@
             </div>
             <div id="notification-history-list"></div>
         </div>
-        <div class="modal-footer">
+        <div class="settings-modal-footer">
             <button id="clear-notifications-history" class="btn btn-danger">Geçmişi Temizle</button>
         </div>
     </div>
