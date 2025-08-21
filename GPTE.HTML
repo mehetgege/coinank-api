@@ -1,0 +1,3873 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ultimate Trading Komuta Merkezi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --ticker-height: 32px;
+      --signal-bar-height: 34px;
+      --header-min-height: 48px;
+      --panel-bg: #0d1117;
+      --input-bg: #0b0f14;
+      --hover-bg: #161b22;
+      --border-color: #30363d;
+      --text-main: #c9d1d9;
+      --text-secondary: #8b949e;
+      --primary: #79c0ff;
+      --positive: #28a745;
+      --negative: #dc3545;
+      --neutral: #ffc107;
+      --war-mode-primary: #ffc107;
+    }
+    [data-theme="light"]{
+      --panel-bg: #ffffff;
+      --input-bg: #f7fafc;
+      --hover-bg: #f2f4f7;
+      --border-color: #e1e4e8;
+      --text-main: #0f172a;
+      --text-secondary: #334155;
+      --primary: #0ea5e9;
+    }
+    [data-theme="war"]{
+      --panel-bg: #1b1302;
+      --input-bg: #0f0a02;
+      --hover-bg: #2a1d04;
+      --border-color: #3c2a07;
+      --text-main: #f8ecd3;
+      --text-secondary: #e5c98f;
+      --primary: #ffc107;
+    }
+
+    /* Panteon Paneli (sağ üst, ticker altı) */
+    #panteon-panel{
+      position: fixed;
+      top: calc(var(--ticker-height) + var(--signal-bar-height) + 6px);
+      right: 10px;
+      z-index: 1200;
+      width: 280px;
+      background: rgba(22,27,34,0.9);
+      backdrop-filter: blur(4px);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-family: 'Roboto Mono', monospace;
+      color: var(--text-main);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+    }
+    #panteon-panel .pp-title{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:8px 10px; border-bottom:1px solid var(--border-color);
+      font-weight:700; font-size:12px; color: var(--primary);
+      user-select:none;
+    }
+    #panteon-panel .pp-body{
+      padding:8px 10px; display:grid; grid-template-columns: 1fr; gap:6px;
+    }
+    .pp-amb{
+      display:flex; align-items:center; justify-content:space-between;
+      background: var(--input-bg); border:1px solid var(--border-color);
+      border-radius:4px; padding:6px 8px; font-size:12px;
+    }
+    .pp-name { font-weight:700; }
+    .pp-rep { font-weight:700; }
+    .pp-mode { font-size:11px; color: var(--text-secondary); }
+
+    /* Kehanet Paneli (sağ alt) */
+    #kehanet-panel{
+      position: fixed;
+      right: 10px;
+      bottom: 12px;
+      z-index: 1200;
+      width: 260px;
+      background: rgba(22,27,34,0.9);
+      backdrop-filter: blur(4px);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-family: 'Roboto Mono', monospace;
+      color: var(--text-main);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+    }
+    #kehanet-panel .kp-title{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:8px 10px; border-bottom:1px solid var(--border-color);
+      font-weight:700; font-size:12px; color:var(--primary); user-select:none;
+    }
+    #kehanet-panel .kp-body{
+      padding:8px 10px; display:grid; gap:6px; font-size:12px;
+    }
+    .kp-row{ display:flex; align-items:center; justify-content:space-between; }
+    .kp-key{ color: var(--text-secondary); }
+    .kp-val{ font-weight:700; }
+
+    /* tsParticles katmanı (İlk Işık ve diğer efektler için) */
+    #cosmic-effects-layer{
+      position: fixed; inset: 0; z-index: 3000; pointer-events: none;
+    }
+
+    /* Mobil uyumluluk */
+    @media screen and (max-width: 768px){
+      #panteon-panel{ display:none; }
+      #kehanet-panel{ right: 8px; bottom: calc(var(--header-min-height) + 8px); width: 220px; }
+    }
+  </style>
+
+  <!-- Orijinal stil bloklarınız (form-control, panel, grid vs.) buradan sonra devam edecek -->
+  <!-- YANI: Sizin mevcut CSS’iniz bu bloktan sonra kalır, biz üstte Panteon ve Kehanet stillerini ekledik. -->
+</head>
+<body class="header-collapsed">
+
+  <!-- Süper üst ticker’iniz burada zaten var, onun altına Panteon Panelini ekliyoruz -->
+  <aside id="panteon-panel" aria-label="Panteon Paneli">
+    <div class="pp-title">
+      <span>⚡ Panteon</span>
+      <span id="pp-env">v3.2</span>
+    </div>
+    <div class="pp-body">
+      <div class="pp-amb" id="amb-metatron">
+        <span class="pp-name">Metatron</span>
+        <span class="pp-rep" data-rep="0">0</span>
+        <span class="pp-mode" data-mode="İnançlı">İnançlı</span>
+      </div>
+      <div class="pp-amb" id="amb-uriel">
+        <span class="pp-name">Uriel</span>
+        <span class="pp-rep" data-rep="0">0</span>
+        <span class="pp-mode" data-mode="İnançlı">İnançlı</span>
+      </div>
+      <div class="pp-amb" id="amb-raphael">
+        <span class="pp-name">Raphael</span>
+        <span class="pp-rep" data-rep="0">0</span>
+        <span class="pp-mode" data-mode="İnançlı">İnançlı</span>
+      </div>
+    </div>
+  </aside>
+
+  <aside id="kehanet-panel" aria-label="Kehanet Paneli">
+    <div class="kp-title">
+      <span>🜲 Kehanet</span>
+      <span id="kp-session">—</span>
+    </div>
+    <div class="kp-body">
+      <div class="kp-row">
+        <span class="kp-key">🛡️ Koruma</span>
+        <span class="kp-val" id="kp-guardian">Aktif</span>
+      </div>
+      <div class="kp-row">
+        <span class="kp-key">⚖️ Rejim</span>
+        <span class="kp-val" id="kp-regime">—</span>
+      </div>
+      <div class="kp-row">
+        <span class="kp-key">⚔️ Nabız</span>
+        <span class="kp-val" id="kp-pulse">—</span>
+      </div>
+    </div>
+  </aside>
+
+  <div id="cosmic-effects-layer"></div>
+
+  <!-- Buradan sonra sizin mevcut HTML yapınız (super-top-ticker, header, grid, vs.) aynen devam eder -->
+
+  <!-- Pantheon Foundation: IndexedDB + Migration + StorageBridge + EffectsManager + Mitolojik isimlendirme -->
+  <script>
+  (function(){
+    'use strict';
+
+    const DB_NAME = 'UTC_PANTHEON_DB';
+    const DB_VERSION = 1;
+
+    class IDBUtil {
+      static promisifyRequest(req){
+        return new Promise((resolve,reject)=>{
+          req.onsuccess = ()=> resolve(req.result);
+          req.onerror = ()=> reject(req.error);
+        });
+      }
+    }
+
+    class DBManager {
+      constructor(){ this.db = null; }
+      static get instance(){
+        if(!window.__dbMan){ window.__dbMan = new DBManager(); }
+        return window.__dbMan;
+      }
+      async open(){
+        if(this.db) return this.db;
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = (ev)=>{
+          const db = ev.target.result;
+          if(!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', { keyPath: 'id' });
+          if(!db.objectStoreNames.contains('panteon')) db.createObjectStore('panteon', { keyPath: 'id' });
+          if(!db.objectStoreNames.contains('strategyStats')) db.createObjectStore('strategyStats', { keyPath: 'strategyKey' });
+          if(!db.objectStoreNames.contains('signals')){
+            const s = db.createObjectStore('signals', { keyPath: 'id', autoIncrement: true });
+            s.createIndex('byTimestamp','timestamp',{unique:false});
+            s.createIndex('bySymbol','symbol',{unique:false});
+            s.createIndex('byStatus','status',{unique:false});
+            s.createIndex('byDirection','direction',{unique:false});
+          }
+          if(!db.objectStoreNames.contains('notifications')){
+            const n = db.createObjectStore('notifications', { keyPath: 'id', autoIncrement: true });
+            n.createIndex('byTimestamp','timestamp',{unique:false});
+            n.createIndex('byType','type',{unique:false});
+          }
+          if(!db.objectStoreNames.contains('kv')) db.createObjectStore('kv',{ keyPath: 'key' });
+          if(!db.objectStoreNames.contains('meta')) db.createObjectStore('meta',{ keyPath: 'key' });
+        };
+        this.db = await IDBUtil.promisifyRequest(req);
+        return this.db;
+      }
+      store(name,mode='readonly'){ const tx = this.db.transaction(name,mode); return tx.objectStore(name); }
+
+      async getSettings(){
+        await this.open();
+        const res = await IDBUtil.promisifyRequest(this.store('settings').get('default'));
+        return res?.data || this._defaults();
+      }
+      async setSettings(data){
+        await this.open();
+        await IDBUtil.promisifyRequest(this.store('settings','readwrite').put({id:'default',data,updatedAt:Date.now()}));
+        return true;
+      }
+      async setPanteonState(data){
+        await this.open();
+        await IDBUtil.promisifyRequest(this.store('panteon','readwrite').put({id:'state',data,updatedAt:Date.now()}));
+        return true;
+      }
+      async getPanteonState(){
+        await this.open();
+        const res = await IDBUtil.promisifyRequest(this.store('panteon').get('state'));
+        return res?.data || this._panteonDefaults();
+      }
+      async kvGet(key){
+        await this.open();
+        const res = await IDBUtil.promisifyRequest(this.store('kv').get(key));
+        return res?.value ?? null;
+      }
+      async kvSet(key,value){
+        await this.open();
+        await IDBUtil.promisifyRequest(this.store('kv','readwrite').put({key,value,updatedAt:Date.now()}));
+        return true;
+      }
+      async getAllStrategyStats(){
+        await this.open();
+        const rows = await IDBUtil.promisifyRequest(this.store('strategyStats').getAll());
+        const out={}; (rows||[]).forEach(r=>out[r.strategyKey]=r.data); return out;
+      }
+      async setStrategyStats(key, stats){
+        await this.open();
+        await IDBUtil.promisifyRequest(this.store('strategyStats','readwrite').put({strategyKey:key,data:stats,updatedAt:Date.now()}));
+        return true;
+      }
+      async addSignal(sig){
+        await this.open();
+        const id = await IDBUtil.promisifyRequest(this.store('signals','readwrite').put(sig));
+        return id;
+      }
+      async setMeta(key,value){
+        await this.open();
+        await IDBUtil.promisifyRequest(this.store('meta','readwrite').put({key,value,updatedAt:Date.now()}));
+        return true;
+      }
+      async getMeta(key){
+        await this.open();
+        const res = await IDBUtil.promisifyRequest(this.store('meta').get(key));
+        return res?.value ?? null;
+      }
+      _defaults(){
+        return {
+          confluenceThreshold: 3,
+          params: { rsiPeriod:14, atrPeriod:14, wallBtc:20, rrRatio:1.5 },
+          cooldowns: { signalMs:15000, sameDirectionMs:30000, oppositeDirectionMs:20000, reverseHysteresisPoints:2, proposalTimeoutMs:3000, strategyProposalMs:10000 },
+          features: { enableSpoofDetection:true, enableCUSUMDrift:true, enableRiskGuardian:true, enableTTS:true, preferredVoiceName:null, enableCandleConfirm:true, enableMtfConfirm:true, mtfTimeframe:'15m', enableDynamicSizing:true },
+          optimization: { enabled:true, autoToggle:true, timeDecaySec:3, dirMargin:0.5, minWeightToStay:0.60, minContribForToggle:30, gating:{enabled:true,spreadMaxPct:0.001,minDepthUsd:50000}, signalQuality:{minContributors:2,minGroups:1}, breakeven:{enabled:true,beAtR:0.8,trailAfterR:1.5,trailToR:0.5} },
+          penalties: { shadowEnabled:true, minWeightToShadow:0.60, minContribForShadow:30, rehabWinRate:0.58, minShadowProposals:20, coolOffMs: 1800000 },
+          statusMaps: { shadowBanned:{}, hardBanned:{} },
+          strategyParams: {},
+          activeStrategies: {}
+        };
+      }
+      _panteonDefaults(){
+        return {
+          zeus:{ role:'creator' },
+          env:{ createdAt: Date.now(), version:'3.2' },
+          ambassadors:{
+            Metatron:{ reputation:0, mode:'İnançlı' },
+            Uriel:{ reputation:0, mode:'İnançlı' },
+            Raphael:{ reputation:0, mode:'İnançlı' }
+          },
+          lastDormancyPenaltyAt: null
+        };
+      }
+    }
+
+    class Migration {
+      static LEGACY = ['utc_settings','utc_strategy_stats','utc_signals','utc_stats','utc_current_symbol','utc_current_timeframe','utc_header_collapsed','utc_current_view','utc_theme','utc_chart_view'];
+      static parse(v){ try{ return JSON.parse(v);}catch{return null;} }
+      static async runOnce(){
+        const db = DBManager.instance;
+        await db.open();
+        const done = await db.getMeta('migrated_v3_2');
+        if(done) return false;
+        const legacy={};
+        for(const k of Migration.LEGACY){ legacy[k]=window.localStorage.getItem(k); }
+
+        const s = Migration.parse(legacy['utc_settings']);
+        if(s) await db.setSettings(s); else await db.setSettings(await db.getSettings());
+
+        const st = Migration.parse(legacy['utc_strategy_stats']);
+        if(st && typeof st === 'object'){ for(const k of Object.keys(st)){ await db.setStrategyStats(k, st[k]); } }
+
+        const sigs = Migration.parse(legacy['utc_signals']);
+        if(Array.isArray(sigs)){
+          for(const sig of sigs){
+            const normalized = { ...sig, timestamp: sig.timestamp || Date.now(), symbol: sig.symbol || 'BTCUSDT', status: sig.status || 'active', direction: sig.direction || 'buy' };
+            await db.addSignal(normalized);
+          }
+        }
+
+        const stats = Migration.parse(legacy['utc_stats']);
+        if(stats) await db.kvSet('globalStats', stats);
+
+        for(const k of ['utc_current_symbol','utc_current_timeframe','utc_header_collapsed','utc_current_view','utc_theme','utc_chart_view']){
+          const raw = legacy[k];
+          if(raw!==null && raw!==undefined){
+            const maybeJson = Migration.parse(raw);
+            await db.kvSet(k, maybeJson!==null ? maybeJson : raw);
+          }
+        }
+        try{ window.localStorage.clear(); }catch{}
+        await db.setMeta('migrated_v3_2', true);
+        return true;
+      }
+    }
+
+    class StorageBridge {
+      constructor(db){ this.db=db; this.cache=new Map(); this.ready=false; }
+      async init(){
+        await this.db.open();
+        const pre = ['utc_current_symbol','utc_current_timeframe','utc_header_collapsed','utc_current_view','utc_theme','utc_chart_view','globalStats'];
+        await Promise.all(pre.map(async k=>{ const v = await this.db.kvGet(k); if(v!==null && v!==undefined) this.cache.set(k,v); }));
+        const settings = await this.db.getSettings(); this.cache.set('utc_settings', settings);
+        const stats = await this.db.getAllStrategyStats(); this.cache.set('utc_strategy_stats', stats);
+        this.ready = true;
+      }
+      getJsonSync(key){ if(!this.ready) return null; return this.cache.has(key) ? this.cache.get(key) : null; }
+      async setJson(key, val){
+        this.cache.set(key,val);
+        if(key==='utc_settings'){ await this.db.setSettings(val); }
+        else if(key==='utc_strategy_stats'){ for(const [k,v] of Object.entries(val||{})){ await this.db.setStrategyStats(k,v); } }
+        else { await this.db.kvSet(key,val); }
+        return true;
+      }
+      inject(app){
+        app.loadData = (k)=> this.getJsonSync(k);
+        app.saveData = (k,d)=>{ this.setJson(k,d); };
+        const originalSaveSettings = app.saveSettings?.bind(app);
+        app.saveSettings = ()=>{ this.setJson('utc_settings', app.settings); if(originalSaveSettings) originalSaveSettings(); };
+      }
+    }
+
+    class EffectsManager {
+      constructor(){
+        this.layerId = 'cosmic-effects-layer';
+        this.ensureLayer();
+      }
+      ensureLayer(){
+        if(!document.getElementById(this.layerId)){
+          const d = document.createElement('div');
+          d.id = this.layerId;
+          d.style.position='fixed'; d.style.inset='0'; d.style.zIndex='3000'; d.style.pointerEvents='none';
+          document.body.appendChild(d);
+        }
+      }
+      async ensureTsParticles(){
+        if(window.tsParticles) return;
+        await new Promise((resolve,reject)=>{
+          const s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/npm/tsparticles@3/tsparticles.bundle.min.js';
+          s.async = true;
+          s.onload = ()=> resolve(true);
+          s.onerror = ()=> reject(new Error('tsParticles yüklenemedi'));
+          document.head.appendChild(s);
+        });
+      }
+      async firstLight(duration=2200){
+        try{
+          await this.ensureTsParticles();
+          const config = {
+            background:{ color:'transparent' }, fullScreen:{ enable:false },
+            particles:{ number:{ value:0 } },
+            emitters:{
+              position:{ x:50, y:50 },
+              rate:{ delay:0.01, quantity:60 },
+              life:{ duration: duration/1000, count:1 },
+              particles:{
+                move:{ enable:true, speed:{min:10,max:40}, outModes:'destroy' },
+                color:{ value:['#ffffff','#7dd3fc','#60a5fa'] },
+                shape:{ type:'circle' },
+                size:{ value:{min:1,max:3} },
+                opacity:{ value:{min:0.2,max:0.8} },
+                wobble:{ enable:true, distance:5, speed:20 },
+                shadow:{ enable:true, blur:6, color:'#a5f3fc' }
+              }
+            }
+          };
+          const container = await window.tsParticles.load('cosmic-effects-layer', config);
+          setTimeout(()=>{ try{ container?.destroy(); }catch{} }, duration+250);
+        }catch(e){
+          const el = document.createElement('div');
+          el.style.position='absolute'; el.style.inset='0';
+          el.style.background='radial-gradient(circle at center, rgba(255,255,255,0.9), rgba(96,165,250,0.5), rgba(2,6,23,0))';
+          el.style.animation='firstLightPulse 1.8s ease-out forwards';
+          const st = document.createElement('style');
+          st.textContent = `
+            @keyframes firstLightPulse {
+              0% { opacity:0; transform:scale(0.6); filter:blur(4px); }
+              25%{ opacity:1; transform:scale(1.0); filter:blur(2px); }
+              100%{ opacity:0; transform:scale(1.8); filter:blur(8px); }
+            }
+          `;
+          document.head.appendChild(st);
+          document.getElementById(this.layerId).appendChild(el);
+          setTimeout(()=>{ try{ el.remove(); }catch{} }, 2000);
+        }
+      }
+    }
+
+    async function bootstrapPantheon(){
+      if(!('indexedDB' in window)){
+        console.error('IndexedDB desteklenmiyor. Geçici bellek modu.');
+      }
+      const db = DBManager.instance;
+      await db.open();
+      await Migration.runOnce();
+      const storage = new StorageBridge(db);
+      await storage.init();
+
+      // İlk Işık
+      const fx = new EffectsManager();
+      await fx.firstLight(2200);
+
+      // UI mitolojik isimlendirme (buton/metin güncellemeleri)
+      const renameUI = ()=>{
+        const honorBtn = document.getElementById('honor-board-btn'); if(honorBtn) honorBtn.textContent = 'Panteon';
+        const bannedBtn = document.getElementById('banned-board-btn'); if(bannedBtn) bannedBtn.textContent = 'Zindan';
+        const saveBtn = document.getElementById('save-settings-btn'); if(saveBtn) saveBtn.textContent = 'Kaderi Mühürle';
+        const resetBtn = document.getElementById('reset-all-settings-btn'); if(resetBtn) resetBtn.textContent = 'Evreni Sıfırla';
+        const mobileHonor = document.getElementById('mobile-honor-board-btn'); if(mobileHonor) mobileHonor.textContent = '🏛️';
+        const mobileBanned = document.getElementById('mobile-banned-board-btn'); if(mobileBanned) mobileBanned.textContent = 'ZDN';
+        const settingsTitle = document.querySelector('.settings-modal-header span'); if(settingsTitle) settingsTitle.textContent = 'AMELİYATHANE & OPTİMİZASYON';
+        const clearSignals = document.getElementById('modal-clear-signals-btn'); if(clearSignals) clearSignals.textContent = 'Kurban Et';
+      };
+      renameUI();
+
+      // Panteon panelini persist edilen değerlerle başlat
+      const initPanteonPanel = async ()=>{
+        const state = await db.getPanteonState();
+        const envEl = document.getElementById('pp-env'); if(envEl) envEl.textContent = state.env?.version || 'v3.2';
+        const setAmb = (id, data)=>{
+          const root = document.getElementById(id);
+          if(!root) return;
+          const rep = root.querySelector('.pp-rep'); if(rep){ rep.textContent = String(data.reputation ?? 0); rep.dataset.rep = String(data.reputation ?? 0); }
+          const mode = root.querySelector('.pp-mode'); if(mode){ mode.textContent = data.mode || 'İnançlı'; mode.dataset.mode = data.mode || 'İnançlı'; }
+        };
+        setAmb('amb-metatron', state.ambassadors?.Metatron || { reputation:0, mode:'İnançlı' });
+        setAmb('amb-uriel', state.ambassadors?.Uriel || { reputation:0, mode:'İnançlı' });
+        setAmb('amb-raphael', state.ambassadors?.Raphael || { reputation:0, mode:'İnançlı' });
+      };
+      initPanteonPanel();
+
+      // Kehanet Paneli (app hazır olduğunda canlı verilerden beslenecek)
+      const initKehanetPanel = ()=>{
+        const sync = ()=>{
+          if(!window.app) return;
+          const regime = window.app.marketRegime || '—';
+          const session = window.app.sessionState || '—';
+          const guardian = (window.app.settings?.features?.enableRiskGuardian) ? 'Aktif' : 'Pasif';
+          const atrPct = (window.app.indicators?.atr && window.app.marketData?.price) ? (window.app.indicators.atr / window.app.marketData.price) : 0;
+          const pulse = atrPct ? `${(atrPct*100).toFixed(2)}%` : '—';
+          const elReg = document.getElementById('kp-regime'); if(elReg) elReg.textContent = regime;
+          const elSes = document.getElementById('kp-session'); if(elSes) elSes.textContent = session;
+          const elGua = document.getElementById('kp-guardian'); if(elGua) elGua.textContent = guardian;
+          const elPulse = document.getElementById('kp-pulse'); if(elPulse) elPulse.textContent = pulse;
+        };
+        setInterval(sync, 1500);
+      };
+      initKehanetPanel();
+
+      // Global export
+      window.Pantheon = { db, storage, effects: new EffectsManager() };
+
+      return storage;
+    }
+
+    // Başlat
+    document.addEventListener('DOMContentLoaded', async ()=>{
+      try{
+        const bridge = await bootstrapPantheon();
+        // window.app oluşturulduktan sonra köprü app’e enjekte edilecek.
+        const ensureInject = setInterval(()=>{
+          if(window.app && window.Pantheon && window.Pantheon.storage){
+            window.Pantheon.storage.inject(window.app);
+            clearInterval(ensureInject);
+          }
+        }, 100);
+      }catch(e){
+        console.error('Pantheon bootstrap hatası:', e);
+      }
+    });
+  })();
+  
+
+ (function(){
+  'use strict';
+
+  // ————————— CONFIG (netleştirme sonrası DB’den yönetilir) —————————
+  const PANTHEON_CONFIG = {
+    reputationBounds: { min: -100, max: 100 },
+    reputationWeights: {
+      tpContributor: +1.0,        // Madde 4: TP katkısı +1
+      tpRaphael: +0.5,            // Madde 4: TP'de Raphael +0.5
+      slAll: -2.0,                // Madde 4: SL olursa tüm elçiler -2
+      slResponsibleExtra: -3.0,   // Madde 4: Sorumlu elçiye ek -3
+      dormancyPenalty: -1.0       // Madde 4: 4 saat işlem yoksa tüm elçiler -1
+    },
+    modeThresholds: {
+      // Not: Netleştirmenize göre güncelleyebiliriz.
+      // İnançlı (agresif + özgüvenli), Şüpheci (temkinli), Kıyamet (defansif) eşikleri:
+      inanc: 20,    // rep >= 20 -> İnançlı
+      kiyame t: -10 // rep <= -10 -> Kıyamet; arası: Şüpheci
+    },
+    dormancyHours: 4, // Madde 4: 4 saat işlem yoksa ceza
+    moodModifiers: {
+      // Modların sistem davranışına etkisi:
+      Inançlı:   { thresholdDelta: -0.25, cooldownScale: 0.92, rrMultiplier: 1.05 }, // daha kolay sinyal
+      Şüpheci:   { thresholdDelta: 0.00,  cooldownScale: 1.00, rrMultiplier: 1.00 },
+      Kıyamet:   { thresholdDelta: +0.40, cooldownScale: 1.12, rrMultiplier: 0.95 }  // daha zor sinyal
+    },
+    oracle: {
+      // TheOracle (Atlılar) tespit eşikleri — netleştirme ile güncellenebilir
+      warAtrPct: 0.02,          // ATR% > 2% => SAVAŞ
+      famineVolFactor: 0.6,     // volSma20’e göre hacim düşüklüğü => KITLIK
+      plagueDropPct: -0.015,    // son mumda % -1.5 ve üstü ani düşüş => SALGIN
+      deathTrendAdx: 18         // trend dönüşü için düşük ADX veya zıt kırılım => ÖLÜM (temel tetik)
+    },
+    whisperTtlMs: 30 * 60 * 1000 // Kehanet Fısıldaması geçici etki süresi
+  };
+
+  // ————————— EffectsManager genişletmeleri (tsparticles tabanlı) —————————
+  class PantheonEffects {
+    constructor() {
+      this.fx = window.Pantheon?.effects || null;
+    }
+    async buyBurst(){ await this._burst(['#22c55e','#a3e635','#facc15'], 1800, {min:10,max:30}); }
+    async sellAsh(){ await this._burst(['#ef4444','#f97316','#7f1d1d'], 1800, {min:10,max:30}); }
+    async tpCelebrate(){ await this._burst(['#facc15','#fef3c7','#d4af37'], 2200, {min:15,max:35}); }
+    async slExplosion(){ await this._burst(['#7f1d1d','#ef4444','#1f2937'], 1800, {min:20,max:45}); }
+    async divineBeam(){ await this._beam('#e0f2fe','#bae6fd', 1400); }
+    async ghostWall(){ await this._wallGlitch('#94a3b8', 1200); }
+    async ghostShatter(){ await this._shatter('#fca5a5', 1200); }
+
+    async atmosphere(horseman){
+      switch(horseman){
+        case 'SAVAŞ':  await this._ambient(['#111827','#fcd34d'], 3500); break;
+        case 'KITLIK': await this._ambient(['#0f172a','#64748b'], 3500); break;
+        case 'SALGIN': await this._ambient(['#1f2937','#ef4444'], 3500); break;
+        case 'ÖLÜM':   await this._ambient(['#020617','#7dd3fc'], 3500); break;
+      }
+    }
+
+    async _burst(colors, duration, speed){
+      if (!this.fx || !window.tsParticles) {
+        // CSS fallback
+        const el = document.createElement('div');
+        el.style.position='fixed'; el.style.inset='0'; el.style.pointerEvents='none'; el.style.zIndex='3000';
+        el.style.background=`radial-gradient(circle at center, ${colors[0]}66, ${colors[1]}33, transparent)`;
+        el.style.animation='pantheonBurst 1.5s ease-out forwards';
+        const st = document.createElement('style');
+        st.textContent = `
+          @keyframes pantheonBurst {
+            0% { opacity:0; transform:scale(0.7); filter:blur(4px); }
+            25%{ opacity:1; transform:scale(1); }
+            100%{ opacity:0; transform:scale(1.8); filter:blur(8px); }
+          }`;
+        document.head.appendChild(st);
+        document.body.appendChild(el);
+        setTimeout(()=>{ try{ el.remove(); }catch{} }, duration);
+        return;
+      }
+      const config = {
+        background:{ color:'transparent' },
+        fullScreen:{ enable:false },
+        particles:{ number:{ value:0 } },
+        emitters:{
+          position:{ x:50, y:50 },
+          rate:{ delay:0.01, quantity: 50 },
+          life:{ duration: duration/1000, count: 1 },
+          particles:{
+            move:{ enable:true, speed, outModes:'destroy' },
+            color:{ value: colors },
+            shape:{ type:'circle' },
+            size:{ value: { min:1, max:3 } },
+            opacity:{ value:{ min:0.2, max:0.9 } },
+            wobble:{ enable:true, distance: 5, speed: 20 },
+            shadow:{ enable:true, blur: 6, color: colors[1] }
+          }
+        }
+      };
+      const container = await window.tsParticles.load('cosmic-effects-layer', config);
+      setTimeout(()=>{ try{ container?.destroy(); }catch{} }, duration + 200);
+    }
+
+    async _beam(c1, c2, duration){
+      const layer = document.getElementById('cosmic-effects-layer') || document.body;
+      const beam = document.createElement('div');
+      Object.assign(beam.style, {
+        position: 'fixed', top: '-20%', left: '50%', transform: 'translateX(-50%)',
+        width: '8px', height: '120%', zIndex: 3000, pointerEvents:'none',
+        background: `linear-gradient(to bottom, ${c1}, ${c2}, transparent)`,
+        filter: 'blur(3px)', opacity: '0', transition: 'opacity 150ms ease'
+      });
+      layer.appendChild(beam);
+      requestAnimationFrame(()=> beam.style.opacity='1');
+      setTimeout(()=>{ beam.style.opacity='0'; setTimeout(()=>{ try{ beam.remove(); }catch{} }, 250); }, duration);
+    }
+
+    async _wallGlitch(color, duration){
+      const layer = document.getElementById('cosmic-effects-layer') || document.body;
+      const wall = document.createElement('div');
+      Object.assign(wall.style, {
+        position:'fixed', inset:'20% 10% 20% 10%', zIndex:3000, pointerEvents:'none',
+        backdropFilter:'blur(2px)', border:`2px dashed ${color}`, boxShadow:`0 0 20px ${color}`,
+        animation: 'wallGlitch 1.2s steps(6,end) infinite alternate', opacity:'0.85'
+      });
+      const st = document.createElement('style');
+      st.textContent = `
+        @keyframes wallGlitch {
+          0% { transform: skewX(0deg); filter: hue-rotate(0deg); }
+          50%{ transform: skewX(3deg); filter: hue-rotate(30deg); }
+          100%{ transform: skewX(-2deg); filter: hue-rotate(-30deg); }
+        }`;
+      document.head.appendChild(st);
+      layer.appendChild(wall);
+      setTimeout(()=>{ try{ wall.remove(); }catch{} }, duration);
+    }
+
+    async _shatter(color, duration){
+      const layer = document.getElementById('cosmic-effects-layer') || document.body;
+      const shards = document.createElement('div');
+      Object.assign(shards.style, {
+        position:'fixed', inset:'0', zIndex:3000, pointerEvents:'none',
+        background:`radial-gradient(circle at center, ${color}66, transparent)`,
+        animation: 'shatterPulse 0.6s ease-out forwards'
+      });
+      const st = document.createElement('style');
+      st.textContent = `
+        @keyframes shatterPulse {
+          0% { opacity:0; transform: scale(0.8); }
+          50%{ opacity:1; transform: scale(1.05); }
+          100%{ opacity:0; transform: scale(1.4); }
+        }`;
+      document.head.appendChild(st);
+      layer.appendChild(shards);
+      setTimeout(()=>{ try{ shards.remove(); }catch{} }, duration);
+    }
+
+    async _ambient(colors, duration){
+      const layer = document.getElementById('cosmic-effects-layer') || document.body;
+      const fog = document.createElement('div');
+      Object.assign(fog.style, {
+        position:'fixed', inset:'0', zIndex:2500, pointerEvents:'none',
+        background:`radial-gradient(120% 120% at 50% 50%, ${colors[0]}55, ${colors[1]}22, transparent)`,
+        animation:'ambientFlow 3.5s ease-in-out infinite alternate'
+      });
+      const st = document.createElement('style');
+      st.textContent = `
+        @keyframes ambientFlow {
+          0% { filter:blur(6px); transform: scale(1); }
+          100%{ filter:blur(10px); transform: scale(1.05); }
+        }`;
+      document.head.appendChild(st);
+      layer.appendChild(fog);
+      setTimeout(()=>{ try{ fog.remove(); }catch{} }, duration);
+    }
+  }
+
+  // ————————— PanteonManager: Elçiler (Metatron, Uriel, Raphael) —————————
+  class PanteonManager {
+    constructor(bot){
+      this.bot = bot;
+      this.db = window.Pantheon?.db || null;
+      this.effects = new PantheonEffects();
+      this.state = null;
+      this.whisper = { bias: 0, until: 0 }; // Kehanet Fısıltısı etkisi
+      this.lastClosedSignalAt = null;
+      this._thresholdPatchApplied = false;
+      this._dormancyTimer = null;
+    }
+
+    async init(){
+      this.state = await this.db.getPanteonState();
+      // Emissaries ensure
+      ['Metatron','Uriel','Raphael'].forEach(k=>{
+        if(!this.state.ambassadors[k]) this.state.ambassadors[k] = { reputation:0, mode:'Şüpheci' };
+      });
+      this._recalcModes();
+      await this._persist();
+      this._patchBotThreshold();
+      this._startDormancyWatch();
+      this._initSacredInterventionsUI();
+    }
+
+    getAmb(name){ return this.state.ambassadors[name]; }
+
+    async onSignalActivated(signal){
+      // BUY/SELL efektleri ve TTS (mitolojik dil)
+      if (signal.direction === 'buy') await this.effects.buyBurst();
+      else await this.effects.sellAsh();
+    }
+
+    async onSignalResult(signal){
+      // PnL (Prime Consciousness) güncelle ve itibar akışını uygula
+      await this._updatePrimePnL(signal);
+      this._applyReputationFromResult(signal);
+      this._recalcModes();
+      await this._persist();
+      // Görsel tezahür
+      if (signal.status === 'tp') await this.effects.tpCelebrate();
+      if (signal.status === 'sl') await this.effects.slExplosion();
+      // UI güncelle
+      this._updatePanteonPanel();
+    }
+
+    // — Reputation mechanics —
+    _applyReputationFromResult(signal){
+      const w = PANTHEON_CONFIG.reputationWeights;
+      const contributors = signal.contributors || [];
+      if (signal.status === 'tp'){
+        // Katkıda bulunan elçilere +1
+        const contribByAmb = this._aggregateContribByAmb(contributors);
+        Object.keys(contribByAmb).forEach(amb=>{
+          this._bumpRep(amb, w.tpContributor);
+        });
+        // Raphael +0.5
+        this._bumpRep('Raphael', w.tpRaphael);
+      } else if (signal.status === 'sl'){
+        // Tüm elçiler -2
+        ['Metatron','Uriel','Raphael'].forEach(k=> this._bumpRep(k, w.slAll));
+        // Sorumlu Elçiye ek -3 (en yüksek katkı sahibini sorumlu kabul)
+        const topAmb = this._topContributorAmb(contributors);
+        if (topAmb) this._bumpRep(topAmb, w.slResponsibleExtra);
+      }
+      this.lastClosedSignalAt = signal.timestamp;
+    }
+
+    _aggregateContribByAmb(contributors){
+      const acc = {};
+      for (const c of contributors){
+        const amb = this._emissaryOfStrategy(c.strategy);
+        const eff = isFinite(c.effScore) ? c.effScore : (c.baseScore * (c.weight||1));
+        acc[amb] = (acc[amb] || 0) + eff;
+      }
+      return acc;
+    }
+    _topContributorAmb(contributors){
+      const map = this._aggregateContribByAmb(contributors);
+      let top=null, val=-Infinity;
+      Object.keys(map).forEach(k=>{ if (map[k] > val){ val = map[k]; top = k; }});
+      return top;
+    }
+
+    _emissaryOfStrategy(key){
+      // Kural: trending -> Uriel (agresif), meanReversion/neutral -> Metatron (muhafazakar)
+      const grp = this.bot.getStrategyGroup(key);
+      if (grp === 'trending') return 'Uriel';
+      return 'Metatron';
+    }
+
+    _bumpRep(amb, delta){
+      const b = PANTHEON_CONFIG.reputationBounds;
+      const obj = this.state.ambassadors[amb];
+      obj.reputation = Math.max(b.min, Math.min(b.max, (obj.reputation || 0) + delta));
+    }
+
+    _modeOf(rep){
+      const t = PANTHEON_CONFIG.modeThresholds;
+      if (rep >= t.inanc) return 'İnançlı';
+      if (rep <= t.kiyamet) return 'Kıyamet';
+      return 'Şüpheci';
+    }
+
+    _recalcModes(){
+      Object.keys(this.state.ambassadors).forEach(k=>{
+        const a = this.state.ambassadors[k];
+        a.mode = this._modeOf(a.reputation || 0);
+      });
+      // Mood etkilerini uygula (eşik ve cooldown vb.)
+      this._applyMoodToSystem();
+    }
+
+    _combinedThresholdDelta(){
+      // Metatron + Uriel + Raphael modlarına göre etkilerin toplamı + fısıltı etkisi
+      const mm = PANTHEON_CONFIG.moodModifiers;
+      const ambs = this.state.ambassadors;
+      const sum = (mm[ambs.Metatron.mode].thresholdDelta
+                 + mm[ambs.Uriel.mode].thresholdDelta
+                 + mm[ambs.Raphael.mode].thresholdDelta);
+      const bias = (Date.now() <= this.whisper.until) ? this.whisper.bias : 0;
+      return Math.max(-1.0, Math.min(1.0, sum + bias));
+    }
+
+    _applyMoodToSystem(){
+      // Eşik delta: getEffectiveThreshold() üzerine ek delta olarak uygulanır (patch ile)
+      // Cooldown scale ve rrMultiplier: settings’e uygulanır
+      if (!this.bot?.settings) return;
+      const mm = PANTHEON_CONFIG.moodModifiers;
+      const ambs = this.state.ambassadors;
+      const scale = (mm[ambs.Metatron.mode].cooldownScale * mm[ambs.Uriel.mode].cooldownScale * mm[ambs.Raphael.mode].cooldownScale);
+      const rrMult = (mm[ambs.Metatron.mode].rrMultiplier * mm[ambs.Uriel.mode].rrMultiplier * mm[ambs.Raphael.mode].rrMultiplier);
+
+      const cd = this.bot.settings.cooldowns;
+      const rescale = (v)=> Math.round(v * scale);
+      const newCd = {
+        signalMs: rescale(cd.signalMs),
+        sameDirectionMs: rescale(cd.sameDirectionMs),
+        oppositeDirectionMs: rescale(cd.oppositeDirectionMs),
+        reverseHysteresisPoints: cd.reverseHysteresisPoints,
+        proposalTimeoutMs: rescale(cd.proposalTimeoutMs),
+        strategyProposalMs: rescale(cd.strategyProposalMs)
+      };
+      this.bot.settings.cooldowns = newCd;
+
+      // RR multiplier — risk/ödül ayarına küçük çarpan
+      const baseRR = this.bot.settings.params.rrRatio || 1.5;
+      this.bot.settings.params.rrRatio = parseFloat((baseRR * rrMult).toFixed(2));
+
+      this.bot.saveSettings?.();
+    }
+
+    _patchBotThreshold(){
+      if (this._thresholdPatchApplied) return;
+      const orig = this.bot.getEffectiveThreshold.bind(this.bot);
+      this.bot.getEffectiveThreshold = () => {
+        const base = orig();
+        return base + this._combinedThresholdDelta();
+      };
+      this._thresholdPatchApplied = true;
+    }
+
+    _startDormancyWatch(){
+      if (this._dormancyTimer) clearInterval(this._dormancyTimer);
+      this._dormancyTimer = setInterval(()=>{
+        const lastClosed = (this.bot.signals.find(s => s.status==='tp' || s.status==='sl')?.timestamp) || this.lastClosedSignalAt;
+        const now = Date.now();
+        const fourH = PANTHEON_CONFIG.dormancyHours * 3600 * 1000;
+        if (!lastClosed) return;
+        if ((now - lastClosed) >= fourH && (!this.state.lastDormancyPenaltyAt || (now - this.state.lastDormancyPenaltyAt) >= fourH)){
+          ['Metatron','Uriel','Raphael'].forEach(k=> this._bumpRep(k, PANTHEON_CONFIG.reputationWeights.dormancyPenalty));
+          this.state.lastDormancyPenaltyAt = now;
+          this._recalcModes();
+          this._persist();
+          this.bot.showNotification('Durgunluk cezası: Tüm Elçiler -1 itibar.', 'warning');
+          this.bot.speak?.('Kehanet: Durgunluk cezası verildi, Elçiler disipline çağrıldı.');
+          this._updatePanteonPanel();
+        }
+      }, 60*1000);
+    }
+
+    async _updatePrimePnL(signal){
+      // Prime Consciousness = Net kümülatif R
+      const kvKey = 'primePnL_R';
+      const pnl = (await this.db.kvGet(kvKey)) || 0;
+      const rR = signal.entrySlDistance && signal.entrySlDistance>0 ? (signal.entryTpDistance / signal.entrySlDistance) : (this.bot.settings?.params?.rrRatio || 1.5);
+      const delta = (signal.status === 'tp') ? rR : (signal.status === 'sl' ? -1 : 0);
+      const newPnl = parseFloat((pnl + delta).toFixed(3));
+      await this.db.kvSet(kvKey, newPnl);
+      // Kehanet paneline yansıt (Nabız yerine PnL de gösterilebilir opsiyonel)
+      const pulseEl = document.getElementById('kp-pulse');
+      if (pulseEl) pulseEl.textContent = `PnL ${newPnl}R`;
+    }
+
+    async _persist(){ await this.db.setPanteonState(this.state); }
+
+    _updatePanteonPanel(){
+      const setAmb = (id, data)=>{
+        const root = document.getElementById(id);
+        if(!root) return;
+        const rep = root.querySelector('.pp-rep'); if(rep){ rep.textContent = String(data.reputation ?? 0); rep.dataset.rep = String(data.reputation ?? 0); }
+        const mode = root.querySelector('.pp-mode'); if(mode){ mode.textContent = data.mode || 'Şüpheci'; mode.dataset.mode = data.mode || 'Şüpheci'; }
+      };
+      setAmb('amb-metatron', this.state.ambassadors.Metatron);
+      setAmb('amb-uriel', this.state.ambassadors.Uriel);
+      setAmb('amb-raphael', this.state.ambassadors.Raphael);
+    }
+
+    // — Sacred Interventions UI + actions —
+    _initSacredInterventionsUI(){
+      const panel = document.getElementById('kehanet-panel');
+      if (!panel) return;
+      const body = panel.querySelector('.kp-body');
+      if (!body) return;
+
+      // Directive (Whisper)
+      const dWrap = document.createElement('div');
+      dWrap.className = 'kp-row';
+      dWrap.innerHTML = `
+        <span class="kp-key">Fısıltı</span>
+        <span class="kp-val">
+          <select id="kp-directive" style="font-family:'Roboto Mono',monospace; font-size:11px;">
+            <option value="none">—</option>
+            <option value="defensive">BE_MORE_DEFENSIVE</option>
+            <option value="aggressive">BE_MORE_AGGRESSIVE</option>
+            <option value="reset">RESET_MOOD</option>
+          </select>
+          <button id="kp-apply-dir" class="btn btn-tiny">Uygula</button>
+        </span>`;
+      body.appendChild(dWrap);
+
+      // Strategy select + Kurban/Kutsal
+      const sWrap = document.createElement('div');
+      sWrap.className = 'kp-row';
+      const options = Object.keys(this.bot.strategies||{}).map(k=> `<option value="${k}">${this.bot.strategies[k]?.displayName || k}</option>`).join('');
+      sWrap.innerHTML = `
+        <span class="kp-key">Emanetler</span>
+        <span class="kp-val">
+          <select id="kp-strat" style="font-family:'Roboto Mono',monospace; font-size:11px; max-width:120px;">${options}</select>
+          <button id="kp-sacrifice" class="btn btn-tiny">Kurban Et</button>
+          <button id="kp-holywater" class="btn btn-tiny">Kutsal Su</button>
+        </span>`;
+      body.appendChild(sWrap);
+
+      document.getElementById('kp-apply-dir').addEventListener('click', ()=>{
+        const v = (document.getElementById('kp-directive').value || 'none');
+        if (v === 'defensive') this._applyWhisper(-0.35); // eşiği zorlaştır
+        else if (v === 'aggressive') this._applyWhisper(+0.35 * -1); // eşiği kolaylaştır => negatif delta
+        else this._clearWhisper();
+        this.bot.showNotification('Kehanet fısıldandı.', 'info');
+        this.bot.speak?.('Zeus’un fısıltısı evrene yayıldı.');
+        this.effects.divineBeam();
+      });
+
+      document.getElementById('kp-sacrifice').addEventListener('click', ()=>{
+        const key = (document.getElementById('kp-strat').value);
+        this._sacrifice(key);
+      });
+      document.getElementById('kp-holywater').addEventListener('click', ()=>{
+        const key = (document.getElementById('kp-strat').value);
+        this._holyWater(key);
+      });
+    }
+
+    _applyWhisper(biasDelta){
+      this.whisper.bias = biasDelta;
+      this.whisper.until = Date.now() + PANTHEON_CONFIG.whisperTtlMs;
+      this._applyMoodToSystem();
+    }
+    _clearWhisper(){
+      this.whisper.bias = 0;
+      this.whisper.until = 0;
+      this._applyMoodToSystem();
+    }
+
+    _sacrifice(key){
+      if (!key || !this.bot.settings) return;
+      // Raphael'in Ameliyathanesi: gölgeye al
+      this.bot.settings.activeStrategies[key] = false;
+      this.bot.settings.statusMaps.shadowBanned[key] = true;
+      this.bot.updateActiveStrategies();
+      this.bot.saveSettings();
+      this.bot.showNotification(`Kurban Edildi: ${this.bot.strategies[key]?.displayName || key} Ameliyathaneye alındı.`, 'warning');
+      this.bot.speak?.('Raphael: Kurban hazır, ameliyathane meşgul.');
+      this.effects.divineBeam();
+      // Raphael’in itibarı da küçük ödül alabilir
+      this._bumpRep('Raphael', +0.5);
+      this._recalcModes();
+      this._persist();
+      this._updatePanteonPanel();
+    }
+
+    _holyWater(key){
+      if (!key || !this.bot.settings) return;
+      // Zindandan affet: shadow/hardban kaldır, tekrar aktif et
+      this.bot.settings.statusMaps.shadowBanned[key] = false;
+      this.bot.settings.statusMaps.hardBanned[key] = false;
+      this.bot.settings.activeStrategies[key] = true;
+      this.bot.updateActiveStrategies();
+      this.bot.saveSettings();
+      this.bot.showNotification(`Kutsal Su: ${this.bot.strategies[key]?.displayName || key} affedildi, kefaret için göreve!`, 'success');
+      this.bot.speak?.('Raphael: Kutsal su serpildi, kefaret kapısı aralandı.');
+      this.effects.divineBeam();
+      // Raphael küçük eksi alabilir (merhametin bedeli) — tercihe göre ayarlanabilir
+      this._bumpRep('Raphael', -0.2);
+      this._recalcModes();
+      this._persist();
+      this._updatePanteonPanel();
+    }
+  }
+
+  // ————————— TheOracle: Mahşerin Dört Atlısı —————————
+  class TheOracle {
+    constructor(bot, panteon){
+      this.bot = bot;
+      this.pantheon = panteon;
+      this.effects = new PantheonEffects();
+      this.current = null;
+      this._timer = null;
+    }
+    start(){
+      if (this._timer) clearInterval(this._timer);
+      this._timer = setInterval(()=> this._tick(), 5000);
+      this._tick();
+    }
+    stop(){
+      if (this._timer) clearInterval(this._timer);
+      this._timer = null;
+    }
+    _tick(){
+      const horseman = this._detectHorseman();
+      if (horseman !== this.current){
+        this.current = horseman;
+        if (horseman) {
+          this.effects.atmosphere(horseman);
+          this.bot.showNotification(`Mahşerin Atlısı: ${horseman}`, 'warning');
+          this.bot.speak?.(`Atlı göründü: ${horseman}. Kader dönüyor!`);
+          this._applyHorsemanProtocol(horseman);
+        } else {
+          // Atmosfer temizlendi
+          this.bot.showNotification('Atlılar çekildi. Denge sağlandı.', 'info');
+        }
+      }
+      const kpReg = document.getElementById('kp-regime');
+      if (kpReg) kpReg.textContent = this.bot.marketRegime || (horseman || '—');
+    }
+
+    _detectHorseman(){
+      // Girdiler
+      const price = this.bot.marketData?.price || 0;
+      const atr = this.bot.indicators?.atr || null;
+      const adx = this.bot.indicators?.adx || null;
+      const last = this.bot.candles?.[this.bot.candles.length - 1] || null;
+      const volSma20 = this.bot.indicators?.volSma20 || null;
+      if (!price || !last) return null;
+
+      const atrPct = atr ? (atr / price) : 0;
+      const volThin = volSma20 ? (last.volume < (PANTHEON_CONFIG.oracle.famineVolFactor * volSma20)) : false;
+      const candleDropPct = (last.close - last.open) / Math.max(1e-8, last.open);
+
+      // Kurallar
+      if (atrPct > PANTHEON_CONFIG.oracle.warAtrPct) return 'SAVAŞ';
+      if (volThin) return 'KITLIK';
+      if (candleDropPct <= PANTHEON_CONFIG.oracle.plagueDropPct) return 'SALGIN';
+      if (adx && adx.adx && adx.adx < PANTHEON_CONFIG.oracle.deathTrendAdx) return 'ÖLÜM';
+      return null;
+    }
+
+    _applyHorsemanProtocol(horseman){
+      // SAVAŞ: agresyon artar (eşik düşsün), KITLIK: eşik artsın, SALGIN: sinyal üretimi askıda, ÖLÜM: eşik artılsın ve hafıza temizlensin (kısmi)
+      if (horseman === 'SAVAŞ'){
+        this.bot.runtimeThresholdOffset = Math.max(-1.0, (this.bot.runtimeThresholdOffset||0) - 0.4);
+      } else if (horseman === 'KITLIK'){
+        this.bot.runtimeThresholdOffset = Math.min(2.0, (this.bot.runtimeThresholdOffset||0) + 0.5);
+      } else if (horseman === 'SALGIN'){
+        // Araf: sinyaller fiilen durdurulsun: devasa ofset
+        this.bot.runtimeThresholdOffset = 5.0;
+      } else if (horseman === 'ÖLÜM'){
+        this.bot.runtimeThresholdOffset = Math.min(2.0, (this.bot.runtimeThresholdOffset||0) + 0.6);
+        // Kısmi hafıza temizliği: pending sinyaller ve markers
+        this.bot.pendingSignals = [];
+        this.bot.chartManager?.clearMarkers();
+      }
+    }
+  }
+
+  // ————————— Entegrasyon: app üstüne zarif yama —————————
+  function integratePantheonWithApp(app){
+    // Panteon
+    app.pantheon = new PanteonManager(app);
+    app.pantheon.init().then(()=> {
+      // Oracle
+      app.oracle = new TheOracle(app, app.pantheon);
+      // start/stop ile birlikte yönetilsin:
+      const origStart = app.start.bind(app);
+      app.start = async function(){
+        const r = await origStart();
+        try{ app.oracle.start(); }catch(e){ console.error(e); }
+        return r;
+      };
+      const origStop = app.stop.bind(app);
+      app.stop = function(){
+        try{ app.oracle.stop(); }catch(e){ console.error(e); }
+        return origStop();
+      };
+
+      // Sinyal aktivasyonu / sonuçları hook
+      const origActivate = app.activateSignal.bind(app);
+      app.activateSignal = function(signal){
+        const res = origActivate(signal);
+        try{ app.pantheon.onSignalActivated(signal); }catch(e){ console.error(e); }
+        return res;
+      };
+      const origUpdateResult = app.updateSignalResult.bind(app);
+      app.updateSignalResult = function(id, result){
+        const before = app.signals.find(s=>s.id===id);
+        const out = origUpdateResult(id, result);
+        const after = app.signals.find(s=>s.id===id);
+        if (after){
+          try{ app.pantheon.onSignalResult(after); }catch(e){ console.error(e); }
+        }
+        return out;
+      };
+
+      // Spoof (Hayalet) görselleştirme: mevcut bildirimlerden sez
+      const origNotify = app.showNotification.bind(app);
+      app.showNotification = function(msg, type='info', timeout=5000){
+        const ret = origNotify(msg, type, timeout);
+        try{
+          const s = (msg||'').toLowerCase();
+          if (s.includes('sahte') || s.includes('spoof')){
+            if (s.includes('çekildi') || s.includes('yok oldu')) app.pantheon.effects.ghostShatter();
+            else app.pantheon.effects.ghostWall();
+          }
+          if (type === 'success' && s.includes('aktif sinyal') && s.includes('buy')) app.pantheon.effects.buyBurst();
+          if (type === 'danger' && s.includes('aktif sinyal') && s.includes('sell')) app.pantheon.effects.sellAsh();
+        }catch(e){ console.error(e); }
+        return ret;
+      };
+
+    }).catch(e=> console.error('Panteon init hatası:', e));
+  }
+
+  // ————————— Bootstrap: window.app hazır olunca entegre et —————————
+  const _intv = setInterval(()=>{
+    if (window.app && window.Pantheon && window.Pantheon.db){
+      try{ integratePantheonWithApp(window.app); }catch(e){ console.error(e); }
+      clearInterval(_intv);
+    }
+  }, 100);
+
+})();
+
+<script>
+(function(){
+  'use strict';
+
+  // Güvenlik: Foundation/Pantheon hazır olmadan bekle
+  function whenReady(fn){
+    const iv = setInterval(()=>{
+      if (window.Pantheon && window.app && window.app.pantheon) {
+        clearInterval(iv); fn();
+      }
+    }, 100);
+  }
+
+  // 1) PantheonEffects genişletmeleri: kalıcı atmosfer ve Genesis Yıldırımı
+  function extendEffects(){
+    if (!window.Pantheon || !window.app || !window.app.pantheon) return;
+    const Efx = window.app.pantheon.effects.constructor;
+
+    if (!Efx.prototype.setAtmosphere) {
+      Efx.prototype.setAtmosphere = function(horseman){
+        const id = 'pantheon-atmo';
+        let el = document.getElementById(id);
+        if (el) { el.remove(); }
+        el = document.createElement('div');
+        el.id = id;
+        el.style.position = 'fixed';
+        el.style.inset = '0';
+        el.style.zIndex = '2400';
+        el.style.pointerEvents = 'none';
+        let bg = 'transparent';
+        if (horseman === 'SAVAŞ')      bg = 'radial-gradient(130% 130% at 50% 50%, rgba(17,24,39,0.65), rgba(252,211,77,0.15), transparent)';
+        else if (horseman === 'KITLIK') bg = 'radial-gradient(130% 130% at 50% 50%, rgba(15,23,42,0.65), rgba(100,116,139,0.15), transparent)';
+        else if (horseman === 'SALGIN') bg = 'radial-gradient(130% 130% at 50% 50%, rgba(31,41,55,0.65), rgba(239,68,68,0.18), transparent)';
+        else if (horseman === 'ÖLÜM')   bg = 'radial-gradient(130% 130% at 50% 50%, rgba(2,6,23,0.75), rgba(125,211,252,0.12), transparent)';
+        el.style.background = bg;
+        el.style.animation = 'pantheonAtmoFlow 4s ease-in-out infinite alternate';
+        if (!document.getElementById('pantheonAtmoFlowStyle')) {
+          const st = document.createElement('style');
+          st.id = 'pantheonAtmoFlowStyle';
+          st.textContent = `
+            @keyframes pantheonAtmoFlow {
+              0% { filter: blur(4px); transform: scale(1); }
+              100%{ filter: blur(8px); transform: scale(1.03); }
+            }`;
+          document.head.appendChild(st);
+        }
+        document.body.appendChild(el);
+      };
+    }
+    if (!Efx.prototype.clearAtmosphere) {
+      Efx.prototype.clearAtmosphere = function(){
+        const el = document.getElementById('pantheon-atmo');
+        if (el) try { el.remove(); } catch {}
+      };
+    }
+    if (!Efx.prototype.genesisLightning) {
+      Efx.prototype.genesisLightning = async function(){
+        // Büyük beyaz/mavi yıldırım flaşı + çatallı çizgiler
+        const layer = document.getElementById('cosmic-effects-layer') || document.body;
+        const flash = document.createElement('div');
+        Object.assign(flash.style, {
+          position:'fixed', inset:'0', zIndex: 3200, pointerEvents:'none',
+          background:'radial-gradient(circle at center, rgba(255,255,255,0.95), rgba(186,230,253,0.35), rgba(2,6,23,0))',
+          opacity:'0', transition:'opacity 60ms ease'
+        });
+        layer.appendChild(flash);
+        requestAnimationFrame(()=> flash.style.opacity='1');
+        setTimeout(()=> flash.style.opacity='0', 140);
+
+        // Yıldırım çizgileri
+        for (let i=0;i<4;i++){
+          const bolt = document.createElement('div');
+          const left = 20 + Math.random()*60;
+          Object.assign(bolt.style, {
+            position:'fixed', top:'-10%', left: left+'%', width:'3px', height:'120%',
+            background:'linear-gradient(to bottom, #e0f2fe, #93c5fd, transparent)',
+            filter:'blur(1px)', opacity:'0.85', zIndex: 3201, pointerEvents:'none',
+            transform:`skewX(${(Math.random()*8-4).toFixed(1)}deg)`
+          });
+          layer.appendChild(bolt);
+          setTimeout(()=>{ try{ bolt.remove(); }catch{} }, 300);
+        }
+        setTimeout(()=>{ try{ flash.remove(); }catch{} }, 500);
+      };
+    }
+  }
+
+  // 2) TheOracle kalıcı atmosfer entegrasyonu ve start'ta Genesis
+  function extendOracle(){
+    const app = window.app;
+    if (!app.oracle || !app.pantheon) return;
+    const oracle = app.oracle;
+    const origTick = oracle._tick.bind(oracle);
+    oracle._tick = function(){
+      const prev = this.current;
+      origTick();
+      if (this.current !== prev) {
+        if (this.current) app.pantheon.effects.setAtmosphere(this.current);
+        else app.pantheon.effects.clearAtmosphere();
+      }
+    };
+
+    // Start patch: Genesis Lightning + TTS
+    const origStart = app.start.bind(app);
+    app.start = async function(){
+      const r = await origStart();
+      try {
+        await app.pantheon.effects.genesisLightning();
+        app.speak?.('Yaratılış Yıldırımı çaktı! Panteon gözlerini açtı. Evren nefes alıyor, kader akmaya başladı.');
+      } catch(e) { console.error(e); }
+      return r;
+    };
+  }
+
+  // 3) Misyoner Bilgelik Puanları: ölç, uygula, DB’ye yaz
+  function extendMissionaries(){
+    const app = window.app;
+    const pantheon = app.pantheon;
+    const db = window.Pantheon.db;
+
+    if (!pantheon.state.missionaries) {
+      pantheon.state.missionaries = {
+        spoof: { score: 50, confirmed:0, rejected:0 },
+        cusum: { score: 50, confirmed:0, rejected:0, eval:null },
+        mtf:   { score: 50, confirmed:0, rejected:0 }
+      };
+      pantheon._persist();
+    }
+
+    pantheon.getWisdom = (key)=> {
+      const m = pantheon.state.missionaries[key];
+      return m ? Math.max(0, Math.min(100, m.score)) : 50;
+    };
+    pantheon._bumpWisdom = async (key, delta)=>{
+      const m = pantheon.state.missionaries[key];
+      if (!m) return;
+      m.score = Math.max(0, Math.min(100, (m.score||50) + delta));
+      await pantheon._persist();
+    };
+
+    // SpoofDetector wrapper: checkConfirmations sonrası delta ölç
+    if (app.spoofDetector && !app.spoofDetector.__wisdomWrapped) {
+      const sd = app.spoofDetector;
+      const origCheck = sd.checkConfirmations.bind(sd);
+      sd.checkConfirmations = function(){
+        const beforeC = this.confirmationStats.confirmed;
+        const beforeR = this.confirmationStats.rejected;
+        const res = origCheck();
+        const afterC = this.confirmationStats.confirmed;
+        const afterR = this.confirmationStats.rejected;
+        const dC = Math.max(0, afterC - beforeC);
+        const dR = Math.max(0, afterR - beforeR);
+        if (dC + dR > 0) {
+          pantheon.state.missionaries.spoof.confirmed += dC;
+          pantheon.state.missionaries.spoof.rejected  += dR;
+          pantheon._bumpWisdom('spoof', dC*0.8 - dR*0.8);
+        }
+        return res;
+      };
+      sd.__wisdomWrapped = true;
+    }
+
+    // CUSUM wrapper: driftDetected -> değerlendirme penceresi
+    if (app.cusumDetector && !app.cusumDetector.__wisdomWrapped) {
+      const cd = app.cusumDetector;
+      const origUpdate = cd.update.bind(cd);
+      cd.update = function(isWin){
+        const drift = origUpdate(isWin);
+        if (drift) {
+          // Drift tespit edildi -> son 20 sinyal baz WR ve değerlendirme başlat
+          const sigs = (app.signals||[]).filter(s=> s.status==='tp' || s.status==='sl');
+          const recent = sigs.slice(0, 20);
+          const beforeTotal = recent.length;
+          const beforeWins = recent.filter(s=> s.status==='tp').length;
+          pantheon.state.missionaries.cusum.eval = {
+            start: Date.now(),
+            beforeTotal, beforeWins,
+            afterTotal: 0, afterWins: 0
+          };
+          pantheon._persist();
+          app.showNotification('Kahin: Performans sapması tespit edildi. Rejim ayarı yapılıyor...', 'warning');
+        }
+        return drift;
+      };
+      app.cusumDetector.__wisdomWrapped = true;
+
+      // Sonuç geldiğinde CUSUM değerlendirme penceresini güncelle
+      const origUpdateResult = app.updateSignalResult.bind(app);
+      app.updateSignalResult = function(id, result){
+        const out = origUpdateResult(id, result);
+        const ev = pantheon.state.missionaries.cusum.eval;
+        if (ev) {
+          ev.afterTotal++;
+          if (result === 'tp') ev.afterWins++;
+          // 10 sonuçluk pencere dolunca değerlendir
+          if (ev.afterTotal >= 10) {
+            const beforeWR = ev.beforeTotal ? (ev.beforeWins/ev.beforeTotal) : 0.5;
+            const afterWR  = ev.afterWins/ev.afterTotal;
+            if (afterWR > beforeWR) {
+              pantheon.state.missionaries.cusum.confirmed++;
+              pantheon._bumpWisdom('cusum', +2);
+              app.speak?.('Kahin: Ayar tutturuldu, kaderde iyileşme var.');
+            } else {
+              pantheon.state.missionaries.cusum.rejected++;
+              pantheon._bumpWisdom('cusum', -2);
+              app.speak?.('Kahin: Ayar hatalıydı, disiplin gerekiyor.');
+            }
+            pantheon.state.missionaries.cusum.eval = null;
+            pantheon._persist();
+          }
+        }
+        // MTF bilgelik değerlendirmesi
+        if (app.settings?.features?.enableMtfConfirm) {
+          const tf = app.settings.features.mtfTimeframe || '15m';
+          const trend = app.multiTimeframeManager?.getTrend(tf) || 'neutral';
+          const signal = app.signals.find(s=> s.id === id);
+          if (signal) {
+            const aligned = (signal.direction === 'buy' && trend==='up') || (signal.direction==='sell' && trend==='down');
+            if (aligned && result==='tp') pantheon._bumpWisdom('mtf', +1.5);
+            else if (aligned && result==='sl') pantheon._bumpWisdom('mtf', -1.5);
+            else if (!aligned && result==='tp') pantheon._bumpWisdom('mtf', -1.0);
+            else if (!aligned && result==='sl') pantheon._bumpWisdom('mtf', +0.5);
+          }
+        }
+        return out;
+      };
+    }
+
+    // MTF ceza/bonus faktörünü dinamikleştir: ConfluenceEngine.checkConfluence override
+    if (app.confluenceEngine && !app.confluenceEngine.__mtfPatched) {
+      const ce = app.confluenceEngine;
+      const origCheck = ce.checkConfluence.bind(ce);
+      // Refactor: kopyalayarak değil, runtime sonrası düzeltme
+      ce.checkConfluence = function(){
+        const before = { buy: this.buyScore, sell: this.sellScore };
+        origCheck();
+        // Eğer MTF aktifse, buy/sell skorlarına bilgelik tabanlı yumuşatma uygulayalım
+        if (app.settings?.features?.enableMtfConfirm) {
+          const w = pantheon.getWisdom('mtf'); // [0,100]
+          // Ceza faktörü: w=0 -> 0.90 (zayıf etkisi), w=100 -> 0.45 (güçlü etki)
+          const f = 0.45 + 0.45 * (1 - w/100);
+          const tf = app.settings.features.mtfTimeframe || '15m';
+          const trend = app.multiTimeframeManager?.getTrend(tf) || 'neutral';
+          if (trend === 'down') this.buyScore = this.buyScore * f;
+          if (trend === 'up')   this.sellScore = this.sellScore * f;
+          // Progress bar UI anında güncellensin
+          app.updateSignalProgressBar?.();
+        }
+      };
+      ce.__mtfPatched = true;
+    }
+  }
+
+  // 4) Modlara bağlı minContributors dinamik ayarı
+  function extendMoodSignalQuality(){
+    const app = window.app;
+    const pantheon = app.pantheon;
+    const apply = ()=>{
+      const ambs = pantheon.state.ambassadors;
+      const modes = [ambs.Metatron.mode, ambs.Uriel.mode, ambs.Raphael.mode];
+      let bias = 0;
+      modes.forEach(m=>{
+        if (m==='İnançlı') bias -= 0.2;
+        else if (m==='Kıyamet') bias += 0.3;
+      });
+      const baseMin = (app.settings?.optimization?.signalQuality?.minContributors ?? 2);
+      let newMin = baseMin + (bias>0 ? 1 : (bias<0 ? -1 : 0));
+      newMin = Math.max(1, Math.min(4, newMin));
+      app.settings.optimization.signalQuality.minContributors = newMin;
+      app.saveSettings?.();
+    };
+    // İlk uygulama + 1 dakikada bir güncelle
+    apply();
+    if (window.__sqInterval) clearInterval(window.__sqInterval);
+    window.__sqInterval = setInterval(apply, 60*1000);
+  }
+
+  // 5) Kutsal Pınar ve Kıyamet Günü Protokolleri
+  function extendDivineProtocols(){
+    const app = window.app;
+    const pantheon = app.pantheon;
+    const db = window.Pantheon.db;
+    const kvHoly = 'holy_spring_last';
+    const kvDoom  = 'doomsday_done';
+
+    const triggerHolySpring = async ()=>{
+      const last = await db.kvGet(kvHoly);
+      if (last && Date.now() - last < 60*60*1000) return; // saatte birden sık çağırma
+      const a = pantheon.state.ambassadors;
+      const totalRep = (a.Metatron.reputation||0) + (a.Uriel.reputation||0) + (a.Raphael.reputation||0);
+      if (totalRep < 60) return; // Zirve eşiği (onayla değiştirilebilir)
+
+      // Gölgedeki stratejilerden en umut vadeden 2’sini affet
+      const keys = Object.keys(app.strategies||{});
+      const candidates = keys.filter(k=> app.settings.statusMaps.shadowBanned[k] && !app.settings.statusMaps.hardBanned[k])
+        .map(k=>{
+          const st = app.strategyStats[k]?.overall || {};
+          const sw = st.shadowWins||0, sl= st.shadowLosses||0, sp = st.shadowProposals||0;
+          const wr = (sw+sl)>0 ? (sw/(sw+sl)) : 0;
+          return { key:k, wr, sp, name: app.strategies[k]?.displayName || k };
+        })
+        .filter(x=> x.sp >= 10 && x.wr >= 0.45)
+        .sort((a,b)=> b.wr - a.wr)
+        .slice(0,2);
+
+      if (candidates.length>0){
+        for (const c of candidates){
+          app.settings.statusMaps.shadowBanned[c.key] = false;
+          app.settings.activeStrategies[c.key] = true;
+        }
+        app.updateActiveStrategies(); app.saveSettings();
+        app.showNotification(`Kutsal Pınar: ${candidates.map(c=>c.name).join(', ')} kefaret hakkı kazandı.`, 'success');
+        app.speak?.('Kutsal Pınar çağladı. Kefaret kapıları aralandı.');
+        await db.kvSet(kvHoly, Date.now());
+      }
+    };
+
+    const triggerDoomsday = async ()=>{
+      const done = await db.kvGet(kvDoom);
+      if (done) return;
+      const total = app.stats?.total || 0;
+      if (total < 1000) return; // Dönüm noktası
+      const keys = Object.keys(app.strategies||{});
+      const fallen = keys.filter(k=> app.settings.statusMaps.hardBanned[k] || app.settings.statusMaps.shadowBanned[k])
+        .map(k=> ({ key:k, name: app.strategies[k]?.displayName || k }));
+      if (fallen.length===0) { await db.kvSet(kvDoom, true); return; }
+
+      // En çok umut veren 3 düşmüşü "Çaylak" olarak geri getir
+      const revive = fallen.slice(0,3);
+      revive.forEach(r=>{
+        app.settings.statusMaps.hardBanned[r.key] = false;
+        app.settings.statusMaps.shadowBanned[r.key] = false;
+        app.settings.activeStrategies[r.key] = true;
+      });
+      app.updateActiveStrategies(); app.saveSettings();
+      app.showNotification(`Kıyamet Günü: ${revive.map(r=>r.name).join(', ')} çaylak olarak geri döndü.`, 'warning');
+      app.speak?.('Kıyamet günü koptu ve eski düşmüşler, çaylak olarak yeniden doğdu.');
+      await db.kvSet(kvDoom, true);
+    };
+
+    if (window.__divineInterval) clearInterval(window.__divineInterval);
+    window.__divineInterval = setInterval(()=>{
+      triggerHolySpring().catch(console.error);
+      triggerDoomsday().catch(console.error);
+    }, 60*1000);
+  }
+
+  // 6) Süvariler: BlackSwanCatcher & PhoenixAscension (yalnızca Atlılar uykudan uyandırır)
+  function registerCavalry(){
+    const app = window.app;
+    const Strategy = app.strategies?.wallBounce?.__proto__.constructor || app.strategies?.wallBounce?.constructor || null;
+    if (!Strategy) return;
+
+    class BlackSwanCatcher extends Strategy {
+      constructor(bot){ 
+        super(bot, 'blackSwanCatcher');
+        this.LOOKBACK = 3;
+        this.DROP_PCT = 0.02; // son mumda %2 ve üstü düşüş
+        this.REBOUND_PCT = 0.004; // hızlı zıplama eşiği
+        this.DEFAULT_PROPOSAL_COOLDOWN_MS = 15000;
+      }
+      periodicAnalyze(){
+        const c = this.bot.candles; if (c.length < this.LOOKBACK) return;
+        const last = c[c.length-1];
+        const drop = (last.close - last.open)/Math.max(1e-8,last.open);
+        if (drop <= -this.DROP_PCT) {
+          // Yüksek risk: ya agresif rebound ya devam
+          const mid = (last.high + last.low + last.close)/3;
+          const price = this.bot.marketData.price || last.close;
+          const dev = (price - mid)/Math.max(1e-8, mid);
+          if (dev >= this.REBOUND_PCT) {
+            this.propose(this.bot.currentSymbol, 'buy', 'BlackSwan: Şok düşüş sonrası ani rebound', 6);
+          } else {
+            this.propose(this.bot.currentSymbol, 'sell', 'BlackSwan: Şok düşüş devam riski', 6);
+          }
+        }
+      }
+    }
+
+    class PhoenixAscension extends Strategy {
+      constructor(bot){ 
+        super(bot, 'phoenixAscension');
+        this.SWING = 3;
+        this.ADX_MIN = 16;
+        this.DEFAULT_PROPOSAL_COOLDOWN_MS = 12000;
+      }
+      periodicAnalyze(){
+        const c = this.bot.candles; const adx = this.bot.indicators.adx;
+        if (!adx || c.length < 2*this.SWING+5) return;
+        const last = c[c.length-1];
+        // BOS yukarı + ADX toparlanma
+        let pivotLow = -Infinity, pivotHigh = -Infinity;
+        for (let i=this.SWING; i<c.length-this.SWING; i++){
+          const ph = (c[i].high > Math.max(...c.slice(i-this.SWING,i).map(x=>x.high)) && c[i].high > Math.max(...c.slice(i+1, i+1+this.SWING).map(x=>x.high)));
+          const pl = (c[i].low < Math.min(...c.slice(i-this.SWING,i).map(x=>x.low)) && c[i].low < Math.min(...c.slice(i+1, i+1+this.SWING).map(x=>x.low)));
+          if (ph) pivotHigh = c[i].high; if (pl) pivotLow = c[i].low;
+        }
+        if (pivotHigh>0 && last.close > pivotHigh && adx.adx >= this.ADX_MIN) {
+          this.propose(this.bot.currentSymbol, 'buy', 'Phoenix: Yeni trend doğuşu (BOS + ADX)', 6);
+        } else if (pivotLow>0 && last.close < pivotLow && adx.adx >= this.ADX_MIN) {
+          this.propose(this.bot.currentSymbol, 'sell', 'Phoenix: Yeni düşüş doğuşu (BOS + ADX)', 6);
+        }
+      }
+    }
+
+    // Sisteme kayıt et
+    app.allStrategiesMap.blackSwanCatcher = BlackSwanCatcher;
+    app.allStrategiesMap.phoenixAscension = PhoenixAscension;
+
+    // Uyuyanlar Salonu: başlangıçta pasif
+    app.settings.activeStrategies.blackSwanCatcher = false;
+    app.settings.activeStrategies.phoenixAscension = false;
+    app.saveSettings();
+
+    // Oracle ile uyanma/uyuma
+    const wakeByHorseman = ()=>{
+      const h = app.oracle?.current || null;
+      if (h === 'SALGIN') {
+        app.settings.activeStrategies.blackSwanCatcher = true;   // şok düşüşlere müdahale
+        app.settings.activeStrategies.phoenixAscension = false;
+      } else if (h === 'ÖLÜM' || h === 'SAVAŞ') {
+        app.settings.activeStrategies.phoenixAscension = true;   // yeni trend doğuşu
+        app.settings.activeStrategies.blackSwanCatcher = false;
+      } else {
+        app.settings.activeStrategies.blackSwanCatcher = false;
+        app.settings.activeStrategies.phoenixAscension = false;
+      }
+      app.updateActiveStrategies(); app.saveSettings();
+    };
+
+    // Oracle değişiminde tetikle
+    const origTick = app.oracle?._tick?.bind(app.oracle);
+    if (origTick && !app.oracle.__cavalryPatched) {
+      app.oracle._tick = function(){
+        const prev = this.current;
+        origTick();
+        if (this.current !== prev) wakeByHorseman();
+      };
+      app.oracle.__cavalryPatched = true;
+    }
+  }
+
+  whenReady(()=>{
+    try {
+      extendEffects();
+      extendOracle();
+      extendMissionaries();
+      extendMoodSignalQuality();
+      extendDivineProtocols();
+      registerCavalry();
+      window.app.showNotification('Pantheon v3.2: Kader Protokolleri ve Süvariler aktif.', 'info');
+    } catch (e) {
+      console.error('Pantheon continuation error:', e);
+    }
+  });
+
+})();
+
+(function(){
+  'use strict';
+
+  // ————————— Util —————————
+  function whenAppReady(fn){
+    const iv = setInterval(()=>{
+      if (window.Pantheon && window.Pantheon.db && window.app && window.app.pantheon) {
+        clearInterval(iv); fn();
+      }
+    }, 100);
+  }
+
+  // ————————— Myth Config (DB’den okunur/yazılır) —————————
+  const DEFAULT_MYTH_CONFIG = {
+    modeThresholds: { inanc: 20, kiyamet: -10 },
+    dormancyHours: 4,
+    whisperTtlMs: 30 * 60 * 1000,
+    oracle: {
+      warAtrPct: 0.02,
+      famineVolFactor: 0.6,
+      plagueDropPct: -0.015,
+      deathTrendAdx: 18
+    },
+    holySpring: { repSumMin: 60, cooldownMs: 60*60*1000 },
+    doomsday:   { totalSignals: 1000 }
+  };
+
+  async function loadMythConfig(db){
+    const v = await db.getMeta('myth_config');
+    if (!v || typeof v !== 'object') {
+      await db.setMeta('myth_config', DEFAULT_MYTH_CONFIG);
+      return { ...DEFAULT_MYTH_CONFIG };
+    }
+    // Merge defaults to ensure completeness
+    const out = structuredClone(DEFAULT_MYTH_CONFIG);
+    deepMerge(out, v);
+    await db.setMeta('myth_config', out);
+    return out;
+  }
+
+  function deepMerge(target, source){
+    Object.keys(source||{}).forEach(k=>{
+      if (source[k] && typeof source[k] === 'object' && !Array.isArray(source[k])) {
+        if (!target[k] || typeof target[k] !== 'object') target[k] = {};
+        deepMerge(target[k], source[k]);
+      } else {
+        target[k] = source[k];
+      }
+    });
+    return target;
+  }
+
+  // ————————— UI: Mitolojik Ayarlar (Settings modal) —————————
+  async function injectMythConfigUI(){
+    const db = window.Pantheon.db;
+    const cfg = await loadMythConfig(db);
+
+    const modalBody = document.querySelector('.settings-modal-body');
+    if (!modalBody || document.getElementById('myth-config-group')) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'settings-group';
+    wrap.id = 'myth-config-group';
+    wrap.innerHTML = `
+      <div class="panel-title" style="margin-bottom: 10px;">Mitolojik Ayarlar</div>
+      <div class="form-group">
+        <label class="form-label">Elçi Mod Eşikleri</label>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+          <div><small>İnançlı ≥</small><input id="myth-inanc" type="number" class="form-control" value="${cfg.modeThresholds.inanc}" step="1"></div>
+          <div><small>Kıyamet ≤</small><input id="myth-kiyamet" type="number" class="form-control" value="${cfg.modeThresholds.kiyamet}" step="1"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Oracle Eşikleri</label>
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px;">
+          <div><small>SAVAŞ ATR%</small><input id="myth-war-atr" type="number" class="form-control" value="${cfg.oracle.warAtrPct}" step="0.001"></div>
+          <div><small>KITLIK Hacim Faktörü</small><input id="myth-famine-vol" type="number" class="form-control" value="${cfg.oracle.famineVolFactor}" step="0.05"></div>
+          <div><small>SALGIN Düşüş%</small><input id="myth-plague-drop" type="number" class="form-control" value="${cfg.oracle.plagueDropPct}" step="0.001"></div>
+          <div><small>ÖLÜM ADX</small><input id="myth-death-adx" type="number" class="form-control" value="${cfg.oracle.deathTrendAdx}" step="1"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kutsal Protokoller</label>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;">
+          <div><small>Kutsal Pınar Rep Toplam ≥</small><input id="myth-holy-rep" type="number" class="form-control" value="${cfg.holySpring.repSumMin}" step="1"></div>
+          <div><small>Kutsal Pınar Cooldown (dk)</small><input id="myth-holy-cool" type="number" class="form-control" value="${Math.round(cfg.holySpring.cooldownMs/60000)}" step="1"></div>
+          <div><small>Kıyamet Günü İşlem Sayısı</small><input id="myth-doom-th" type="number" class="form-control" value="${cfg.doomsday.totalSignals}" step="50"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ritüeller</label>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;">
+          <div><small>Durgunluk (saat)</small><input id="myth-dormancy" type="number" class="form-control" value="${cfg.dormancyHours}" step="1"></div>
+          <div><small>Fısıltı TTL (dk)</small><input id="myth-whisper" type="number" class="form-control" value="${Math.round(cfg.whisperTtlMs/60000)}" step="5"></div>
+          <div><button id="myth-save-btn" class="btn btn-success">Mitolojik Ayarları Kaydet</button></div>
+        </div>
+      </div>
+    `;
+    modalBody.appendChild(wrap);
+
+    const saveBtn = document.getElementById('myth-save-btn');
+    saveBtn.addEventListener('click', async ()=>{
+      const newCfg = structuredClone(cfg);
+      newCfg.modeThresholds.inanc = parseInt(document.getElementById('myth-inanc').value);
+      newCfg.modeThresholds.kiyamet = parseInt(document.getElementById('myth-kiyamet').value);
+      newCfg.oracle.warAtrPct = parseFloat(document.getElementById('myth-war-atr').value);
+      newCfg.oracle.famineVolFactor = parseFloat(document.getElementById('myth-famine-vol').value);
+      newCfg.oracle.plagueDropPct = parseFloat(document.getElementById('myth-plague-drop').value);
+      newCfg.oracle.deathTrendAdx = parseInt(document.getElementById('myth-death-adx').value);
+      newCfg.holySpring.repSumMin = parseInt(document.getElementById('myth-holy-rep').value);
+      newCfg.holySpring.cooldownMs = parseInt(document.getElementById('myth-holy-cool').value) * 60000;
+      newCfg.doomsday.totalSignals = parseInt(document.getElementById('myth-doom-th').value);
+      newCfg.dormancyHours = parseInt(document.getElementById('myth-dormancy').value);
+      newCfg.whisperTtlMs = parseInt(document.getElementById('myth-whisper').value) * 60000;
+
+      await window.Pantheon.db.setMeta('myth_config', newCfg);
+      await applyMythConfig(newCfg);
+      window.app.showNotification('Mitolojik ayarlar kaydedildi ve uygulandı.', 'success');
+      window.app.speak?.('Mitolojik ayarlar kutsandı, kader yeniden yazıldı.');
+    });
+  }
+
+  // ————————— Panteon & Oracle’e konfigürasyon uygulama (monkey-patch) —————————
+  async function applyMythConfig(cfg){
+    const app = window.app;
+    const pant = app.pantheon;
+    const oracle = app.oracle;
+
+    // PanteonManager: mod eşikleri, fısıltı TTL, durgunluk saatleri
+    pant._modeOf = function(rep){
+      const t = cfg.modeThresholds;
+      if (rep >= t.inanc) return 'İnançlı';
+      if (rep <= t.kiyamet) return 'Kıyamet';
+      return 'Şüpheci';
+    };
+    // fısıltı TTL
+    const origApplyWhisper = pant._applyWhisper.bind(pant);
+    pant._applyWhisper = function(biasDelta){
+      this.whisper.bias = biasDelta;
+      this.whisper.until = Date.now() + (cfg.whisperTtlMs || 30*60*1000);
+      this._applyMoodToSystem();
+    };
+    // durgunluk süresi & watcher reset
+    if (pant._dormancyTimer) clearInterval(pant._dormancyTimer);
+    pant._startDormancyWatch = function(){
+      if (this._dormancyTimer) clearInterval(this._dormancyTimer);
+      this._dormancyTimer = setInterval(()=>{
+        const lastClosed = (this.bot.signals.find(s => s.status==='tp' || s.status==='sl')?.timestamp) || this.lastClosedSignalAt;
+        const now = Date.now();
+        const fourH = (cfg.dormancyHours||4) * 3600 * 1000;
+        if (!lastClosed) return;
+        if ((now - lastClosed) >= fourH && (!this.state.lastDormancyPenaltyAt || (now - this.state.lastDormancyPenaltyAt) >= fourH)){
+          ['Metatron','Uriel','Raphael'].forEach(k=> this._bumpRep(k, -1));
+          this.state.lastDormancyPenaltyAt = now;
+          this._recalcModes();
+          this._persist();
+          this.bot.showNotification('Durgunluk cezası: Tüm Elçiler -1 itibar.', 'warning');
+          this.bot.speak?.('Kehanet: Durgunluk cezası verildi, Elçiler disipline çağrıldı.');
+          this._updatePanteonPanel();
+        }
+      }, 60*1000);
+    };
+    pant._startDormancyWatch();
+
+    // Oracle: eşikler
+    oracle._detectHorseman = function(){
+      const price = this.bot.marketData?.price || 0;
+      const atr = this.bot.indicators?.atr || null;
+      const adx = this.bot.indicators?.adx || null;
+      const last = this.bot.candles?.[this.bot.candles.length - 1] || null;
+      const volSma20 = this.bot.indicators?.volSma20 || null;
+      if (!price || !last) return null;
+
+      const atrPct = atr ? (atr / price) : 0;
+      const volThin = volSma20 ? (last.volume < ((cfg.oracle.famineVolFactor||0.6) * volSma20)) : false;
+      const candleDropPct = (last.close - last.open) / Math.max(1e-8, last.open);
+
+      if (atrPct > (cfg.oracle.warAtrPct||0.02)) return 'SAVAŞ';
+      if (volThin) return 'KITLIK';
+      if (candleDropPct <= (cfg.oracle.plagueDropPct||-0.015)) return 'SALGIN';
+      if (adx && adx.adx && adx.adx < (cfg.oracle.deathTrendAdx||18)) return 'ÖLÜM';
+      return null;
+    };
+  }
+
+  // ————————— Cehennem Zebanileri (Mikro Tehdit) İzleyici —————————
+  function setupZebanilerMonitor(){
+    const app = window.app;
+    const monitor = {
+      apiErrors: 0,
+      lastErrorAt: 0,
+      badTickCount: 0,
+      lastTickTs: 0,
+      lastPrice: 0,
+      slippageHighUntil: 0
+    };
+    app.zebaniler = monitor;
+
+    // API / JS hataları
+    window.addEventListener('error', ()=> { monitor.apiErrors++; monitor.lastErrorAt = Date.now(); escalateIfNeeded(); }, true);
+    window.addEventListener('unhandledrejection', ()=> { monitor.apiErrors++; monitor.lastErrorAt = Date.now(); escalateIfNeeded(); });
+
+    function escalateIfNeeded(){
+      const now = Date.now();
+      if (monitor.apiErrors >= 3 && now - monitor.lastErrorAt < 60000) {
+        app.runtimeThresholdOffset = Math.min(2.0, (app.runtimeThresholdOffset||0) + 0.8);
+        app.showNotification('Zebaniler: API/JS hata akını! Sistem savunma modunu artırdı.', 'warning');
+        app.speak?.('Zebaniler saldırdı! Savunma protokolü yükseltildi.');
+      }
+    }
+
+    // Bad tick filtresi ve slippage ortamı ölçümü
+    const origHandle = app.handleMarketData.bind(app);
+    app.handleMarketData = function(stream, data){
+      try {
+        const type = stream.split('@')[1];
+        const now = Date.now();
+        // Fiyat güncellemesi varsa zıplama kontrolü
+        if (type === 'ticker') {
+          const p = parseFloat(data.c);
+          const dt = now - monitor.lastTickTs;
+          if (monitor.lastPrice > 0 && dt <= 500) {
+            const jump = Math.abs(p - monitor.lastPrice) / monitor.lastPrice;
+            // 500ms içinde %1.5+ zıplama => bad tick olarak filtrele
+            if (jump >= 0.015) {
+              monitor.badTickCount++;
+              if (monitor.badTickCount <= 5) {
+                window.app.pantheon?.effects.ghostWall();
+              }
+              // Bu tick'i yok say (fiyatı güncellemeyelim)
+              return;
+            }
+          }
+          monitor.lastPrice = p; monitor.lastTickTs = now;
+        }
+      } catch (e) { /* sessiz geç */ }
+      return origHandle(stream, data);
+    };
+
+    // Slippage ortamı: sinyal aktivasyonundan 2sn sonra hareket ölç
+    const origActivate = app.activateSignal.bind(app);
+    app.activateSignal = function(signal){
+      const ret = origActivate(signal);
+      try {
+        const entry = signal.price;
+        const t0 = Date.now();
+        setTimeout(()=>{
+          const priceNow = app.marketData?.price || entry;
+          const move = Math.abs(priceNow - entry) / Math.max(1e-8, entry);
+          if (move >= 0.004) { // ≥ %0.4
+            monitor.slippageHighUntil = Date.now() + 60*1000;
+            app.showNotification('Zebaniler: Slippage ortamı yüksek! Likidite uyarısı.', 'warning');
+            app.speak?.('Zebaniler: Slipaj yüksek, temkinli ilerleyin.');
+          }
+        }, 2000);
+      } catch(e) {}
+      return ret;
+    };
+
+    // Gating cezasına ek: slippage yüksekse +1.0 ceza uygula
+    const origGating = app.marketGatingPenalty.bind(app);
+    app.marketGatingPenalty = function(direction){
+      let pen = origGating(direction);
+      if (Date.now() <= (monitor.slippageHighUntil||0)) pen += 1.0;
+      return pen;
+    };
+
+    // Kehanet Panelinde Zebaniler durumu
+    const panel = document.getElementById('kehanet-panel');
+    if (panel && !document.getElementById('kp-zebaniler')) {
+      const row = document.createElement('div');
+      row.className = 'kp-row';
+      row.innerHTML = `<span class="kp-key">👹 Zebaniler</span><span class="kp-val" id="kp-zebaniler">Temiz</span>`;
+      panel.querySelector('.kp-body').appendChild(row);
+      setInterval(()=>{
+        const valEl = document.getElementById('kp-zebaniler');
+        if (!valEl) return;
+        const bad = monitor.badTickCount;
+        const slip = Date.now() <= (monitor.slippageHighUntil||0);
+        const api = (Date.now() - monitor.lastErrorAt) < 60000 && monitor.apiErrors >= 1;
+        let status = 'Temiz';
+        if (slip || api) status = 'Hassas';
+        if ((bad >= 3) || (monitor.apiErrors >= 3 && api) ) status = 'Yüksek';
+        valEl.textContent = status;
+      }, 1500);
+    }
+  }
+
+  // ————————— Misyoner Bilgelik Göstergeleri (Panteon Paneli) —————————
+  function injectWisdomInPantheon(){
+    const panel = document.getElementById('panteon-panel');
+    if (!panel || document.getElementById('pp-wisdom')) return;
+    const body = panel.querySelector('.pp-body');
+    const box = document.createElement('div');
+    box.id = 'pp-wisdom';
+    box.style.marginTop = '6px';
+    box.innerHTML = `
+      <div class="pp-amb" style="justify-content:flex-start; gap:8px;">
+        <span class="pp-name">Bilgelik:</span>
+        <span class="pp-mode" id="pp-wis-spoof">Gözcü: —</span>
+        <span class="pp-mode" id="pp-wis-cusum">Kahin: —</span>
+        <span class="pp-mode" id="pp-wis-mtf">Üst ZD: —</span>
+      </div>`;
+    body.appendChild(box);
+    setInterval(()=>{
+      const pant = window.app?.pantheon;
+      if (!pant || !pant.state?.missionaries) return;
+      const s1 = Math.round(pant.state.missionaries.spoof?.score ?? 50);
+      const s2 = Math.round(pant.state.missionaries.cusum?.score ?? 50);
+      const s3 = Math.round(pant.state.missionaries.mtf?.score ?? 50);
+      const el1 = document.getElementById('pp-wis-spoof'); if (el1) el1.textContent = `Gözcü: ${s1}`;
+      const el2 = document.getElementById('pp-wis-cusum'); if (el2) el2.textContent = `Kahin: ${s2}`;
+      const el3 = document.getElementById('pp-wis-mtf');   if (el3) el3.textContent = `Üst ZD: ${s3}`;
+    }, 1500);
+  }
+
+  // ————————— Zindanda İşkence (banlanan strateji parametrelerini radikal ayarla) —————————
+  function tortureWhenBanned(){
+    const app = window.app;
+    function torture(key){
+      // Strateji parametresine radikal “daha katı” yönlü ayar uygula
+      const p = app.settings.strategyParams[key] || {};
+      Object.keys(p).forEach(k=>{
+        const v = p[k];
+        if (typeof v === 'number') {
+          // “strict up” varsayalım: eşikleri %+25 katı yap; negatif parametreler için dikkat:
+          const newV = v >= 0 ? v * 1.25 : v * 0.75;
+          p[k] = Number.isInteger(v) ? Math.round(newV) : parseFloat(newV.toPrecision(5));
+        }
+      });
+      app.settings.strategyParams[key] = p;
+      app.applyStrategyParamOverrides();
+      app.saveSettings();
+      app.showNotification(`${app.strategies[key]?.displayName || key} işkence gördü (parametreler sıkılaştırıldı).`, 'warning');
+    }
+
+    // toggleShadow / toggleHardBan sar
+    if (!app.__torturePatched){
+      const origShadow = app.toggleShadow?.bind(app);
+      if (origShadow) {
+        app.toggleShadow = function(key){
+          const was = !!this.settings.statusMaps.shadowBanned[key];
+          const out = origShadow(key);
+          const nowBan = !!this.settings.statusMaps.shadowBanned[key];
+          if (!was && nowBan) torture(key);
+          return out;
+        };
+      }
+      const origHard = app.toggleHardBan?.bind(app);
+      if (origHard) {
+        app.toggleHardBan = function(key){
+          const was = !!this.settings.statusMaps.hardBanned[key];
+          const out = origHard(key);
+          const nowBan = !!this.settings.statusMaps.hardBanned[key];
+          if (!was && nowBan) torture(key);
+          return out;
+        };
+      }
+      // Oto-optimizasyon gölge ban’ında da işkence:
+      const origAutoToggle = app.autoToggleStrategies?.bind(app);
+      if (origAutoToggle){
+        app.autoToggleStrategies = function(){
+          const before = { ...this.settings.statusMaps.shadowBanned };
+          const res = origAutoToggle();
+          const after = this.settings.statusMaps.shadowBanned;
+          Object.keys(after).forEach(k=>{
+            if (after[k] && !before[k]) torture(k);
+          });
+          return res;
+        };
+      }
+      app.__torturePatched = true;
+    }
+  }
+
+  // ————————— Dinamik minContributors (modlara bağlı, config sonrası tekrar uygula) —————————
+  function reapplyDynamicSignalQuality(){
+    if (window.__sqInterval) clearInterval(window.__sqInterval);
+    const app = window.app;
+    const pantheon = app.pantheon;
+    const apply = ()=>{
+      const ambs = pantheon.state.ambassadors;
+      const modes = [ambs.Metatron.mode, ambs.Uriel.mode, ambs.Raphael.mode];
+      let bias = 0;
+      modes.forEach(m=>{
+        if (m==='İnançlı') bias -= 0.2;
+        else if (m==='Kıyamet') bias += 0.3;
+      });
+      const baseMin = (app.settings?.optimization?.signalQuality?.minContributors ?? 2);
+      let newMin = baseMin + (bias>0 ? 1 : (bias<0 ? -1 : 0));
+      newMin = Math.max(1, Math.min(4, newMin));
+      app.settings.optimization.signalQuality.minContributors = newMin;
+      app.saveSettings?.();
+    };
+    apply();
+    window.__sqInterval = setInterval(apply, 60*1000);
+  }
+
+  // ————————— Kutsal Pınar / Kıyamet Günü: config’e bağla (interval’i yenile) —————————
+  async function rewireDivineProtocols(){
+    const db = window.Pantheon.db;
+    const app = window.app;
+    const cfg = await loadMythConfig(db);
+    const kvHoly = 'holy_spring_last';
+    const kvDoom  = 'doomsday_done';
+
+    if (window.__divineInterval) clearInterval(window.__divineInterval);
+    window.__divineInterval = setInterval(async ()=>{
+      try {
+        // Kutsal Pınar
+        const last = await db.kvGet(kvHoly);
+        if (!last || (Date.now() - last) >= (cfg.holySpring.cooldownMs||3600000)) {
+          const a = app.pantheon.state.ambassadors;
+          const totalRep = (a.Metatron.reputation||0) + (a.Uriel.reputation||0) + (a.Raphael.reputation||0);
+          if (totalRep >= (cfg.holySpring.repSumMin||60)) {
+            const keys = Object.keys(app.strategies||{});
+            const candidates = keys.filter(k=> app.settings.statusMaps.shadowBanned[k] && !app.settings.statusMaps.hardBanned[k])
+              .map(k=>{
+                const st = app.strategyStats[k]?.overall || {};
+                const sw = st.shadowWins||0, sl= st.shadowLosses||0, sp = st.shadowProposals||0;
+                const wr = (sw+sl)>0 ? (sw/(sw+sl)) : 0;
+                return { key:k, wr, sp, name: app.strategies[k]?.displayName || k };
+              })
+              .filter(x=> x.sp >= 10 && x.wr >= 0.45)
+              .sort((a,b)=> b.wr - a.wr)
+              .slice(0,2);
+            if (candidates.length>0){
+              for (const c of candidates){
+                app.settings.statusMaps.shadowBanned[c.key] = false;
+                app.settings.activeStrategies[c.key] = true;
+              }
+              app.updateActiveStrategies(); app.saveSettings();
+              app.showNotification(`Kutsal Pınar: ${candidates.map(c=>c.name).join(', ')} kefaret aldı.`, 'success');
+              app.speak?.('Kutsal Pınar çağladı. Kefaret kapıları aralandı.');
+              await db.kvSet(kvHoly, Date.now());
+            }
+          }
+        }
+        // Kıyamet Günü
+        const done = await db.kvGet(kvDoom);
+        if (!done) {
+          const total = app.stats?.total || 0;
+          if (total >= (cfg.doomsday.totalSignals||1000)) {
+            const keys = Object.keys(app.strategies||{});
+            const fallen = keys.filter(k=> app.settings.statusMaps.hardBanned[k] || app.settings.statusMaps.shadowBanned[k])
+              .map(k=> ({ key:k, name: app.strategies[k]?.displayName || k }));
+            if (fallen.length>0){
+              const revive = fallen.slice(0,3);
+              revive.forEach(r=>{
+                app.settings.statusMaps.hardBanned[r.key] = false;
+                app.settings.statusMaps.shadowBanned[r.key] = false;
+                app.settings.activeStrategies[r.key] = true;
+              });
+              app.updateActiveStrategies(); app.saveSettings();
+              app.showNotification(`Kıyamet Günü: ${revive.map(r=>r.name).join(', ')} çaylak olarak döndü.`, 'warning');
+              app.speak?.('Kıyamet yankılandı, düşmüşler yeniden dirildi.');
+            }
+            await db.kvSet(kvDoom, true);
+          }
+        }
+      } catch(e) { console.error(e); }
+    }, 60*1000);
+  }
+
+  // ————————— Bootstrap —————————
+  whenAppReady(async ()=>{
+    try {
+      await injectMythConfigUI();
+      const cfg = await loadMythConfig(window.Pantheon.db);
+      await applyMythConfig(cfg);
+      setupZebanilerMonitor();
+      injectWisdomInPantheon();
+      tortureWhenBanned();
+      reapplyDynamicSignalQuality();
+      await rewireDivineProtocols();
+      window.app.showNotification('Mitolojik Konfigürasyon ve Zebaniler koruması aktif.', 'info');
+    } catch (e) {
+      console.error('Mythology advanced init error:', e);
+    }
+  });
+
+})();
+
+(function(){
+  'use strict';
+
+  function whenReady(fn){
+    const iv = setInterval(()=>{
+      if (window.app && window.Pantheon && window.app.pantheon && window.app.oracle) {
+        clearInterval(iv); fn();
+      }
+    }, 100);
+  }
+
+  // ————————— Stiller —————————
+  function injectStyles(){
+    if (document.getElementById('pantheon-enhance-styles')) return;
+    const st = document.createElement('style');
+    st.id = 'pantheon-enhance-styles';
+    st.textContent = `
+      .chip{ display:inline-flex; align-items:center; gap:6px; padding:2px 6px; border:1px solid var(--border-color); border-radius:12px; font-size:11px; margin:1px 4px 1px 0; background: var(--input-bg); }
+      .chip small{ opacity:0.8; font-size:10px; }
+      .amb-metatron{ box-shadow: 0 0 0 1px rgba(125,211,252,0.25) inset; color:#7dd3fc; }
+      .amb-uriel{ box-shadow: 0 0 0 1px rgba(251,191,36,0.25) inset; color:#fbbf24; }
+      .amb-raphael{ box-shadow: 0 0 0 1px rgba(244,114,182,0.25) inset; color:#f472b6; }
+
+      #pp-bulletin, #pp-cavalry { margin-top:6px; }
+      .pp-line{ display:flex; align-items:center; justify-content:space-between; background: var(--input-bg); border:1px solid var(--border-color); border-radius:4px; padding:6px 8px; font-size:12px; }
+      .badge{ display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border:1px solid var(--border-color); border-radius:12px; font-size:11px; margin-right:6px; opacity:0.7; }
+      .badge.active{ opacity:1; box-shadow:0 0 10px rgba(124,58,237,0.15); }
+      .badge.bs{ color:#fca5a5; border-color:#fca5a5; }
+      .badge.ph{ color:#f59e0b; border-color:#f59e0b; }
+      .regime-pill{ display:inline-flex; align-items:center; gap:6px; padding:2px 6px; border:1px solid var(--border-color); border-radius:12px; font-size:11px; }
+    `;
+    document.head.appendChild(st);
+  }
+
+  // ————————— Yardımcılar —————————
+  function regimeIconText(reg){
+    switch((reg||'').toUpperCase()){
+      case 'SAVAŞ': return '⚔️ SAVAŞ';
+      case 'KITLIK': return '🌾 KITLIK';
+      case 'SALGIN': return '☣️ SALGIN';
+      case 'ÖLÜM': return '☠️ ÖLÜM';
+      case 'TREND': return '📈 TREND';
+      case 'RANGE': return '📊 RANGE';
+      case 'TRANSITION': return '🌀 GEÇİŞ';
+      default: return '—';
+    }
+  }
+  function emissaryOf(key){
+    try{
+      const grp = window.app.getStrategyGroup(key);
+      if (grp === 'trending') return 'Uriel';
+      return 'Metatron';
+    }catch{ return 'Metatron'; }
+  }
+  function ambClass(amb){
+    if (amb === 'Uriel') return 'amb-uriel';
+    if (amb === 'Raphael') return 'amb-raphael';
+    return 'amb-metatron';
+  }
+
+  // ————————— Kehanet: rejim ikonografisi —————————
+  function enhanceRegimeInKehanet(){
+    const el = document.getElementById('kp-regime');
+    if (!el) return;
+    setInterval(()=>{
+      const horse = window.app.oracle?.current || null;
+      const reg = horse || window.app.marketRegime || '—';
+      el.textContent = regimeIconText(reg);
+    }, 1200);
+  }
+
+  // ————————— Panteon: Süvariler rozetleri ve Günün Şeref Bülteni —————————
+  function injectPantheonBadges(){
+    const panel = document.getElementById('panteon-panel'); if (!panel) return;
+    const body = panel.querySelector('.pp-body'); if (!body) return;
+
+    // Süvariler
+    if (!document.getElementById('pp-cavalry')){
+      const cv = document.createElement('div');
+      cv.id = 'pp-cavalry';
+      cv.className = 'pp-line';
+      cv.innerHTML = `
+        <div>🛡️ Süvariler</div>
+        <div>
+          <span id="badge-bs" class="badge bs">🦢 BlackSwan</span>
+          <span id="badge-ph" class="badge ph">🔥 Phoenix</span>
+        </div>`;
+      body.appendChild(cv);
+    }
+    // Bülten
+    if (!document.getElementById('pp-bulletin')){
+      const bl = document.createElement('div');
+      bl.id = 'pp-bulletin';
+      bl.className = 'pp-line';
+      bl.innerHTML = `<div>🗞️ Bülten</div><div id="pp-bul-text">—</div>`;
+      body.appendChild(bl);
+    }
+
+    // Güncelleyiciler
+    setInterval(()=>{
+      try{
+        const bs = document.getElementById('badge-bs');
+        const ph = document.getElementById('badge-ph');
+        const act = window.app.settings?.activeStrategies || {};
+        if (bs) bs.classList.toggle('active', !!act.blackSwanCatcher);
+        if (ph) ph.classList.toggle('active', !!act.phoenixAscension);
+      }catch{}
+    }, 1500);
+
+    setInterval(()=>{
+      try{
+        const keys = Object.keys(window.app.strategies||{});
+        const minContrib = 10;
+        const filt = keys.filter(k=> !window.app.settings?.statusMaps?.hardBanned?.[k] && !window.app.settings?.statusMaps?.shadowBanned?.[k]);
+        const scored = filt.map(k=>{
+          const w = window.app.getStrategyWeight(k);
+          const contrib = window.app.strategyStats[k]?.overall?.contrib || 0;
+          return { k, name: window.app.strategies[k]?.displayName || k, w, contrib };
+        }).filter(x=> x.contrib >= minContrib);
+
+        if (scored.length === 0){
+          const tgt = document.getElementById('pp-bul-text'); if (tgt) tgt.textContent = 'Veri toplanıyor...';
+          return;
+        }
+
+        const best = scored.slice().sort((a,b)=> b.w - a.w)[0];
+        const worst = scored.slice().sort((a,b)=> a.w - b.w)[0];
+        const txt = `🏅 Şerefli: ${best.name} (w=${best.w.toFixed(2)})  •  ⚠️ Şerefsiz: ${worst.name} (w=${worst.w.toFixed(2)})`;
+        const tgt = document.getElementById('pp-bul-text'); if (tgt) tgt.textContent = txt;
+      }catch{}
+    }, 4000);
+  }
+
+  // ————————— Katkı kolonunu Elçi-renkli chip’lerle zenginleştir —————————
+  function enhanceContributorsCell(){
+    const app = window.app;
+    if (!app || !app.renderSignals || app.__contributorsEnhanced) return;
+
+    const orig = app.renderSignals.bind(app);
+    app.renderSignals = function(fullRender=false){
+      const out = orig(fullRender);
+      try{
+        const tbody = document.getElementById('modal-signals-body');
+        if (!tbody) return out;
+        app.signals.forEach(sig=>{
+          const row = document.getElementById(`signal-row-${sig.id}`);
+          if (!row) return;
+          const cell = row.cells?.[7]; // "Katkı" kolonu
+          if (!cell) return;
+          const contribs = Array.isArray(sig.contributors) ? sig.contributors : [];
+          if (contribs.length === 0){
+            cell.textContent = row.cells[7].textContent || (sig.reason || '-');
+            return;
+          }
+          const chips = contribs.map(c=>{
+            const amb = emissaryOf(c.strategy);
+            const cls = ambClass(amb);
+            const name = app.strategies[c.strategy]?.displayName || c.strategy;
+            const eff = isFinite(c.effScore) ? c.effScore : (c.baseScore * (c.weight||1));
+            const title = `${name} • Elçi: ${amb} • Ağırlık:${(c.weight||1).toFixed(2)} • Etkili Skor:${(eff||0).toFixed(2)}`;
+            return `<span class="chip ${cls}" title="${title}">${name} <small>${(eff||0).toFixed(2)}</small></span>`;
+          }).join('');
+          cell.innerHTML = chips;
+        });
+      }catch(e){ console.error(e); }
+      return out;
+    };
+    app.__contributorsEnhanced = true;
+  }
+
+  // ————————— TTS Mitolojik zenginleştirme —————————
+  function enhanceTTS(){
+    const app = window.app;
+    if (!app || !app.speechTexts || app.__mythTtsEnhanced) return;
+    const add = (key, arr)=>{ app.speechTexts[key] = Array.isArray(app.speechTexts[key]) ? app.speechTexts[key].concat(arr) : arr; };
+
+    add('buy', [
+      "Olimpos'un rüzgarı arkanda, [Sembol] için talihin kapıları açılıyor. Kaderin terazisi bizden yana! Skor [Skor].",
+      "Metatron fısıldıyor: Denge yükselişte, [Sembol] için zafer vakti! Skor [Skor].",
+      "Uriel mızrağını kaldırdı: [Sembol] ileri! Piyasanın kalbi şimdi bizim ritmimizde atıyor. Skor [Skor]."
+    ]);
+    add('sell', [
+      "Kılıçlar kınına, [Sembol] için geri çekil! Disiplin zaferin kardeşidir. Skor [Skor].",
+      "Raphael uyardı: Yarayı büyütme, [Sembol] için savunma hattına çekil. Skor [Skor].",
+      "O vakit geldi: [Sembol] için yük hafifletilecek. Akıl, hırstan üstündür. Skor [Skor]."
+    ]);
+    add('warEnter', [
+      "⚔️ SAVAŞ atlısı ufukta! Uriel’in orduları toplandı, piyasa hiddetli dalgalarla saldırıyor.",
+      "SAVAŞ modu! Volatilite kükredi, çelik gibi irade gerek!"
+    ]);
+    add('famineEnter', [
+      "🌾 KITLIK çöktü. Metatron sessizliği dinliyor, sabrın meyvesi tatlıdır.",
+      "Pazar soluk aldı: Hacim zayıf, enerji tasarrufu devrede."
+    ]);
+    add('plagueEnter', [
+      "☣️ SALGIN! Flash çöküş dalgası. Savunma protokolü, şimdi!",
+      "Kahin haykırıyor: Sert düşüş! Kalkanları kaldırın!"
+    ]);
+    add('deathEnter', [
+      "☠️ ÖLÜM atlısı: Eski trend öldü. Phoenix yeniden doğuşa hazırlanıyor.",
+      "Kara perde indi. Hafızayı temizle, yeni dünya yazılıyor."
+    ]);
+
+    // Oracle patch: mitik anons
+    const oracle = app.oracle;
+    if (oracle && !oracle.__mythAnnouncePatched){
+      const origTick = oracle._tick.bind(oracle);
+      oracle._tick = function(){
+        const prev = this.current;
+        origTick();
+        if (this.current !== prev){
+          const key = (this.current==='SAVAŞ') ? 'warEnter' :
+                      (this.current==='KITLIK') ? 'famineEnter' :
+                      (this.current==='SALGIN') ? 'plagueEnter' :
+                      (this.current==='ÖLÜM') ? 'deathEnter' : null;
+          if (key) app.speak?.(app.getRandomMessage(key));
+        }
+      };
+      oracle.__mythAnnouncePatched = true;
+    }
+    app.__mythTtsEnhanced = true;
+  }
+
+  // ————————— Bootstrap —————————
+  whenReady(()=>{
+    try{
+      injectStyles();
+      enhanceRegimeInKehanet();
+      injectPantheonBadges();
+      enhanceContributorsCell();
+      enhanceTTS();
+      window.app.showNotification('Panteon: Süvari rozetleri, rejim ikonları ve katkı rozetleri aktif.', 'info');
+    }catch(e){
+      console.error('Pantheon UI enhance error:', e);
+    }
+  });
+
+})();
+
+(function(){
+  'use strict';
+
+  function whenReady(fn){
+    const iv = setInterval(()=>{
+      if (window.app && window.Pantheon && window.app.pantheon && window.app.oracle) {
+        clearInterval(iv); fn();
+      }
+    }, 100);
+  }
+
+  // ————————— Styles —————————
+  function injectStyles(){
+    if (document.getElementById('pantheon-mood-styles')) return;
+    const st = document.createElement('style');
+    st.id = 'pantheon-mood-styles';
+    st.textContent = `
+      .mood-box { display:grid; gap:6px; background: var(--input-bg); border:1px solid var(--border-color); border-radius:6px; padding:6px; }
+      .mood-row { display:flex; align-items:center; justify-content:space-between; font-size:12px; }
+      .meter { position:relative; height:10px; background: #0b0f14; border:1px solid var(--border-color); border-radius:6px; overflow:hidden; width: 160px; }
+      .meter .fill { position:absolute; left:0; top:0; bottom:0; width:0%; background: linear-gradient(90deg, #10b981, #22c55e); transition: width .25s ease, background .25s ease, left .25s ease; }
+      .meter.center .fill { left:50%; width:0%; }
+      .pill { display:inline-flex; align-items:center; gap:6px; padding:2px 6px; border:1px solid var(--border-color); border-radius:12px; font-size:11px; }
+      /* Honor Modal row coloring */
+      .honor-amb-uriel td { color:#fbbf24; }
+      .honor-amb-metatron td { color:#7dd3fc; }
+      .honor-amb-raphael td { color:#f472b6; }
+      .honor-filters { display:flex; gap:6px; margin:6px 0; flex-wrap:wrap; }
+      .honor-filters .btn { padding:2px 8px; font-size:11px; }
+      .stamp-seal { position:fixed; z-index: 3500; pointer-events:none; mix-blend-mode: multiply; }
+      @keyframes doomShake {
+        0%{ transform: translate(0,0) rotate(0deg) }
+        25%{ transform: translate(2px,-2px) rotate(0.2deg) }
+        50%{ transform: translate(-2px,2px) rotate(-0.2deg) }
+        75%{ transform: translate(2px,2px) rotate(0.1deg) }
+        100%{ transform: translate(0,0) rotate(0deg) }
+      }
+    `;
+    document.head.appendChild(st);
+  }
+
+  // ————————— Emissary helpers —————————
+  function emissaryOfKey(key){
+    try {
+      const grp = window.app.getStrategyGroup(key);
+      return grp === 'trending' ? 'Uriel' : 'Metatron';
+    } catch { return 'Metatron'; }
+  }
+  function rowClassForAmb(amb){
+    if (amb==='Uriel') return 'honor-amb-uriel';
+    if (amb==='Raphael') return 'honor-amb-raphael';
+    return 'honor-amb-metatron';
+  }
+
+  // ————————— Effects extension: seal, goldRain, doomQuake —————————
+  function extendEffects(){
+    const fx = window.app.pantheon.effects;
+    if (!fx || fx.__extended) return;
+    fx.__extended = true;
+
+    fx.sealStamp = function(kind='SEAL'){
+      const panel = document.getElementById('panteon-panel') || document.body;
+      const r = panel.getBoundingClientRect();
+      const d = document.createElement('div');
+      d.className = 'stamp-seal';
+      const size = Math.min(220, Math.max(140, r.width*0.6));
+      Object.assign(d.style, {
+        left: (r.left + (r.width/2) - size/2) + 'px',
+        top: (r.top + (r.height/2) - size/2) + 'px',
+        width: size+'px', height: size+'px',
+        borderRadius: '50%',
+        border: '4px double rgba(252,211,77,0.8)',
+        boxShadow: '0 0 24px rgba(252,211,77,0.35)',
+        background: 'radial-gradient(circle at 50% 50%, rgba(252,211,77,0.15), rgba(252,211,77,0.05), transparent)',
+        transform: 'scale(0.6) rotate(-8deg)',
+        opacity: '0'
+      });
+      const txt = document.createElement('div');
+      txt.textContent = (kind === 'HOLY') ? 'MÜHÜR' : (kind === 'DOOM' ? 'KADER' : 'MÜHÜR');
+      Object.assign(txt.style, {
+        position:'absolute', inset:'0', display:'flex', alignItems:'center', justifyContent:'center',
+        color: 'rgba(252,211,77,0.9)', fontFamily: 'serif', fontWeight:'700', fontSize: (size*0.22) + 'px',
+        letterSpacing: '4px', textShadow: '0 2px 8px rgba(0,0,0,0.6)'
+      });
+      d.appendChild(txt);
+      document.body.appendChild(d);
+      requestAnimationFrame(()=>{
+        d.style.transition = 'transform 150ms ease, opacity 150ms ease';
+        d.style.transform = 'scale(1) rotate(0deg)';
+        d.style.opacity = '1';
+      });
+      setTimeout(()=>{ d.style.opacity='0'; d.style.transform='scale(1.1) rotate(2deg)'; setTimeout(()=>{ try{ d.remove(); }catch{} }, 220); }, 1200);
+    };
+
+    fx.goldRain = async function(duration=1600){
+      // try tsparticles; fallback css sparkles
+      if (window.tsParticles) {
+        const config = {
+          background:{ color:'transparent' }, fullScreen:{ enable:false },
+          particles:{ number:{ value:0 } },
+          emitters:{
+            position:{ x: 50, y: 0 }, rate:{ delay: 0.01, quantity: 20 },
+            life:{ duration: duration/1000, count: 1 },
+            particles:{
+              move:{ enable:true, direction:'bottom', speed:{min:10,max:30}, outModes:'destroy' },
+              gravity:{ enable:true, acceleration: 9.8 },
+              color:{ value:['#facc15','#fde68a','#eab308'] },
+              shape:{ type:'circle' }, size:{ value:{min:1,max:3} }, opacity:{ value:{min:0.3, max:0.9} }
+            }
+          }
+        };
+        const c = await window.tsParticles.load('cosmic-effects-layer', config);
+        setTimeout(()=>{ try{ c?.destroy(); }catch{} }, duration+150);
+      } else {
+        const layer = document.getElementById('cosmic-effects-layer') || document.body;
+        const el = document.createElement('div');
+        Object.assign(el.style, { position:'fixed', inset:'0', background:'linear-gradient(to bottom, rgba(250,204,21,0.15), transparent)', zIndex:3000, pointerEvents:'none', opacity:'0' });
+        layer.appendChild(el);
+        requestAnimationFrame(()=> el.style.transition='opacity 100ms ease'; el.style.opacity='1');
+        setTimeout(()=>{ el.style.opacity='0'; setTimeout(()=>{ try{ el.remove(); }catch{} }, 200); }, duration);
+      }
+    };
+
+    fx.doomQuake = function(duration=1000){
+      const target = document.body;
+      target.style.animation = 'doomShake 90ms linear 10';
+      setTimeout(()=>{ target.style.animation='none'; }, duration);
+    };
+  }
+
+  // ————————— Panteon Paneli: Ruh Hali ve canlı çarpan barları —————————
+  async function injectPantheonMood(){
+    const panel = document.getElementById('panteon-panel'); if (!panel) return;
+    const body = panel.querySelector('.pp-body'); if (!body) return;
+
+    if (!document.getElementById('pp-mood')){
+      const box = document.createElement('div');
+      box.id = 'pp-mood';
+      box.className = 'mood-box';
+      box.innerHTML = `
+        <div class="mood-row">
+          <span>🧠 Ruh Hali</span>
+          <span id="pp-mood-text" class="pill">—</span>
+        </div>
+        <div class="mood-row">
+          <span>Eşik Δ</span>
+          <div class="meter center"><div id="pp-meter-thr" class="fill"></div></div>
+        </div>
+        <div class="mood-row">
+          <span>Cooldown x</span>
+          <div class="meter"><div id="pp-meter-cd" class="fill"></div></div>
+        </div>
+        <div class="mood-row">
+          <span>RR x</span>
+          <div class="meter"><div id="pp-meter-rr" class="fill"></div></div>
+        </div>
+        <div class="mood-row">
+          <span class="pill" title="Baz değerleri mevcut ayardan al ve yeniden karşılaştır.">♻ Bazı Sıfırla</span>
+          <button id="pp-reset-basis" class="btn btn-tiny">Yeniden Ölç</button>
+        </div>
+      `;
+      body.appendChild(box);
+    }
+
+    // Baseline KV
+    const db = window.Pantheon.db;
+    let basis = await db.kvGet('basis_scalars');
+    if (!basis) {
+      const cd = window.app.settings.cooldowns;
+      basis = {
+        cd: { signalMs: cd.signalMs, same: cd.sameDirectionMs, opp: cd.oppositeDirectionMs, proposal: cd.proposalTimeoutMs },
+        rr: window.app.settings.params.rrRatio
+      };
+      await db.kvSet('basis_scalars', basis);
+    }
+
+    document.getElementById('pp-reset-basis').addEventListener('click', async ()=>{
+      const cd = window.app.settings.cooldowns;
+      basis = {
+        cd: { signalMs: cd.signalMs, same: cd.sameDirectionMs, opp: cd.oppositeDirectionMs, proposal: cd.proposalTimeoutMs },
+        rr: window.app.settings.params.rrRatio
+      };
+      await db.kvSet('basis_scalars', basis);
+      window.app.showNotification('Baz değerler güncellendi.', 'info');
+    });
+
+    const moodTextEl = document.getElementById('pp-mood-text');
+    const thrEl = document.getElementById('pp-meter-thr');
+    const cdEl  = document.getElementById('pp-meter-cd');
+    const rrEl  = document.getElementById('pp-meter-rr');
+
+    setInterval(()=>{
+      try{
+        // Mood label
+        const delta = window.app.pantheon._combinedThresholdDelta();
+        const label = (delta <= -0.15) ? 'Cesur' : (delta >= 0.15 ? 'Temkinli' : 'Dengeli');
+        if (moodTextEl) moodTextEl.textContent = label;
+
+        // Eşik Δ: -1..1 -> merkezli bar (50% ± 50%)
+        const pct = Math.max(-1, Math.min(1, delta));
+        const width = Math.abs(pct) * 50; // center bar
+        const left = pct < 0 ? (50 - width) : 50;
+        thrEl.style.left = left + '%';
+        thrEl.style.width = width + '%';
+        thrEl.style.background = (pct < 0) ? 'linear-gradient(90deg, #10b981, #22c55e)' : 'linear-gradient(90deg, #f97316, #ef4444)';
+
+        // Cooldown x: avg scale vs basis
+        const cd = window.app.settings.cooldowns;
+        const b = basis.cd;
+        const s1 = cd.signalMs / Math.max(1,b.signalMs);
+        const s2 = cd.sameDirectionMs / Math.max(1,b.same);
+        const s3 = cd.oppositeDirectionMs / Math.max(1,b.opp);
+        const s4 = cd.proposalTimeoutMs / Math.max(1,b.proposal);
+        const sAvg = (s1+s2+s3+s4)/4;
+        const cdPct = Math.max(0, Math.min(2.0, sAvg)) / 2.0 * 100;
+        cdEl.style.width = cdPct + '%';
+        cdEl.style.background = (sAvg <= 1.0) ? 'linear-gradient(90deg, #10b981, #22c55e)' : 'linear-gradient(90deg, #f97316, #ef4444)';
+
+        // RR x: rrRatio / basis.rr
+        const rr = window.app.settings.params.rrRatio / Math.max(1e-6, basis.rr);
+        const rrPct = Math.max(0, Math.min(2.0, rr)) / 2.0 * 100;
+        rrEl.style.width = rrPct + '%';
+        rrEl.style.background = (rr >= 1.0) ? 'linear-gradient(90deg, #22c55e, #84cc16)' : 'linear-gradient(90deg, #f59e0b, #f97316)';
+      }catch(e){}
+    }, 1200);
+  }
+
+  // ————————— Honor Modal zenginleştirme: Elçi renkleri ve filtreler —————————
+  function enhanceHonorModal(){
+    const body = document.getElementById('honor-modal-body');
+    if (!body) return;
+
+    // Filtre bar yoksa ekle
+    if (!document.getElementById('honor-filter-bar')){
+      const bar = document.createElement('div');
+      bar.id = 'honor-filter-bar';
+      bar.className = 'honor-filters';
+      bar.innerHTML = `
+        <button data-f="all" class="btn btn-tiny">Hepsi</button>
+        <button data-f="metatron" class="btn btn-tiny">Metatron</button>
+        <button data-f="uriel" class="btn btn-tiny">Uriel</button>
+        <button data-f="banned" class="btn btn-tiny">Banlılar</button>
+      `;
+      body.prepend(bar);
+      bar.addEventListener('click', (e)=>{
+        if (!(e.target instanceof HTMLElement)) return;
+        const f = e.target.getAttribute('data-f'); if (!f) return;
+        applyFilter(f);
+      });
+    }
+
+    // Satırları renklendir ve veriyi ilişkilendir
+    body.querySelectorAll('table.data-table tbody tr').forEach(tr=>{
+      const nameCell = tr.querySelector('td'); if (!nameCell) return;
+      const name = nameCell.textContent.trim();
+      let matchedKey = null;
+      for (const k of Object.keys(window.app.strategies||{})){
+        const disp = window.app.strategies[k]?.displayName || k;
+        if (disp === name){ matchedKey = k; break; }
+      }
+      if (!matchedKey) return;
+      const amb = emissaryOfKey(matchedKey);
+      tr.classList.add(rowClassForAmb(amb));
+      tr.setAttribute('data-amb', amb.toLowerCase());
+      // Rozet ekle
+      if (!nameCell.querySelector('.pill')){
+        const pill = document.createElement('span');
+        pill.className = 'pill';
+        pill.textContent = amb;
+        pill.style.marginLeft = '6px';
+        nameCell.appendChild(pill);
+      }
+      // Ban durumu işareti
+      const isShadow = !!window.app.settings.statusMaps.shadowBanned[matchedKey];
+      const isHard = !!window.app.settings.statusMaps.hardBanned[matchedKey];
+      tr.setAttribute('data-banned', (isShadow || isHard) ? '1' : '0');
+    });
+
+    // Varsayılan filtre Hepsi
+    applyFilter('all');
+
+    function applyFilter(f){
+      body.querySelectorAll('table.data-table tbody tr').forEach(tr=>{
+        const amb = tr.getAttribute('data-amb') || '';
+        const ban = tr.getAttribute('data-banned') === '1';
+        let show = true;
+        if (f === 'metatron') show = amb==='metatron';
+        if (f === 'uriel') show = amb==='uriel';
+        if (f === 'banned') show = ban;
+        tr.style.display = show ? '' : 'none';
+      });
+    }
+  }
+
+  // ————————— Notification sniff: Holy Spring / Doomsday özel efekt —————————
+  function extendNotificationForSeals(){
+    const app = window.app;
+    if (app.__notifySealsPatched) return;
+    app.__notifySealsPatched = true;
+
+    const orig = app.showNotification.bind(app);
+    app.showNotification = function(msg, type='info', timeout=5000){
+      const ret = orig(msg, type, timeout);
+      try{
+        const lower = (msg||'').toLowerCase();
+        if (lower.includes('kutsal pınar')) {
+          app.pantheon.effects.sealStamp('HOLY'); app.pantheon.effects.goldRain();
+        }
+        if (lower.includes('kıyamet günü')) {
+          app.pantheon.effects.sealStamp('DOOM'); app.pantheon.effects.doomQuake();
+        }
+      }catch(e){}
+      return ret;
+    };
+  }
+
+  // ————————— Bootstrap —————————
+  whenReady(()=>{
+    try {
+      injectStyles();
+      extendEffects();
+      injectPantheonMood();
+
+      // Honor modal enhance by patching openHonorModal
+      const app = window.app;
+      if (!app.__honorEnhancePatched){
+        const origOpen = app.openHonorModal.bind(app);
+        app.openHonorModal = function(filter='all'){
+          const r = origOpen(filter);
+          try { enhanceHonorModal(); } catch(e){ console.error(e); }
+          return r;
+        };
+        app.__honorEnhancePatched = true;
+      }
+
+      extendNotificationForSeals();
+
+      window.app.showNotification('Panteon: Ruh Hali ve Mühür ritüelleri etkin.', 'info');
+    } catch (e) {
+      console.error('Pantheon mood/seal init error:', e);
+    }
+  });
+
+})();
+
+(function(){
+  'use strict';
+
+  function whenReady(fn){
+    const iv = setInterval(()=>{
+      if (window.app && window.Pantheon && window.app.pantheon && window.app.oracle) {
+        clearInterval(iv); fn();
+      }
+    }, 100);
+  }
+
+  // ————————— Styles —————————
+  function injectStyles(){
+    if (document.getElementById('pantheon-rep-heat-styles')) return;
+    const st = document.createElement('style');
+    st.id = 'pantheon-rep-heat-styles';
+    st.textContent = `
+      /* Rep sparkline canvases */
+      #pp-rep-trends{ display:grid; grid-template-columns: 1fr; gap:6px; margin-top:6px; }
+      .rep-item{ display:flex; align-items:center; gap:8px; background: var(--input-bg); border:1px solid var(--border-color); border-radius:4px; padding:6px; }
+      .rep-item .label{ font-size:12px; min-width:72px; display:flex; align-items:center; gap:6px; }
+      .rep-item canvas{ width:120px; height:28px; border-radius:3px; background:#0b0f14; border:1px solid var(--border-color); }
+      .dot-m{ width:8px; height:8px; border-radius:50%; background:#7dd3fc; }
+      .dot-u{ width:8px; height:8px; border-radius:50%; background:#fbbf24; }
+      .dot-r{ width:8px; height:8px; border-radius:50%; background:#f472b6; }
+
+      /* Honor heat section */
+      .heat-section{ margin-top:12px; background: var(--input-bg); border:1px solid var(--border-color); border-radius:6px; padding:8px; }
+      .heat-title{ font-weight:700; color:var(--primary); margin-bottom:6px; }
+      .heat-grid{ display:grid; grid-template-columns: 1.2fr repeat(3, 0.6fr); gap:4px; align-items:center; }
+      .heat-h{ font-size:11px; color:var(--text-secondary); }
+      .heat-name{ font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .heat-cell{ height:20px; border:1px solid var(--border-color); border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:11px; color:#0f172a; }
+      .heat-amb-uriel .heat-name{ color:#fbbf24; }
+      .heat-amb-metatron .heat-name{ color:#7dd3fc; }
+      .heat-amb-raphael .heat-name{ color:#f472b6; }
+
+      /* Cavalry mission tag */
+      #pp-cavalry .mission{ margin-left:8px; font-size:11px; opacity:0.85; }
+      .mission.badge{ padding:2px 8px; border-radius:12px; border:1px solid var(--border-color); }
+      .mission.sleep{ color:#94a3b8; }
+      .mission.ready{ color:#22c55e; }
+      .mission.engaged{ color:#f59e0b; }
+    `;
+    document.head.appendChild(st);
+  }
+
+  // ————————— Rep history persistence & sparklines —————————
+  function repKey(name){ return `rep_hist_${name}`; }
+  async function loadRepHistory(db, name){
+    const arr = await db.kvGet(repKey(name));
+    return Array.isArray(arr) ? arr : [];
+  }
+  async function saveRepHistory(db, name, arr){
+    const trimmed = arr.slice(-180);
+    await db.kvSet(repKey(name), trimmed);
+    return trimmed;
+  }
+
+  function drawSparkline(canvas, points, color='#7dd3fc'){
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.floor(rect.width * dpr);
+    canvas.height = Math.floor(rect.height * dpr);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.scale(dpr, dpr);
+    const w = rect.width, h = rect.height;
+    ctx.clearRect(0,0,w,h);
+
+    if (!points || points.length < 2) {
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(0, h/2 - 1, w, 2);
+      return;
+    }
+    const reps = points.map(p => p.rep);
+    const min = Math.min(...reps, -100), max = Math.max(...reps, 100);
+    const span = Math.max(1, max - min);
+    const pad = 2;
+
+    // Gradient fill
+    const grad = ctx.createLinearGradient(0,0,0,h);
+    grad.addColorStop(0, color + 'AA'.replace('AA','AA'));
+    grad.addColorStop(1, 'transparent');
+
+    ctx.beginPath();
+    points.forEach((p, i) => {
+      const x = (i / (points.length - 1)) * (w - pad*2) + pad;
+      const y = h - pad - ((p.rep - min) / span) * (h - pad*2);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    // Stroke
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Fill under curve
+    const lastX = ( (points.length - 1) / (points.length - 1) ) * (w - pad*2) + pad;
+    const lastY = h - pad - ((points[points.length - 1].rep - min) / span) * (h - pad*2);
+    ctx.lineTo(lastX, h - pad);
+    ctx.lineTo(pad, h - pad);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Baseline 0 marker
+    if (min <= 0 && max >= 0) {
+      const y0 = h - pad - ((0 - min) / span) * (h - pad*2);
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pad, y0);
+      ctx.lineTo(w - pad, y0);
+      ctx.stroke();
+    }
+  }
+
+  function ambColor(amb){
+    if (amb==='Metatron') return '#7dd3fc';
+    if (amb==='Uriel') return '#fbbf24';
+    if (amb==='Raphael') return '#f472b6';
+    return '#7dd3fc';
+  }
+
+  async function setupRepSparklines(){
+    const panel = document.getElementById('panteon-panel'); if (!panel) return;
+    const body = panel.querySelector('.pp-body'); if (!body) return;
+
+    if (!document.getElementById('pp-rep-trends')){
+      const wrap = document.createElement('div');
+      wrap.id = 'pp-rep-trends';
+      wrap.innerHTML = `
+        <div class="rep-item"><div class="label"><span class="dot-m"></span>Metatron</div><canvas id="rep-canv-Metatron"></canvas></div>
+        <div class="rep-item"><div class="label"><span class="dot-u"></span>Uriel</div><canvas id="rep-canv-Uriel"></canvas></div>
+        <div class="rep-item"><div class="label"><span class="dot-r"></span>Raphael</div><canvas id="rep-canv-Raphael"></canvas></div>
+      `;
+      body.appendChild(wrap);
+    }
+
+    const db = window.Pantheon.db;
+    const hist = {
+      Metatron: await loadRepHistory(db, 'Metatron'),
+      Uriel:    await loadRepHistory(db, 'Uriel'),
+      Raphael:  await loadRepHistory(db, 'Raphael')
+    };
+
+    // İlk nokta yoksa mevcut reputations ile doldur
+    const st = window.app.pantheon.state.ambassadors;
+    const now = Date.now();
+    ['Metatron','Uriel','Raphael'].forEach(k=>{
+      if (!hist[k] || hist[k].length === 0) hist[k] = [{ ts: now, rep: st[k].reputation||0 }];
+    });
+
+    // Çizim fonksiyonu
+    function redraw(){
+      try {
+        drawSparkline(document.getElementById('rep-canv-Metatron'), hist.Metatron, ambColor('Metatron'));
+        drawSparkline(document.getElementById('rep-canv-Uriel'), hist.Uriel, ambColor('Uriel'));
+        drawSparkline(document.getElementById('rep-canv-Raphael'), hist.Raphael, ambColor('Raphael'));
+      } catch (e) {}
+    }
+    redraw();
+
+    // _bumpRep patch: her değişimde kaydet ve çiz
+    if (!window.app.pantheon.__bumpPatched){
+      const orig = window.app.pantheon._bumpRep.bind(window.app.pantheon);
+      window.app.pantheon._bumpRep = function(amb, delta){
+        const before = (this.state.ambassadors[amb]?.reputation || 0);
+        const ret = orig(amb, delta);
+        const after = (this.state.ambassadors[amb]?.reputation || 0);
+        const arr = hist[amb] || [];
+        arr.push({ ts: Date.now(), rep: after });
+        hist[amb] = arr.slice(-180);
+        saveRepHistory(db, amb, hist[amb]).then(()=> redraw());
+        return ret;
+      };
+      window.app.pantheon.__bumpPatched = true;
+    }
+
+    // Pencere yeniden boyutlandırmada çizimi güncelle
+    window.addEventListener('resize', ()=> redraw());
+  }
+
+  // ————————— Cavalry mission status —————————
+  function updateCavalryMission(){
+    const line = document.querySelector('#pp-cavalry .mission');
+    if (!line) {
+      const host = document.getElementById('pp-cavalry');
+      if (!host) return;
+      const span = document.createElement('span');
+      span.className = 'mission badge sleep';
+      span.textContent = 'Uyku';
+      span.classList.add('mission');
+      host.appendChild(span);
+    }
+    const node = document.querySelector('#pp-cavalry .mission');
+    const act = window.app.settings?.activeStrategies || {};
+    const h = window.app.oracle?.current || null;
+
+    let state = 'sleep';
+    let text = 'Uyku';
+    if (h && (act.blackSwanCatcher || act.phoenixAscension)) {
+      state = 'engaged'; text = 'Angaje';
+    } else if (act.blackSwanCatcher || act.phoenixAscension) {
+      state = 'ready'; text = 'Hazır';
+    }
+    node.className = `mission badge ${state}`;
+    node.textContent = text;
+  }
+
+  function startMissionTicker(){
+    updateCavalryMission();
+    if (window.__missionTicker) clearInterval(window.__missionTicker);
+    window.__missionTicker = setInterval(updateCavalryMission, 1500);
+  }
+
+  // ————————— Honor Modal: Regime Performance Heatmap —————————
+  function wrOf(stat){
+    if (!stat) return null;
+    const total = (stat.wins||0) + (stat.losses||0);
+    if (total <= 0) return null;
+    return (stat.wins/total) * 100;
+  }
+  function ambOfKey(key){
+    try{
+      const grp = window.app.getStrategyGroup(key);
+      return grp === 'trending' ? 'Uriel' : 'Metatron';
+    }catch{ return 'Metatron'; }
+  }
+  function colorForWR(wr){
+    // 0 -> red, 50 -> yellow, 100 -> green
+    const clamp = Math.max(0, Math.min(100, wr));
+    const r = clamp < 50 ? 255 : Math.round(255 - (clamp-50)*5.1);
+    const g = clamp < 50 ? Math.round(clamp*5.1) : 255;
+    const b = 80;
+    return `rgb(${r},${g},${b})`;
+  }
+  function ensureHonorHeat(){
+    const body = document.getElementById('honor-modal-body');
+    if (!body || document.getElementById('honor-heat')) return;
+    const box = document.createElement('div');
+    box.id = 'honor-heat';
+    box.className = 'heat-section';
+    box.innerHTML = `
+      <div class="heat-title">Rejime Göre Performans Isı Haritası</div>
+      <div class="heat-grid" id="heat-grid">
+        <div class="heat-h"></div>
+        <div class="heat-h">Trend</div>
+        <div class="heat-h">Range</div>
+        <div class="heat-h">Geçiş</div>
+      </div>
+    `;
+    body.appendChild(box);
+
+    const grid = box.querySelector('#heat-grid');
+    // En yüksek katkıya göre sıralayıp 18 adet gösterelim (liste uzun olabilir)
+    const keys = Object.keys(window.app.strategyStats||{});
+    const sorted = keys.sort((a,b)=> (window.app.strategyStats[b]?.overall?.contrib||0) - (window.app.strategyStats[a]?.overall?.contrib||0)).slice(0,18);
+    sorted.forEach(key=>{
+      const amb = ambOfKey(key);
+      const disp = window.app.strategies[key]?.displayName || key;
+      const s = window.app.strategyStats[key] || {};
+      const wrT = wrOf(s.trend), wrR = wrOf(s.range), wrX = wrOf(s.transition);
+      const row = document.createElement('div'); row.className = `heat-row heat-amb-${amb.toLowerCase()}`;
+      const nm = document.createElement('div'); nm.className = 'heat-name'; nm.textContent = disp; row.appendChild(nm);
+      const c1 = document.createElement('div'); c1.className = 'heat-cell'; c1.style.background = (wrT==null?'#1f2937':colorForWR(wrT)); c1.title = `Trend WR: ${wrT==null?'-':wrT.toFixed(0)}%`; c1.textContent = wrT==null?'-':`${wrT.toFixed(0)}%`; row.appendChild(c1);
+      const c2 = document.createElement('div'); c2.className = 'heat-cell'; c2.style.background = (wrR==null?'#1f2937':colorForWR(wrR)); c2.title = `Range WR: ${wrR==null?'-':wrR.toFixed(0)}%`; c2.textContent = wrR==null?'-':`${wrR.toFixed(0)}%`; row.appendChild(c2);
+      const c3 = document.createElement('div'); c3.className = 'heat-cell'; c3.style.background = (wrX==null?'#1f2937':colorForWR(wrX)); c3.title = `Geçiş WR: ${wrX==null?'-':wrX.toFixed(0)}%`; c3.textContent = wrX==null?'-':`${wrX.toFixed(0)}%`; row.appendChild(c3);
+      grid.appendChild(row);
+    });
+  }
+
+  // ————————— Patch Honor open to build heat —————————
+  function patchHonorOpen(){
+    const app = window.app;
+    if (app.__honorHeatPatched) return;
+    const prev = app.openHonorModal.bind(app);
+    app.openHonorModal = function(filter='all'){
+      const r = prev(filter);
+      try { ensureHonorHeat(); } catch(e){ console.error(e); }
+      return r;
+    };
+    app.__honorHeatPatched = true;
+  }
+
+  // ————————— Bootstrap —————————
+  whenReady(async ()=>{
+    try {
+      injectStyles();
+      await setupRepSparklines();
+      startMissionTicker();
+      patchHonorOpen();
+      window.app.showNotification('Panteon: İtibar trendleri ve rejim ısı haritası etkin.', 'info');
+    } catch (e) {
+      console.error('Pantheon rep/heat init error:', e);
+    }
+  });
+
+})();
+
+(function(){
+  'use strict';
+
+  function whenReady(fn){
+    const iv = setInterval(()=>{
+      if (window.app && window.Pantheon && window.app.pantheon && window.Pantheon.db) {
+        clearInterval(iv); fn();
+      }
+    }, 100);
+  }
+
+  // ————————— Styles —————————
+  function injectStyles(){
+    if (document.getElementById('kehanet-pnl-styles')) return;
+    const st = document.createElement('style');
+    st.id = 'kehanet-pnl-styles';
+    st.textContent = `
+      #kp-pnl-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+      #kp-pnl-wrap{ display:flex; align-items:center; gap:8px; }
+      #kp-pnl-canvas{ width:110px; height:28px; border:1px solid var(--border-color); border-radius:4px; background:#0b0f14; }
+      #kp-pnl-stats{ font-size:11px; color: var(--text-secondary); white-space:nowrap; }
+      .bar-14d { height:10px; border:1px solid var(--border-color); border-radius:6px; background:#0b0f14; position:relative; overflow:hidden; }
+      .bar-14d .fill { position:absolute; left:0; top:0; bottom:0; width:0%; background: linear-gradient(90deg,#ef4444,#f59e0b,#22c55e); }
+      .sec-14d { margin-top:12px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius:6px; padding:8px; }
+      .sec-14d-title { font-weight:700; color:var(--primary); margin-bottom:6px; }
+      .grid-14d { display:grid; grid-template-columns: 1.4fr 1fr; gap:6px; align-items:center; }
+      .cell-14d-name { font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .cell-14d-wr { font-size:11px; color:#94a3b8; text-align:right; }
+    `;
+    document.head.appendChild(st);
+  }
+
+  // ————————— PnL helpers —————————
+  function dateKey(ts){
+    const d = new Date(ts);
+    const y = d.getFullYear(), m = (d.getMonth()+1).toString().padStart(2,'0'), dd = d.getDate().toString().padStart(2,'0');
+    return `${y}-${m}-${dd}`;
+  }
+
+  async function appendPnlLog(delta, ts){
+    const db = window.Pantheon.db;
+    const log = await db.kvGet('primePnL_log') || [];
+    log.push({ ts, delta });
+    const trimmed = log.slice(-500);
+    await db.kvSet('primePnL_log', trimmed);
+
+    const daily = await db.kvGet('primePnL_daily') || {};
+    const key = dateKey(ts);
+    daily[key] = (daily[key] || 0) + delta;
+    await db.kvSet('primePnL_daily', daily);
+    return { log: trimmed, daily };
+  }
+
+  function drawSpark(canvas, points){
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.floor(rect.width * dpr);
+    canvas.height = Math.floor(rect.height * dpr);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.scale(dpr, dpr);
+    const w = rect.width, h = rect.height, pad = 3;
+    ctx.clearRect(0,0,w,h);
+
+    if (!points || points.length === 0){
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(0, h/2 - 1, w, 2);
+      return;
+    }
+
+    // cumulative series from last 60 deltas
+    const deltas = points.slice(-60);
+    const vals = [];
+    let acc = 0;
+    deltas.forEach(d => { acc += d.delta; vals.push(acc); });
+    const min = Math.min(...vals, 0), max = Math.max(...vals, 0), span = Math.max(1e-6, max - min);
+
+    // Baseline 0
+    const y0 = h - pad - ((0 - min)/span) * (h - pad*2);
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad, y0); ctx.lineTo(w - pad, y0); ctx.stroke();
+
+    // Line
+    ctx.beginPath();
+    vals.forEach((v,i)=>{
+      const x = (i/(vals.length-1)) * (w - pad*2) + pad;
+      const y = h - pad - ((v - min)/span) * (h - pad*2);
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  function todayMidnightTs(){
+    const d = new Date(); d.setHours(0,0,0,0); return d.getTime();
+  }
+
+  async function setupKehanetPnl(){
+    const panel = document.getElementById('kehanet-panel'); if (!panel) return;
+    const body = panel.querySelector('.kp-body'); if (!body) return;
+    if (!document.getElementById('kp-pnl-row')){
+      const row = document.createElement('div');
+      row.id = 'kp-pnl-row';
+      row.innerHTML = `
+        <span class="kp-key">💠 PnL Akış</span>
+        <span id="kp-pnl-wrap">
+          <canvas id="kp-pnl-canvas"></canvas>
+          <span id="kp-pnl-stats">—</span>
+        </span>
+      `;
+      body.appendChild(row);
+    }
+    const db = window.Pantheon.db;
+    const cvs = document.getElementById('kp-pnl-canvas');
+    const statsEl = document.getElementById('kp-pnl-stats');
+
+    async function refresh(){
+      const log = await db.kvGet('primePnL_log') || [];
+      drawSpark(cvs, log);
+
+      // today & 7d sums
+      const daily = await db.kvGet('primePnL_daily') || {};
+      const now = Date.now(), todayKey = dateKey(now);
+      const today = +(daily[todayKey] || 0);
+      let last7 = 0;
+      for (let i=0;i<7;i++){
+        const t = now - i*24*3600*1000;
+        const k = dateKey(t);
+        last7 += +(daily[k] || 0);
+      }
+      statsEl.textContent = `Bugün: ${today.toFixed(2)}R • 7g: ${last7.toFixed(2)}R`;
+    }
+
+    // İlk çizim + periyodik
+    await refresh();
+    if (window.__kpPnlTimer) clearInterval(window.__kpPnlTimer);
+    window.__kpPnlTimer = setInterval(()=>{ refresh().catch(console.error); }, 3000);
+
+    // Canvas resize
+    window.addEventListener('resize', ()=> { refresh().catch(console.error); });
+  }
+
+  // ————————— Patch: _updatePrimePnL -> log & daily persist —————————
+  function extendPrimeLogging(){
+    const pant = window.app.pantheon;
+    if (pant.__pnlPatched) return;
+    pant.__pnlPatched = true;
+
+    const orig = pant._updatePrimePnL.bind(pant);
+    pant._updatePrimePnL = async function(signal){
+      await orig(signal);
+      try {
+        // delta hesapla (aynı mantık)
+        let delta = 0;
+        if (signal.status === 'tp'){
+          const rR = (signal.entrySlDistance && signal.entrySlDistance>0) ? (signal.entryTpDistance / signal.entrySlDistance) : (this.bot.settings?.params?.rrRatio || 1.5);
+          delta = rR;
+        } else if (signal.status === 'sl'){
+          delta = -1;
+        } else {
+          return; // sadece kapanışlarda log
+        }
+        await appendPnlLog(delta, signal.timestamp);
+      } catch (e) { console.error('PnL log append error:', e); }
+    };
+  }
+
+  // ————————— Honor Modal: Son 14 Gün Performans Barları —————————
+  function wrColor(widthPct){
+    // widthPct 0..100: color gradient is already handled by CSS gradient; this helper not used
+    return '';
+  }
+
+  async function ensureHonor14d(){
+    const body = document.getElementById('honor-modal-body');
+    if (!body || document.getElementById('sec-14d-perf')) return;
+    const box = document.createElement('div');
+    box.id = 'sec-14d-perf';
+    box.className = 'sec-14d';
+    box.innerHTML = `
+      <div class="sec-14d-title">Son 14 Gün Performansı</div>
+      <div class="grid-14d" id="grid-14d"></div>
+    `;
+    body.appendChild(box);
+
+    // Sinyallerden 14g performansı hesapla (katkı kredisiyle)
+    const db = window.Pantheon.db;
+    const since = Date.now() - 14*24*3600*1000;
+    const sigs = await db.getSignals({ since, limit: 4000 });
+    const map = {}; // { stratKey: { w, l, contrib } }
+
+    for (const s of sigs){
+      if (s.status !== 'tp' && s.status !== 'sl') continue;
+      const contributors = Array.isArray(s.contributors) ? s.contributors : [];
+      if (contributors.length === 0) continue;
+
+      const totalEff = contributors.reduce((sum,c)=> sum + (isFinite(c.effScore) ? c.effScore : (c.baseScore * (c.weight||1))), 0) || contributors.length;
+      for (const c of contributors){
+        const eff = isFinite(c.effScore) ? c.effScore : (c.baseScore * (c.weight||1));
+        const credit = eff / totalEff;
+        if (!map[c.strategy]) map[c.strategy] = { w:0, l:0, contrib:0 };
+        if (s.status === 'tp') map[c.strategy].w += credit; else map[c.strategy].l += credit;
+        map[c.strategy].contrib += 1;
+      }
+    }
+
+    const keys = Object.keys(map);
+    // katkıya göre sırala, en çok katkı alan 16 stratejiyi göster
+    keys.sort((a,b)=> map[b].contrib - map[a].contrib);
+    const top = keys.slice(0,16);
+    const grid = document.getElementById('grid-14d');
+
+    top.forEach(k=>{
+      const name = window.app.strategies[k]?.displayName || k;
+      const w = map[k].w, l = map[k].l, t = w + l;
+      const wr = t>0 ? (w/t)*100 : null;
+
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'cell-14d-name';
+      nameDiv.textContent = name;
+
+      const barWrap = document.createElement('div');
+      barWrap.innerHTML = `
+        <div class="bar-14d"><div class="fill" style="width:${wr==null?0:wr.toFixed(0)}%"></div></div>
+        <div class="cell-14d-wr">${wr==null?'-':wr.toFixed(0)+'%'}</div>
+      `;
+      grid.appendChild(nameDiv);
+      grid.appendChild(barWrap);
+    });
+  }
+
+  function patchHonorOpen(){
+    const app = window.app;
+    if (app.__honor14dPatched) return;
+    const prev = app.openHonorModal.bind(app);
+    app.openHonorModal = function(filter='all'){
+      const r = prev(filter);
+      try { ensureHonor14d().catch(console.error); } catch (e){ console.error(e); }
+      return r;
+    };
+    app.__honor14dPatched = true;
+  }
+
+  // ————————— Patch updateSignalResult to refresh Kehanet PnL ASAP —————————
+  function patchUpdateSignalForPnlRefresh(){
+    const app = window.app;
+    if (app.__pnlRefreshPatched) return;
+    const prev = app.updateSignalResult.bind(app);
+    app.updateSignalResult = function(id, result){
+      const out = prev(id, result);
+      // kısa gecikmeyle PnL panelini tazele
+      setTimeout(()=> { try { setupKehanetPnl(); } catch(e){} }, 200);
+      return out;
+    };
+    app.__pnlRefreshPatched = true;
+  }
+
+  // ————————— Bootstrap —————————
+  whenReady(async ()=>{
+    try {
+      injectStyles();
+      extendPrimeLogging();
+      await setupKehanetPnl();
+      patchHonorOpen();
+      patchUpdateSignalForPnlRefresh();
+      window.app.showNotification('Kehanet: PnL akış grafiği ve 14g performans barları etkin.', 'info');
+    } catch (e) {
+      console.error('PnL/14d integrate error:', e);
+    }
+  });
+
+})();
+
+(function(){
+  'use strict';
+
+  function whenReady(fn){
+    const iv = setInterval(()=>{
+      if (window.app && window.Pantheon && window.Pantheon.db && window.app.pantheon) {
+        clearInterval(iv); fn();
+      }
+    }, 100);
+  }
+
+  // ————————— Styles —————————
+  function injectStyles(){
+    if (document.getElementById('pantheon-ritual-chip-styles')) return;
+    const st = document.createElement('style');
+    st.id = 'pantheon-ritual-chip-styles';
+    st.textContent = `
+      /* Ritual history */
+      #pp-rituals{ margin-top:6px; background: var(--input-bg); border:1px solid var(--border-color); border-radius:6px; padding:6px; }
+      #pp-rituals .title{ font-weight:700; color:var(--primary); font-size:12px; margin-bottom:4px; }
+      #pp-rituals .list{ display:grid; gap:4px; max-height: 120px; overflow:auto; }
+      .rit-line{ display:flex; align-items:center; justify-content:space-between; font-size:11px; border:1px solid var(--border-color); border-radius:4px; padding:3px 6px; background: #0b0f14; }
+      .rit-kind{ font-weight:700; }
+      .rit-kind.holy{ color:#fde68a; }
+      .rit-kind.sac{ color:#93c5fd; }
+      .rit-kind.doom{ color:#fda4af; }
+      .rit-kind.aff{ color:#86efac; }
+      .rit-ts{ color: var(--text-secondary); }
+      .rit-detail{ color: var(--text-secondary); opacity:0.9; margin-left:6px; }
+
+      /* Hover card for strategy chips */
+      #strategy-pop{
+        position: fixed; z-index: 3500; pointer-events:none;
+        min-width: 220px; max-width: 320px;
+        background: rgba(22,27,34,0.98); border:1px solid var(--border-color); border-radius:6px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+        font-family: 'Roboto Mono', monospace; color: var(--text-main);
+        padding:8px; font-size:12px; display:none;
+      }
+      #strategy-pop .row{ display:flex; justify-content:space-between; margin:2px 0; }
+      #strategy-pop .hl{ color: var(--primary); font-weight:700; }
+      #strategy-pop .amb{ color:#7dd3fc; }
+      #strategy-pop .amb.uriel{ color:#fbbf24; }
+      #strategy-pop .amb.raphael{ color:#f472b6; }
+      #strategy-pop .muted{ color: var(--text-secondary); }
+
+      /* Honor Modal: 14g canlı vs gölge */
+      .sec-14d-split { margin-top:12px; background: var(--input-bg); border:1px solid var(--border-color); border-radius:6px; padding:8px; }
+      .sec-14d-split .title{ font-weight:700; color:var(--primary); margin-bottom:6px; }
+      .grid-split{ display:grid; grid-template-columns: 1.4fr 1fr; gap:6px; align-items:center; }
+      .split-name{ font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .bar-s{ height:10px; border:1px solid var(--border-color); border-radius:6px; background:#0b0f14; position:relative; overflow:hidden; }
+      .bar-s .live{ position:absolute; left:0; top:0; bottom:0; width:0%; background: linear-gradient(90deg, #22c55e, #16a34a); }
+      .bar-s .shadow{ position:absolute; left:0; top:0; bottom:0; width:0%; background: linear-gradient(90deg, #f59e0b, #f97316); opacity:0.75; }
+      .split-legend{ font-size:11px; color: var(--text-secondary); text-align:right; }
+    `;
+    document.head.appendChild(st);
+  }
+
+  // ————————— Ritual log helpers —————————
+  function fmtRelTime(ts){
+    const d = Date.now() - ts;
+    const s = Math.floor(d/1000);
+    if (s < 60) return `${s}s önce`;
+    const m = Math.floor(s/60);
+    if (m < 60) return `${m}dk önce`;
+    const h = Math.floor(m/60);
+    if (h < 24) return `${h}s önce`;
+    const day = Math.floor(h/24);
+    return `${day}g önce`;
+  }
+  async function logRitual(type, detail){
+    const db = window.Pantheon.db;
+    const key = 'ritual_log';
+    const arr = await db.kvGet(key) || [];
+    arr.push({ ts: Date.now(), type, detail });
+    const trimmed = arr.slice(-100);
+    await db.kvSet(key, trimmed);
+    return trimmed;
+  }
+  async function getRituals(){
+    const db = window.Pantheon.db;
+    return await db.kvGet('ritual_log') || [];
+  }
+
+  // ————————— UI: Panteon Panel Ritüel Geçmişi —————————
+  async function setupRitualHistory(){
+    const panel = document.getElementById('panteon-panel'); if (!panel) return;
+    const body = panel.querySelector('.pp-body'); if (!body) return;
+    if (!document.getElementById('pp-rituals')){
+      const wrap = document.createElement('div');
+      wrap.id = 'pp-rituals';
+      wrap.innerHTML = `
+        <div class="title">Mühür & Ritüel Geçmişi</div>
+        <div class="list" id="pp-rit-list"></div>
+      `;
+      body.appendChild(wrap);
+    }
+    async function refresh(){
+      const list = document.getElementById('pp-rit-list'); if (!list) return;
+      const hist = await getRituals();
+      list.innerHTML = '';
+      hist.slice(-12).reverse().forEach(e=>{
+        const line = document.createElement('div');
+        line.className = 'rit-line';
+        const kind = document.createElement('span');
+        kind.className = 'rit-kind ' + (e.type==='holywater'?'aff': e.type==='sacrifice'?'sac': e.type==='doomsday'?'doom':'holy');
+        kind.textContent = (e.type==='holySpringAuto'?'Kutsal Pınar': e.type==='doomsday'?'Kıyamet': e.type==='holywater'?'Kutsal Su':'Kurban');
+        const detail = document.createElement('span');
+        detail.className = 'rit-detail';
+        detail.textContent = e.detail || '';
+        const ts = document.createElement('span');
+        ts.className = 'rit-ts'; ts.textContent = fmtRelTime(e.ts);
+        const left = document.createElement('div'); left.appendChild(kind); left.appendChild(detail);
+        const right = document.createElement('div'); right.appendChild(ts);
+        line.appendChild(left); line.appendChild(right);
+        list.appendChild(line);
+      });
+    }
+    await refresh();
+    if (window.__ritInterval) clearInterval(window.__ritInterval);
+    window.__ritInterval = setInterval(()=>{ refresh().catch(console.error); }, 5000);
+
+    // Patch sacred actions to log
+    const pant = window.app.pantheon;
+    if (!pant.__ritPatched){
+      const origSac = pant._sacrifice.bind(pant);
+      pant._sacrifice = function(key){
+        const res = origSac(key);
+        const name = this.bot.strategies[key]?.displayName || key;
+        logRitual('sacrifice', name).then(()=>{}); return res;
+      };
+      const origHoly = pant._holyWater.bind(pant);
+      pant._holyWater = function(key){
+        const res = origHoly(key);
+        const name = this.bot.strategies[key]?.displayName || key;
+        logRitual('holywater', name).then(()=>{}); return res;
+      };
+      // Notification-based auto logs (Kutsal Pınar / Kıyamet)
+      const app = window.app;
+      const origNotif = app.showNotification.bind(app);
+      app.showNotification = function(msg, type='info', timeout=5000){
+        const ret = origNotif(msg, type, timeout);
+        try{
+          const s = (msg||'').toLowerCase();
+          if (s.includes('kutsal pınar')) logRitual('holySpringAuto','Oto-kefaret').then(()=>{});
+          if (s.includes('kıyamet günü')) logRitual('doomsday','Dönüm noktası').then(()=>{});
+        }catch(e){}
+        return ret;
+      };
+      pant.__ritPatched = true;
+    }
+  }
+
+  // ————————— Gölge Sonuçları (IndexedDB: shadow_results) —————————
+  async function appendShadowResults(signal){
+    // Aynı mantıkla gölgeye katılan stratejileri tespit et ve sonucu yaz
+    try {
+      const app = window.app;
+      const db = window.Pantheon.db;
+      const windowMs = (app.settings.cooldowns?.proposalTimeoutMs || 3000) * 2;
+      const start = signal.timestamp - windowMs;
+      const end = signal.timestamp;
+      const involved = {};
+      for (const p of (app.shadowProposals||[])){
+        if (p.timestamp >= start && p.timestamp <= end && p.direction === signal.direction) {
+          involved[p.strategy] = true;
+        }
+      }
+      const resList = await db.kvGet('shadow_results') || [];
+      Object.keys(involved).forEach(strat=>{
+        resList.push({ ts: signal.timestamp, strategy: strat, result: signal.status }); // tp/sl
+      });
+      const trimmed = resList.slice(-4000);
+      await db.kvSet('shadow_results', trimmed);
+    } catch(e) { console.error('shadow_results append error', e); }
+  }
+
+  function patchShadowLogger(){
+    const app = window.app;
+    if (app.__shadowLogPatched) return;
+    const prev = app.updateSignalResult.bind(app);
+    app.updateSignalResult = function(id, result){
+      const out = prev(id, result);
+      const sig = this.signals.find(s=> s.id===id);
+      if (sig && (result==='tp' || result==='sl')) appendShadowResults(sig).then(()=>{});
+      return out;
+    };
+    app.__shadowLogPatched = true;
+  }
+
+  // ————————— Honor Modal: 14g Canlı vs Gölge ayrışımı —————————
+  async function ensureSplit14d(){
+    const body = document.getElementById('honor-modal-body');
+    if (!body || document.getElementById('sec-14d-split')) return;
+    const box = document.createElement('div');
+    box.id = 'sec-14d-split';
+    box.className = 'sec-14d-split';
+    box.innerHTML = `<div class="title">Son 14 Gün: Canlı vs Gölge</div><div class="grid-split" id="grid-split"></div>`;
+    body.appendChild(box);
+
+    const db = window.Pantheon.db;
+    const since = Date.now() - 14*24*3600*1000;
+    const sigs = await db.getSignals({ since, limit: 4000 });
+    // Canlı: katkı kredisi baz alınır
+    const liveMap = {};
+    for (const s of sigs){
+      if (s.status!=='tp' && s.status!=='sl') continue;
+      const contr = Array.isArray(s.contributors)? s.contributors : [];
+      if (contr.length===0) continue;
+      const totalEff = contr.reduce((sum,c)=> sum + (isFinite(c.effScore)? c.effScore : (c.baseScore*(c.weight||1))), 0) || contr.length;
+      for (const c of contr){
+        const eff = isFinite(c.effScore)? c.effScore : (c.baseScore*(c.weight||1));
+        const credit = eff / totalEff;
+        if (!liveMap[c.strategy]) liveMap[c.strategy] = { w:0, l:0, c:0 };
+        if (s.status==='tp') liveMap[c.strategy].w += credit; else liveMap[c.strategy].l += credit;
+        liveMap[c.strategy].c += 1;
+      }
+    }
+    // Gölge: shadow_results kayıtları (eşit ağırlıklı)
+    const shArr = (await db.kvGet('shadow_results')) || [];
+    const shadowMap = {};
+    shArr.filter(r=> r.ts >= since).forEach(r=>{
+      if (!shadowMap[r.strategy]) shadowMap[r.strategy] = { w:0, l:0, c:0 };
+      if (r.result==='tp') shadowMap[r.strategy].w += 1; else if (r.result==='sl') shadowMap[r.strategy].l += 1;
+      shadowMap[r.strategy].c += 1;
+    });
+
+    // Gösterilecek liste: son 14g’de en çok katkı alan 14 strateji
+    const keys = Object.keys(window.app.strategies||{});
+    const metric = keys.map(k=>{
+      const l = liveMap[k]?.c || 0;
+      const sh = shadowMap[k]?.c || 0;
+      return { k, score: l + sh };
+    }).sort((a,b)=> b.score - a.score).slice(0,14);
+
+    const grid = document.getElementById('grid-split');
+    metric.forEach(m=>{
+      const name = window.app.strategies[m.k]?.displayName || m.k;
+      const lw = liveMap[m.k]?.w || 0, ll = liveMap[m.k]?.l || 0;
+      const sw = shadowMap[m.k]?.w || 0, sl = shadowMap[m.k]?.l || 0;
+      const lTotal = lw + ll, sTotal = sw + sl;
+      const lWR = lTotal>0 ? (lw/lTotal)*100 : null;
+      const sWR = sTotal>0 ? (sw/sTotal)*100 : null;
+
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'split-name'; nameDiv.textContent = name;
+
+      const barWrap = document.createElement('div');
+      const lPct = lWR==null ? 0 : Math.max(0, Math.min(100, lWR));
+      const sPct = sWR==null ? 0 : Math.max(0, Math.min(100, sWR));
+      barWrap.innerHTML = `
+        <div class="bar-s" title="Canlı WR: ${lWR==null?'-':lWR.toFixed(0)}% | Gölge WR: ${sWR==null?'-':sWR.toFixed(0)}%">
+          <div class="live" style="width:${lPct}%"></div>
+          <div class="shadow" style="width:${sPct}%"></div>
+        </div>
+        <div class="split-legend">${lWR==null?'-':lWR.toFixed(0)+'%'} / ${sWR==null?'-':sWR.toFixed(0)+'%'}</div>
+      `;
+      grid.appendChild(nameDiv);
+      grid.appendChild(barWrap);
+    });
+  }
+
+  function patchHonorOpen(){
+    const app = window.app;
+    if (app.__honorSplitPatched) return;
+    const prev = app.openHonorModal.bind(app);
+    app.openHonorModal = function(filter='all'){
+      const r = prev(filter);
+      try { ensureSplit14d().catch(console.error); } catch(e){ console.error(e); }
+      return r;
+    };
+    app.__honorSplitPatched = true;
+  }
+
+  // ————————— Hover Kartı: Strateji Chip info —————————
+  function emissaryOfKey(key){
+    try{
+      const grp = window.app.getStrategyGroup(key);
+      return grp==='trending' ? 'Uriel' : 'Metatron';
+    }catch{ return 'Metatron'; }
+  }
+  function ensurePop(){
+    if (document.getElementById('strategy-pop')) return;
+    const p = document.createElement('div');
+    p.id = 'strategy-pop';
+    document.body.appendChild(p);
+  }
+  function showPop(x,y,html){
+    const p = document.getElementById('strategy-pop'); if (!p) return;
+    p.innerHTML = html; p.style.display='block';
+    const pad = 8; p.style.left = (x + pad) + 'px'; p.style.top = (y + pad) + 'px';
+  }
+  function hidePop(){
+    const p = document.getElementById('strategy-pop'); if (p) p.style.display='none';
+  }
+  function keyByDisplayName(name){
+    // Yaklaşık eşleştirme: tam eşleşme öncelik
+    const keys = Object.keys(window.app.strategies||{});
+    for (const k of keys){ const disp = window.app.strategies[k]?.displayName || k; if (disp === name) return k; }
+    // İçeriyorsa (fallback)
+    for (const k of keys){ const disp = window.app.strategies[k]?.displayName || k; if (name && disp && disp.toLowerCase().includes(name.toLowerCase())) return k; }
+    return null;
+    }
+  function setupChipHover(){
+    ensurePop();
+    const tbody = document.getElementById('modal-signals-body');
+    if (!tbody || tbody.__chipHoverSet) return;
+    tbody.__chipHoverSet = true;
+
+    tbody.addEventListener('mousemove', (e)=>{
+      const target = e.target;
+      const chip = target?.closest && target.closest('.chip');
+      if (!chip){ hidePop(); return; }
+      const nameText = chip.textContent?.trim().split(/\s+/)[0] || '';
+      const key = keyByDisplayName(nameText);
+      if (!key){ hidePop(); return; }
+
+      const amb = emissaryOfKey(key);
+      const w = window.app.getStrategyWeight(key);
+      const boost = window.app.getGroupBoost(key);
+      const regime = window.app.marketRegime || 'unknown';
+      const minC = window.app.settings?.optimization?.signalQuality?.minContributors ?? 2;
+      const ambCls = (amb==='Uriel'?'uriel': (amb==='Raphael'?'raphael':'' ));
+
+      const html = `
+        <div class="row"><span class="hl">${window.app.strategies[key]?.displayName || key}</span> <span class="muted">${regime.toUpperCase()}</span></div>
+        <div class="row"><span>Elçi</span> <span class="amb ${ambCls}">${amb}</span></div>
+        <div class="row"><span>Ağırlık (w)</span> <span>${w.toFixed(2)}</span></div>
+        <div class="row"><span>Grup Boost</span> <span>${boost.toFixed(2)}</span></div>
+        <div class="row"><span>Min Katkı</span> <span>${minC}</span></div>
+      `;
+      showPop(e.clientX, e.clientY, html);
+    });
+    tbody.addEventListener('mouseleave', ()=> hidePop());
+  }
+
+  // ————————— Bootstrap —————————
+  whenReady(async ()=>{
+    try {
+      injectStyles();
+      await setupRitualHistory();
+      patchShadowLogger();
+      patchHonorOpen();
+      setupChipHover();
+      window.app.showNotification('Panteon: Ritüel geçmişi ve 14g canlı/gölge ayrışımı etkin.', 'info');
+    } catch (e) {
+      console.error('Pantheon rituals/split init error:', e);
+    }
+  });
+
+})();
+
+
+
+    // Uygulamayı başlat
+    document.addEventListener('DOMContentLoaded', () => {
+        window.app = new UltimateTradingCommandCenter();
+    });
+(function(){
+  'use strict';
+
+  function whenReady(fn){
+    const iv = setInterval(()=>{
+      if (window.app && window.Pantheon && window.app.pantheon && window.Pantheon.db) {
+        clearInterval(iv); fn();
+      }
+    }, 100);
+  }
+
+  // ————————— Styles —————————
+  function injectStyles(){
+    if (document.getElementById('pantheon-wind-tt-styles')) return;
+    const st = document.createElement('style');
+    st.id = 'pantheon-wind-tt-styles';
+    st.textContent = `
+      /* Panteon WindRose */
+      #pp-windrose { margin-top:6px; background: var(--input-bg); border:1px solid var(--border-color); border-radius:6px; padding:6px; }
+      #pp-windrose .title{ font-weight:700; color:var(--primary); font-size:12px; margin-bottom:6px; }
+      #wind-canvas{ width:130px; height:130px; display:block; margin:0 auto; border:1px solid var(--border-color); border-radius:6px; background:#0b0f14; }
+      .wind-legend{ margin-top:6px; display:flex; justify-content:space-between; font-size:11px; color: var(--text-secondary); }
+      .wind-legend span b{ color: var(--text-main); }
+
+      /* Kehanet: Eşik/MinKatkı */
+      #kp-thr-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+      #kp-thr-row .kp-val{ font-weight:700; }
+
+      /* Honor sparks */
+      .spark-wrap { display:flex; align-items:center; gap:6px; }
+      .spark-strip { width:120px; height:10px; border:1px solid var(--border-color); background:#0b0f14; border-radius:6px; position:relative; overflow:hidden; }
+      .spark-strip .tick { position:absolute; top:0; bottom:0; width:2px; }
+      .tick.live.tp { background:#22c55e; }
+      .tick.live.sl { background:#ef4444; }
+      .tick.shadow.tp { background:#f59e0b; opacity:0.9; }
+      .tick.shadow.sl { background:#f97316; opacity:0.9; }
+      .spark-legend { font-size:10px; color: var(--text-secondary); white-space:nowrap; }
+    `;
+    document.head.appendChild(st);
+  }
+
+  // ————————— Panteon Paneli: Rüzgar Gülü —————————
+  function setupWindRose(){
+    const panel = document.getElementById('panteon-panel'); if (!panel) return;
+    const body = panel.querySelector('.pp-body'); if (!body) return;
+    if (!document.getElementById('pp-windrose')){
+      const wrap = document.createElement('div');
+      wrap.id = 'pp-windrose';
+      wrap.innerHTML = `
+        <div class="title">Rüzgar Gülü (Katkı Dağılımı)</div>
+        <canvas id="wind-canvas"></canvas>
+        <div class="wind-legend">
+          <span>📈 Trend: <b id="wind-t">0%</b></span>
+          <span>📊 Range: <b id="wind-r">0%</b></span>
+          <span>🌀 Geçiş: <b id="wind-x">0%</b></span>
+        </div>
+      `;
+      body.appendChild(wrap);
+    }
+
+    function draw(values){
+      const cvs = document.getElementById('wind-canvas');
+      if (!cvs) return;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = cvs.getBoundingClientRect();
+      const W = Math.max(120, Math.floor(rect.width||130));
+      const H = Math.max(120, Math.floor(rect.height||130));
+      cvs.width = W * dpr; cvs.height = H * dpr;
+      cvs.style.width = W + 'px'; cvs.style.height = H + 'px';
+      const ctx = cvs.getContext('2d'); if (!ctx) return;
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0,0,W,H);
+
+      const cx = W/2, cy = H/2, base = Math.min(W,H)/2 - 12;
+      const axes = [
+        { ang: -90 * Math.PI/180, val: values.t, color: '#22c55e' },   // Trend (üst)
+        { ang: 30 * Math.PI/180,  val: values.r, color: '#f59e0b' },   // Range (sağ alt)
+        { ang: 150 * Math.PI/180, val: values.x, color: '#60a5fa' }    // Geçiş (sol alt)
+      ];
+      // Grid çemberi
+      ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(cx, cy, base, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy, base*0.66, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy, base*0.33, 0, Math.PI*2); ctx.stroke();
+
+      // Petaller
+      axes.forEach(ax=>{
+        const r = base * ax.val; // 0..1
+        const r2 = Math.max(6, r*0.35);
+        ctx.fillStyle = ax.color;
+        ctx.beginPath();
+        const x1 = cx + Math.cos(ax.ang) * r, y1 = cy + Math.sin(ax.ang) * r;
+        const l1 = ax.ang + (Math.PI/2.8);
+        const l2 = ax.ang - (Math.PI/2.8);
+        const x2 = cx + Math.cos(l1) * r2, y2 = cy + Math.sin(l1) * r2;
+        const x3 = cx + Math.cos(l2) * r2, y3 = cy + Math.sin(l2) * r2;
+        ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.lineTo(x3,y3); ctx.closePath();
+        ctx.globalAlpha = 0.9; ctx.fill(); ctx.globalAlpha = 1.0;
+      });
+
+      // Merkez noktası
+      ctx.fillStyle = '#94a3b8'; ctx.beginPath(); ctx.arc(cx,cy,3,0,Math.PI*2); ctx.fill();
+    }
+
+    function computeValues(){
+      // strategyStats rejim katkıları (contrib) baz alınır
+      const stats = window.app.strategyStats || {};
+      let sumT=0, sumR=0, sumX=0;
+      Object.keys(stats).forEach(k=>{
+        const s = stats[k] || {};
+        sumT += (s.trend?.contrib || 0);
+        sumR += (s.range?.contrib || 0);
+        sumX += (s.transition?.contrib || 0);
+      });
+      const tot = Math.max(1e-6, (sumT + sumR + sumX));
+      const vt = sumT/tot, vr = sumR/tot, vx = sumX/tot;
+      const tEl = document.getElementById('wind-t'), rEl = document.getElementById('wind-r'), xEl = document.getElementById('wind-x');
+      if (tEl) tEl.textContent = Math.round(vt*100) + '%';
+      if (rEl) rEl.textContent = Math.round(vr*100) + '%';
+      if (xEl) xEl.textContent = Math.round(vx*100) + '%';
+      draw({ t: vt, r: vr, x: vx });
+    }
+
+    computeValues();
+    if (window.__windTimer) clearInterval(window.__windTimer);
+    window.__windTimer = setInterval(computeValues, 3000);
+    window.addEventListener('resize', computeValues);
+  }
+
+  // ————————— Kehanet Paneli: Eşik ve Min Katkı satırı —————————
+  function setupKehanetThresholdRow(){
+    const panel = document.getElementById('kehanet-panel'); if (!panel) return;
+    const body = panel.querySelector('.kp-body'); if (!body) return;
+    if (!document.getElementById('kp-thr-row')){
+      const row = document.createElement('div');
+      row.id = 'kp-thr-row';
+      row.innerHTML = `
+        <span class="kp-key">📏 Eşik / 👥 Katkı</span>
+        <span class="kp-val"><b id="kp-thr-val">—</b> / <b id="kp-minc-val">—</b></span>
+      `;
+      body.appendChild(row);
+    }
+    const thrEl = document.getElementById('kp-thr-val');
+    const mcEl  = document.getElementById('kp-minc-val');
+    function refresh(){
+      try{
+        const thr = window.app.getEffectiveThreshold ? window.app.getEffectiveThreshold() : (window.app.settings?.confluenceThreshold || 3);
+        const mc  = window.app.settings?.optimization?.signalQuality?.minContributors ?? 2;
+        if (thrEl) thrEl.textContent = (thr || 0).toFixed(2);
+        if (mcEl) mcEl.textContent = String(mc);
+      }catch(e){}
+    }
+    refresh();
+    if (window.__thrTimer) clearInterval(window.__thrTimer);
+    window.__thrTimer = setInterval(refresh, 1200);
+  }
+
+  // ————————— Honor: satırlara mini “canlı/gölge son 50” spark —————————
+  async function buildSparkForRow(tr, stratKey){
+    const nameCell = tr.querySelector('td'); if (!nameCell) return;
+    if (nameCell.querySelector('.spark-wrap')) return;
+
+    // Hazırlık
+    const db = window.Pantheon.db;
+    const since = Date.now() - 30*24*3600*1000; // 30g arşivinden bakarak 50 olay çıkar
+    const signals = await db.getSignals({ since, limit: 4000 });
+    const evLive = [];
+
+    // Canlı (katkı kredisi: var-yok bazında olay)
+    for (const s of signals){
+      if (s.status!=='tp' && s.status!=='sl') continue;
+      const contr = Array.isArray(s.contributors) ? s.contributors : [];
+      if (contr.find(c => c.strategy === stratKey)) {
+        evLive.push({ ts: s.timestamp, type: 'live', res: s.status }); // tp/sl
+      }
+    }
+
+    // Gölge (shadow_results KV)
+    const shArr = (await db.kvGet('shadow_results')) || [];
+    const evShadow = shArr.filter(r => r.strategy === stratKey && r.ts >= since)
+                          .map(r => ({ ts: r.ts, type: 'shadow', res: r.result }));
+
+    // Birleştir, tarihe göre sırala ve son 50’yi al
+    const merged = evLive.concat(evShadow).sort((a,b)=> a.ts - b.ts).slice(-50);
+
+    // UI
+    const wrap = document.createElement('div');
+    wrap.className = 'spark-wrap';
+    const strip = document.createElement('div');
+    strip.className = 'spark-strip';
+    const legend = document.createElement('div');
+    legend.className = 'spark-legend';
+    const liveWins = evLive.filter(e=> e.res==='tp').length;
+    const liveLoss = evLive.filter(e=> e.res==='sl').length;
+    const shWins   = evShadow.filter(e=> e.res==='tp').length;
+    const shLoss   = evShadow.filter(e=> e.res==='sl').length;
+    legend.textContent = `Canlı ${liveWins}/${liveLoss} • Gölge ${shWins}/${shLoss}`;
+
+    // Ticks yerleştir
+    const N = merged.length;
+    for (let i=0;i<N;i++){
+      const e = merged[i];
+      const tick = document.createElement('div');
+      tick.className = `tick ${e.type} ${e.res}`;
+      const left = (i/N)*100;
+      tick.style.left = left + '%';
+      strip.appendChild(tick);
+    }
+
+    wrap.appendChild(strip);
+    wrap.appendChild(legend);
+    nameCell.appendChild(wrap);
+  }
+
+  function patchHonorRowsForSparks(){
+    const app = window.app;
+    if (app.__honorSparkPatched) return;
+    const prev = app.openHonorModal.bind(app);
+    app.openHonorModal = function(filter='all'){
+      const r = prev(filter);
+      try {
+        const body = document.getElementById('honor-modal-body');
+        // Biraz gecikmeyle satırları işler
+        setTimeout(async ()=>{
+          const rows = body.querySelectorAll('table.data-table tbody tr');
+          for (const tr of rows){
+            const nameCell = tr.querySelector('td'); if (!nameCell) continue;
+            const name = nameCell.firstChild?.textContent?.trim() || '';
+            // Strateji anahtarını bul
+            let key = null;
+            const keys = Object.keys(app.strategies||{});
+            for (const k of keys){
+              const disp = app.strategies[k]?.displayName || k;
+              if (disp === name) { key = k; break; }
+            }
+            if (!key) continue;
+            await buildSparkForRow(tr, key);
+          }
+        }, 50);
+      } catch(e){ console.error(e); }
+      return r;
+    };
+    app.__honorSparkPatched = true;
+  }
+
+  // ————————— Bootstrap —————————
+  whenReady(()=>{
+    try{
+      injectStyles();
+      setupWindRose();
+      setupKehanetThresholdRow();
+      patchHonorRowsForSparks();
+      window.app.showNotification('Panteon: Rüzgar Gülü, Eşik/Gereken Katkı ve Honor spark şeritleri etkin.', 'info');
+    }catch(e){
+      console.error('Wind/KP-thr/Honor-spark init error:', e);
+    }
+  });
+
+})();
+</script>
+</html>

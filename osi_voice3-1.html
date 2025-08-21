@@ -1,0 +1,203 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Komuta Merkezi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for specific components */
+        .heatmap-container {
+            min-height: 400px;
+            background: #1f2937;
+            border-radius: 8px;
+        }
+        .signals-graph {
+            min-height: 300px;
+            background: #1f2937;
+            border-radius: 8px;
+        }
+        .sidebar {
+            min-width: 300px;
+            max-width: 400px;
+        }
+        .scrollable-table {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-6 text-center">KOMUTA MERKEZİ</h1>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Sidebar: Settings & Strategies -->
+            <div class="sidebar bg-gray-800 rounded-lg p-4">
+                <h2 class="text-xl font-semibold mb-4">AYARLAR & STRATEJİLER</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm">Min. Uyum Skoru (1-10)</label>
+                        <input type="number" min="1" max="10" class="w-full bg-gray-700 rounded p-2 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm">RSI Periyodu</label>
+                        <input type="number" class="w-full bg-gray-700 rounded p-2 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm">ATR Periyodu</label>
+                        <input type="number" class="w-full bg-gray-700 rounded p-2 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm">Duvar Tespiti (BTC)</label>
+                        <input type="number" class="w-full bg-gray-700 rounded p-2 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm">Risk/Ödül Oranı (R/R)</label>
+                        <input type="number" class="w-full bg-gray-700 rounded p-2 text-white">
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">AYARLARI SIFIRLA</button>
+                        <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">AYARLARI KAYDET</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content: Heatmap and Metrics -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Metrics -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <h3 class="text-sm">FİYAT</h3>
+                        <p class="text-lg">-</p>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <h3 class="text-sm">24s DEĞİŞİM</h3>
+                        <p class="text-lg">-</p>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <h3 class="text-sm">24s HACİM</h3>
+                        <p class="text-lg">-</p>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <h3 class="text-sm">VOLATİLİTE (ATR)</h3>
+                        <p class="text-lg">-</p>
+                    </div>
+                </div>
+
+                <!-- Heatmap -->
+                <div class="heatmap-container">
+                    <h2 class="text-xl font-semibold p-4">EMİR DEFTERİ ISI HARİTASI</h2>
+                    <div id="heatmap" class="p-4">
+                        <!-- Placeholder for heatmap visualization -->
+                        <p class="text-center text-gray-400">Isı Haritası Burada Görüntülenecek</p>
+                    </div>
+                </div>
+
+                <!-- Signals Graph -->
+                <div class="signals-graph">
+                    <h2 class="text-xl font-semibold p-4">SİNYALLER & ANALİZ</h2>
+                    <div id="signals-graph" class="p-4">
+                        <!-- Placeholder for signals graph -->
+                        <p class="text-center text-gray-400">Sinyal Grafiği Burada Görüntülenecek</p>
+                    </div>
+                </div>
+
+                <!-- Signals Table -->
+                <div class="bg-gray-800 rounded-lg p-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">SİNYAL GEÇMİŞİ</h2>
+                        <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Tüm Sinyalleri Sil</button>
+                    </div>
+                    <div class="scrollable-table">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-gray-700">
+                                    <th class="p-2">Zaman</th>
+                                    <th class="p-2">Tip</th>
+                                    <th class="p-2">Fiyat</th>
+                                    <th class="p-2">TP</th>
+                                    <th class="p-2">SL</th>
+                                    <th class="p-2">Skor</th>
+                                    <th class="p-2">İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" class="p-2 text-center text-gray-400">Henüz sinyal yok</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex justify-between items-center mt-6 bg-gray-800 rounded-lg p-4">
+            <div class="flex space-x-2">
+                <button class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">1m</button>
+                <button class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">5m</button>
+                <button class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">15m</button>
+                <button class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">1h</button>
+                <button class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">4h</button>
+            </div>
+            <div class="flex space-x-2">
+                <select class="bg-gray-700 rounded p-2">
+                    <option>Tema</option>
+                    <option>Koyu</option>
+                    <option>Açık</option>
+                </select>
+                <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">SİSTEMİ BAŞLAT</button>
+                <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">DURDUR</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Placeholder for heatmap and signals graph initialization
+        // You can integrate libraries like Chart.js or D3.js here for actual visualizations
+        console.log("Initialize heatmap and signals graph here");
+    </script>
+</body>
+</html>

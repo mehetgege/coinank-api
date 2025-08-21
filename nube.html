@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="olympus">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PANTEON'UN KADERİ v4.2 | NİHAİ SÖZLEŞME</title>
+    
+    <!-- Mitolojik ve Teknik Fontlar Birleştirildi -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Orbitron:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Gerekli Kütüphaneler -->
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+</head>
+<body>
+    <!-- Görsel Efektler için Zemin (Madde 2) -->
+    <div id="particles-container"></div>
+
+    <!-- Üst Bilgi Şeridi (v2.0 Görünümü) -->
+    <div id="super-top-ticker">
+        <div class="super-top-left">
+            <span id="ticker-bar-symbol">BTC/USDT</span>
+            <span id="ticker-bar-price">-</span>
+            <span id="ticker-bar-change">-</span>
+        </div>
+        <div class="super-top-right-buttons desktop-only">
+            <button id="main-controls-btn" class="btn btn-tiny">Panteon</button>
+            <button id="chart-view-btn" class="btn btn-tiny">Kader Haritası</button>
+            <button id="heatmap-view-btn" class="btn btn-tiny">Alev Denizi</button>
+            <button id="fullscreen-chart-btn" class="btn btn-tiny">Tam Ekran</button>
+            <button id="honor-board-btn" class="btn btn-tiny">Şeref Tablosu</button>
+            <button id="banned-board-btn" class="btn btn-tiny">Zindan</button>
+            <button id="open-settings-modal-btn" class="btn btn-tiny btn-primary">Kutsal Kitap</button>
+        </div>
+        <div class="super-top-right-buttons mobile-only">
+            <button id="mobile-fullscreen-chart-btn" class="btn btn-tiny">Tam Ekran</button>
+            <button id="mobile-open-log-modal-btn" class="btn btn-tiny">📜 Günlük</button>
+            <button id="mobile-open-settings-modal-btn" class="btn btn-tiny btn-primary">Kitap</button>
+        </div>
+    </div>
+
+    <!-- Sinyal Gücü Barı (v2.0'dan) -->
+    <div id="signal-progress-bar-container">
+        <div class="signal-bar-wrapper">
+            <div class="signal-bar-label">YÜKSELİŞ (BUY) UYUMU</div>
+            <div class="signal-bar"><div id="buy-signal-bar-fill" class="signal-bar-fill buy"></div></div>
+            <div id="buy-signal-score-text" class="signal-score-text">0.0</div>
+        </div>
+        <div class="signal-bar-wrapper">
+            <div class="signal-bar-label">DÜŞÜŞ (SELL) UYUMU</div>
+            <div class="signal-bar"><div id="sell-signal-bar-fill" class="signal-bar-fill sell"></div></div>
+            <div id="sell-signal-score-text" class="signal-score-text">0.0</div>
+        </div>
+    </div>
+
+    <!-- Ana Konteyner -->
+    <div class="container">
+        <!-- Komuta Merkezi Başlığı (v2.0 Görünümü, v3.2 Teması) -->
+        <header class="header">
+            <div id="header-main-bar" class="header-top-bar">
+                <div class="header-left-controls">
+                    <button id="mobile-toggle-controls-btn" class="btn btn-tiny mobile-only" title="Kontrolleri Aç/Kapat">☰</button>
+                </div>
+                <div class="header-center-title" title="Paneli aç/kapatmak için çift tıkla">
+                    <span class="header-title-text">⚡ PANTEON KONTROLLERİ ⚡</span>
+                </div>
+                <div class="header-right-controls">
+                    <button id="mobile-chart-view-btn" class="btn btn-tiny mobile-only" title="Kader Haritası">📈</button>
+                    <button id="mobile-heatmap-view-btn" class="btn btn-tiny mobile-only" title="Alev Denizi">🔥</button>
+                    <button id="mobile-honor-board-btn" class="btn btn-tiny mobile-only" title="Şeref Tablosu">🏆</button>
+                    <button id="mobile-banned-board-btn" class="btn btn-tiny mobile-only" title="Zindan">⛓️</button>
+                </div>
+            </div>
+            <div class="header-collapsible-content">
+                <div class="main-controls">
+                    <input type="text" id="symbol-input" class="form-control" placeholder="Sembol (BTC, ETH)">
+                    <select id="timeframe-select" class="form-control">
+                        <option value="1m">1m</option><option value="5m">5m</option><option value="15m" selected>15m</option><option value="1h">1h</option><option value="4h">4h</option>
+                    </select>
+                    <div class="status">
+                        <div id="connection-status" class="status-dot"></div>
+                        <span id="connection-text">BAĞLANTI YOK</span>
+                    </div>
+                    <button id="theme-toggle-btn" class="btn">Tema Değiştir</button>
+                    <button id="start-btn" class="btn btn-success">Kaderi Başlat</button>
+                    <button id="stop-btn" class="btn btn-danger" disabled>Durdur</button>
+                    <button id="clear-markers-btn" class="btn">İşaretleri Sil</button> 
+                </div>
+                <div class="price-display">
+                    <div class="price-item"><div class="price-label">ANLIK FİYAT</div><div class="price-value" id="current-price">-</div></div>
+                    <div class="price-item"><div class="price-label">24s DEĞİŞİM</div><div class="price-value" id="price-change-24h">-</div></div>
+                    <div class="price-item"><div class="price-label">24s HACİM</div><div class="price-value" id="volume-24h">-</div></div>
+                    <div class="price-item"><div class="price-label">VOLATİLİTE (ATR)</div><div class="price-value" id="atr-value">-</div></div>
+                    <div class="price-item countdown"><span id="candle-countdown">--:--</span></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Ana Yerleşim Grid'i -->
+        <main class="main-grid">
+            <!-- Orta Panel: Grafik ve Isı Haritası -->
+            <section class="center-panel panel">
+                <div class="panel-title">KADER HARİTASI</div>
+                <div class="data-container">
+                    <div class="data-grid" id="chart-container-view">
+                        <div id="live-chart"></div>
+                        <div class="chart-zoom-controls"> 
+                            <button id="chart-zoom-in" class="btn btn-tiny">+</button>
+                            <button id="chart-zoom-out" class="btn btn-tiny">-</button>
+                            <button id="chart-zoom-reset" class="btn btn-tiny">Sıfırla</button>
+                        </div>
+                        <button id="exit-fullscreen-btn" class="btn btn-tiny hidden-view" title="Tam Ekrandan Çık">&times;</button>
+                        <div id="chart-countdown-overlay" class="hidden-view">--:--</div>
+                    </div>
+                    <div class="heatmap-container hidden-view" id="heatmap-container-view">
+                        <div class="panel-title" style="border-top: 1px solid var(--border-color); border-bottom: none;">ALEV DENİZİ (EMİR DEFTERİ)</div>
+                        <canvas id="orderbook-heatmap"></canvas>
+                    </div>
+                </div>
+                <div class="resize-handle"></div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- Panteon ve Kehanet Panelleri (Madde 3) -->
+    <aside id="panteon-panel" class="panel">
+        <div class="panel-title">PANTEON</div>
+        <div class="panel-content">
+            <div class="elci-container">
+                <!-- Metatron -->
+                <div class="elci-card" id="elci-metatron">
+                    <div class="elci-header">
+                        <span class="elci-name">METATRON</span>
+                        <span class="elci-mode inancli" id="metatron-mode">İNANÇLI</span>
+                    </div>
+                    <div class="elci-stats">
+                        <div class="elci-stat"><span>İtibar:</span><span class="elci-itibar" id="metatron-itibar">100</span></div>
+                        <div class="elci-stat"><span>Başarı:</span><span id="metatron-success-rate">0%</span></div>
+                    </div>
+                </div>
+                <!-- Uriel -->
+                <div class="elci-card" id="elci-uriel">
+                    <div class="elci-header">
+                        <span class="elci-name">URIEL</span>
+                        <span class="elci-mode inancli" id="uriel-mode">İNANÇLI</span>
+                    </div>
+                    <div class="elci-stats">
+                        <div class="elci-stat"><span>İtibar:</span><span class="elci-itibar" id="uriel-itibar">100</span></div>
+                        <div class="elci-stat"><span>Başarı:</span><span id="uriel-success-rate">0%</span></div>
+                    </div>
+                </div>
+                <!-- Raphael -->
+                <div class="elci-card" id="elci-raphael">
+                    <div class="elci-header">
+                        <span class="elci-name">RAPHAEL</span>
+                        <span class="elci-mode inancli" id="raphael-mode">İNANÇLI</span>
+                    </div>
+                    <div class="elci-stats">
+                        <div class="elci-stat"><span>İtibar:</span><span class="elci-itibar" id="raphael-itibar">100</span></div>
+                        <div class="elci-stat"><span>Başarı:</span><span id="raphael-success-rate">0%</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+    <aside id="kehanet-panel" class="panel">
+        <div class="panel-title">ZEUS'UN FISILTILARI</div>
+        <div class="panel-content kehanet-buttons">
+            <button class="kehanet-btn" id="kehanet-shield" title="Koruma">🛡️</button>
+            <button class="kehanet-btn" id="kehanet-balance" title="Denge">⚖️</button>
+            <button class="kehanet-btn" id="kehanet-sword" title="Saldırı">⚔️</button>
+        </div>
+    </aside>
+
+    <!-- Bildirimler için Konteyner -->
+    <div id="notifications-container" class="notifications"></div>
+
+    <!-- Ayarlar Modalı (Kutsal Kitap) -->
+    <div id="settings-modal-overlay">
+        <div class="settings-modal-content">
+            <div class="settings-modal-header">
+                <h2 class="settings-modal-title">📜 KUTSAL KİTAP 📜</h2>
+                <button class="close-btn" id="close-settings-modal-btn">&times;</button>
+            </div>
+            <div class="settings-modal-body">
+                <!-- Ayar grupları buraya gelecek -->
+            </div>
+            <div class="settings-modal-footer">
+                <button id="reset-universe-btn" class="btn btn-danger">Evreni Sıfırla</button>
+                <button id="save-settings-btn" class="btn btn-primary">Kaderi Mühürle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistem Günlüğü (Log) Modalı -->
+    <div id="log-modal-overlay">
+        <div class="log-modal-content">
+            <div class="log-modal-header">
+                <span>SİSTEM GÜNLÜĞÜ</span>
+                <div>
+                    <button id="export-logs-btn" class="btn btn-sm btn-success">Günlüğü Aktar</button>
+                    <button class="close-btn" id="close-log-modal-btn">&times;</button>
+                </div>
+            </div>
+            <div class="log-modal-body">
+                <pre id="log-output"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Şeref/Zindan Tablosu Modalı -->
+    <div id="honor-modal-overlay">
+      <div class="honor-modal-content">
+        <div class="honor-modal-header">
+          <div id="honor-modal-title" class="panel-title">Şeref Tablosu</div>
+          <button id="close-honor-modal" class="btn btn-tiny">Kapat</button>
+        </div>
+        <div id="honor-modal-body" class="panel-content"></div>
+      </div>
+    </div>
+    <!-- Önceki HTML İskeleti Burada Bitiyor -->
+
+    <style>
+        /* ===============================================
+           TEMA v4.2 - NİHAİ SÖZLEŞME STİLİ
+           =============================================== */
+        :root {
+            /* Mitolojik Tema Renkleri ve Fontları (v3.2'den) */
+            --font-divine: 'Cinzel', serif;
+            --font-primary: 'Orbitron', sans-serif;
+            --font-secondary: 'Roboto Mono', monospace;
+            
+            --olympus-bg: linear-gradient(145deg, #0a0a1f 0%, #1a1a3e 100%);
+            --olympus-panel-bg: rgba(20, 20, 40, 0.85);
+            --olympus-text-main: #e8e8ff;
+            --olympus-text-secondary: #a8a8ff;
+            --olympus-border: rgba(100, 100, 200, 0.3);
+            --olympus-input-bg: rgba(10, 10, 31, 0.7);
+            --olympus-hover-bg: rgba(30, 30, 60, 1);
+            --olympus-primary: #ffd700;
+
+            /* Genel Renkler */
+            --positive: #00ff88;
+            --negative: #ff3366;
+            --neutral: #ffaa00;
+            --info: #00aaff;
+
+            /* Işıma Efektleri (v3.2'den) */
+            --glow-primary: 0 0 25px rgba(255, 215, 0, 0.6);
+            --glow-success: 0 0 15px rgba(0, 255, 136, 0.5);
+            --glow-danger: 0 0 15px rgba(255, 51, 102, 0.5);
+            
+            /* Yerleşim Değişkenleri (v2.0'dan) */
+            --ticker-height: 35px;
+            --signal-bar-height: 40px;
+            --header-min-height: 50px;
+            --transition-divine: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="olympus"] { --background: var(--olympus-bg); --panel-bg: var(--olympus-panel-bg); --text-main: var(--olympus-text-main); --text-secondary: var(--olympus-text-secondary); --border-color: var(--olympus-border); --input-bg: var(--olympus-input-bg); --hover-bg: var(--olympus-hover-bg); --primary: var(--olympus-primary); }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-secondary); font-size: 12px; background: var(--background); color: var(--text-main); overflow: hidden; transition: background 0.5s, color 0.5s; }
+        
+        #particles-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+
+        #super-top-ticker { display: flex; position: fixed; top: 0; left: 0; width: 100%; background: var(--panel-bg); border-bottom: 1px solid var(--border-color); padding: 5px 15px; z-index: 1100; align-items: center; justify-content: space-between; font-size: 12px; height: var(--ticker-height); backdrop-filter: blur(8px); }
+        .super-top-left { display: flex; align-items: center; gap: 15px; }
+        #ticker-bar-symbol { font-family: var(--font-primary); color: var(--primary); font-size: 14px; text-shadow: var(--glow-primary); }
+        #ticker-bar-price { font-size: 16px; font-weight: 700; }
+        
+        #signal-progress-bar-container { display: flex; gap: 10px; width: 100%; padding: 5px 15px; background: var(--panel-bg); border-bottom: 1px solid var(--border-color); justify-content: space-around; align-items: center; position: fixed; top: var(--ticker-height); left: 0; z-index: 1099; height: var(--signal-bar-height); }
+        .signal-bar-wrapper { flex: 1; text-align: center; }
+        .signal-bar-label { font-size: 10px; color: var(--text-secondary); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 1px; }
+        .signal-bar { width: 100%; height: 10px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 5px; overflow: hidden; position: relative; }
+        .signal-bar-fill { height: 100%; width: 0%; transition: width 0.3s ease-out; position: absolute; left: 0; top: 0; }
+        .signal-bar-fill.buy { background: linear-gradient(90deg, transparent, var(--positive)); }
+        .signal-bar-fill.sell { background: linear-gradient(90deg, transparent, var(--negative)); }
+        .signal-score-text { font-size: 11px; margin-top: 2px; color: var(--primary); font-weight: 700; }
+
+        .container { display: flex; flex-direction: column; height: 100vh; padding-top: calc(var(--ticker-height) + var(--signal-bar-height)); }
+
+        .header { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; flex-shrink: 0; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 10px; position: relative; backdrop-filter: blur(8px); }
+        .header-top-bar { display: flex; align-items: center; justify-content: center; width: 100%; padding: 8px; min-height: var(--header-min-height); cursor: pointer; font-family: var(--font-divine); font-size: 24px; font-weight: 900; color: var(--primary); text-shadow: var(--glow-primary); letter-spacing: 3px; }
+        .header-collapsible-content { transition: max-height 0.4s ease-in-out, opacity 0.4s ease, padding 0.4s ease; max-height: 500px; opacity: 1; overflow: hidden; padding: 0 15px 15px 15px; }
+        body.header-collapsed .header-collapsible-content { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; }
+
+        .main-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; padding-bottom: 15px; }
+        .form-control { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 12px; font-family: var(--font-secondary); }
+        .form-control:focus { outline: none; border-color: var(--info); box-shadow: 0 0 10px rgba(0, 170, 255, 0.3); }
+        
+        .status { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--negative); transition: background-color 0.5s; }
+        .status-dot.online { background: var(--positive); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--positive); } 70% { box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); } }
+        
+        .btn { padding: 8px 18px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); border-radius: 6px; cursor: pointer; transition: var(--transition-divine); font-family: var(--font-primary); text-transform: uppercase; letter-spacing: 1px; }
+        .btn:hover { background: var(--hover-bg); border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+        .btn-success { background: var(--positive); color: #000; border-color: var(--positive); box-shadow: var(--glow-success); }
+        .btn-danger { background: var(--negative); color: #fff; border-color: var(--negative); box-shadow: var(--glow-danger); }
+        .btn-primary { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: var(--glow-primary); }
+        .btn-tiny { padding: 4px 10px; font-size: 11px; }
+
+        .price-display { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 15px; }
+        .price-item { text-align: center; background: var(--input-bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); }
+        .price-label { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .price-value { font-size: 18px; font-weight: 700; font-family: var(--font-primary); }
+        .price-item.countdown { grid-column: 1 / -1; font-size: 16px; color: var(--neutral); }
+
+        .main-grid { display: grid; grid-template-columns: 1fr; gap: 10px; flex-grow: 1; margin: 0 10px 10px 10px; overflow: hidden; height: calc(100% - var(--header-min-height) - 20px); }
+        body.header-collapsed .main-grid { height: calc(100% - 20px); }
+        
+        .panel { display: flex; flex-direction: column; background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; backdrop-filter: blur(8px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .panel-title { font-family: var(--font-divine); font-weight: 700; font-size: 16px; color: var(--primary); padding: 12px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; text-align: center; letter-spacing: 1px; text-shadow: var(--glow-primary); }
+        .panel-content { padding: 10px; overflow-y: auto; flex-grow: 1; }
+        
+        .center-panel .panel-title { display: none; }
+        .data-container { display: grid; grid-template-rows: 1fr auto; overflow: hidden; height: 100%; }
+        .data-grid { position: relative; overflow: hidden; min-height: 0; }
+        #live-chart { width: 100%; height: 100%; }
+        .heatmap-container { display: grid; grid-template-rows: auto 1fr; border-top: 1px solid var(--border-color); }
+        #orderbook-heatmap { width: 100%; height: 100%; display: block; }
+        .chart-zoom-controls { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; z-index: 100; }
+        #exit-fullscreen-btn, #chart-countdown-overlay { display: none; }
+
+        #panteon-panel, #kehanet-panel { position: fixed; z-index: 1000; backdrop-filter: blur(8px); }
+        #panteon-panel { top: calc(var(--ticker-height) + var(--signal-bar-height) + 10px); right: 10px; width: 280px; }
+        #kehanet-panel { bottom: 10px; right: 10px; width: 280px; }
+        .elci-container { display: flex; flex-direction: column; gap: 10px; }
+        .elci-card { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; transition: var(--transition-divine); }
+        .elci-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .elci-name { font-family: var(--font-divine); font-size: 16px; font-weight: 700; color: var(--text-main); }
+        .elci-mode { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        .elci-mode.inancli { background: var(--positive); color: #000; }
+        .elci-mode.supheci { background: var(--neutral); color: #000; }
+        .elci-mode.kiyamet { background: var(--negative); color: #fff; }
+        .elci-stats { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); }
+        .elci-itibar { font-weight: 700; color: var(--primary); }
+        .kehanet-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .kehanet-btn { padding: 10px; background: var(--input-bg); border: 1px solid var(--primary); border-radius: 6px; color: var(--primary); font-size: 20px; cursor: pointer; transition: var(--transition-divine); text-align: center; }
+        .kehanet-btn:hover { background: var(--primary); color: #000; transform: scale(1.1); box-shadow: var(--glow-primary); }
+
+        .notifications { position: fixed; bottom: 10px; left: 10px; z-index: 2000; width: 320px; }
+        .notification { background: var(--panel-bg); border: 1px solid var(--border-color); border-left-width: 4px; border-radius: 6px; padding: 15px; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); margin-top: 10px; animation: slideInLeft 0.4s ease-out; backdrop-filter: blur(5px); }
+        @keyframes slideInLeft { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .notification.success { border-left-color: var(--positive); }
+        .notification.danger { border-left-color: var(--negative); }
+        .notification.warning { border-left-color: var(--neutral); }
+        .notification.divine { border-left-color: var(--primary); box-shadow: var(--glow-primary); }
+        .notification-title { font-family: var(--font-primary); font-weight: 700; margin-bottom: 5px; }
+
+        #settings-modal-overlay, #log-modal-overlay, #honor-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 2500; }
+        #settings-modal-overlay.visible, #log-modal-overlay.visible, #honor-modal-overlay.visible { display: flex; }
+        .settings-modal-content, .log-modal-content, .honor-modal-content { background: var(--panel-bg); border: 1px solid var(--primary); border-radius: 12px; width: 90%; max-width: 1000px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: var(--glow-primary); }
+        .settings-modal-header, .log-modal-header, .honor-modal-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .settings-modal-title, .log-modal-title, #honor-modal-title { font-family: var(--font-divine); font-size: 20px; color: var(--primary); }
+        .close-btn { background: none; border: none; color: var(--text-main); font-size: 24px; cursor: pointer; }
+        .settings-modal-body, .log-modal-body, #honor-modal-body { padding: 20px; overflow-y: auto; flex-grow: 1; }
+        .settings-modal-footer { padding: 15px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; }
+        #log-output { font-family: var(--font-secondary); font-size: 11px; color: var(--text-secondary); white-space: pre-wrap; word-break: break-all; }
+
+        @media screen and (max-width: 1200px) {
+            #panteon-panel, #kehanet-panel { display: none; }
+        }
+        @media screen and (max-width: 768px) {
+            .desktop-only { display: none !important; }
+            .mobile-only { display: flex !important; align-items: center; }
+            .container { padding-bottom: var(--header-min-height); }
+            .header { order: 2; position: fixed; bottom: 0; left: 0; right: 0; width: 100%; margin: 0; border-radius: 0; border: none; border-top: 1px solid var(--border-color); }
+            .header-top-bar { justify-content: space-between; padding: 0 10px; }
+            .header-center-title .header-title-text { display: none; }
+            .main-grid { order: 1; margin: 0; height: 100%; display: flex; flex-direction: column; }
+            .center-panel { border: none; border-radius: 0; background: transparent; box-shadow: none; margin: 0; }
+            .main-controls { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+
+    <script>
+    // ==================================================
+    // TESLİMAT 2: TEMEL JS SINIFLARI
+    // ==================================================
+
+    class DBManager {
+        constructor() { this.dbName = 'PanteonDB_v4_Final'; this.version = 1; this.db = null; }
+        async init() {
+            return new Promise((resolve, reject) => {
+                if (!window.indexedDB) { return reject("Tarayıcınız IndexedDB'yi desteklemiyor."); }
+                const request = indexedDB.open(this.dbName, this.version);
+                request.onerror = (event) => reject("Veritabanı hatası: " + event.target.errorCode);
+                request.onsuccess = (event) => { this.db = event.target.result; console.log("Evrenin Hafızası (IndexedDB) başarıyla bağlandı."); resolve(); };
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    ['settings', 'panteonState', 'strategyStats', 'signalHistory', 'notificationHistory'].forEach(name => {
+                        if (!db.objectStoreNames.contains(name)) { db.createObjectStore(name, { keyPath: 'id', autoIncrement: true }); }
+                    });
+                };
+            });
+        }
+    }
+
+    class EffectsManager {
+        constructor() { this.particles = null; }
+        async init() {
+            if (typeof tsparticles === 'undefined') { return console.error("tsparticles kütüphanesi bulunamadı."); }
+            try {
+                this.particles = await tsparticles.load("particles-container", { fpsLimit: 60, particles: { number: { value: 0 }, color: { value: "#ffffff" }, shape: { type: "circle" }, opacity: { value: { min: 0.5, max: 1 }, animation: { enable: true, speed: 1, destroy: "min" } }, size: { value: { min: 1, max: 3 } }, move: { enable: true, speed: 2, direction: "none", random: true, straight: false, outModes: { default: "destroy" } } }, detectRetina: true });
+                console.log("Kaderin Tezahürü (Görsel Efektler) motoru yüklendi.");
+            } catch (error) { console.error("Parçacık motoru başlatılamadı:", error); }
+        }
+    }
+
+    class ChartManager {
+        constructor(containerId) {
+            this.container = document.getElementById(containerId);
+            if (!this.container) throw new Error("Grafik konteyneri bulunamadı!");
+            this.chart = null; this.candleSeries = null; this.bollingerSeries = { upper: null, middle: null, lower: null };
+            this._init();
+        }
+        _init() {
+            if (typeof LightweightCharts === 'undefined') { return console.error("LightweightCharts kütüphanesi bulunamadı."); }
+            const styles = getComputedStyle(document.body);
+            this.chart = LightweightCharts.createChart(this.container, { width: this.container.clientWidth, height: this.container.clientHeight, layout: { backgroundColor: 'transparent', textColor: styles.getPropertyValue('--text-main').trim(), fontFamily: styles.getPropertyValue('--font-secondary'), }, grid: { vertLines: { color: styles.getPropertyValue('--border-color').trim() }, horzLines: { color: styles.getPropertyValue('--border-color').trim() } }, timeScale: { borderColor: styles.getPropertyValue('--border-color').trim(), timeVisible: true, secondsVisible: false, } });
+            this.candleSeries = this.chart.addCandlestickSeries({ upColor: styles.getPropertyValue('--positive').trim(), downColor: styles.getPropertyValue('--negative').trim(), borderVisible: false, wickUpColor: styles.getPropertyValue('--positive').trim(), wickDownColor: styles.getPropertyValue('--negative').trim(), });
+            const bbLineStyle = { color: 'rgba(255, 170, 0, 0.7)', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dotted };
+            this.bollingerSeries.upper = this.chart.addLineSeries(bbLineStyle); this.bollingerSeries.middle = this.chart.addLineSeries(bbLineStyle); this.bollingerSeries.lower = this.chart.addLineSeries(bbLineStyle);
+            window.addEventListener('resize', () => { if (this.chart && this.container.clientWidth > 0) { this.chart.resize(this.container.clientWidth, this.container.clientHeight); } });
+            console.log("Kader Haritası (Grafik Yöneticisi) çizime hazır.");
+        }
+    }
+
+    class PanteonManager {
+        constructor(app) { this.app = app; }
+        async init() { console.log("Panteon Hiyerarşisi kuruldu."); }
+    }
+
+    class ConfluenceEngine {
+        constructor(app) { this.app = app; }
+        async init() { console.log("Uyum Motoru başlatıldı."); }
+    }
+
+    class TheOracle {
+        constructor(app) { this.app = app; }
+        async init() { console.log("Kahin (TheOracle) gözlemeye başladı."); }
+    }
+
+    class UltimateTradingCommandCenter {
+        constructor() {
+            this.isRunning = false;
+            this.dbManager = new DBManager();
+            this.effectsManager = new EffectsManager();
+            this.chartManager = new ChartManager('live-chart');
+            this.panteonManager = new PanteonManager(this);
+            this.confluenceEngine = new ConfluenceEngine(this);
+            this.oracle = new TheOracle(this);
+            this.init();
+        }
+
+        async init() {
+            console.log("🏛️ PANTEON'UN KADERİ v4.2 BAŞLATILIYOR...");
+            try {
+                await this.dbManager.init();
+                await this.effectsManager.init();
+                await this.panteonManager.init();
+                await this.confluenceEngine.init();
+                await this.oracle.init();
+                this.setupEventListeners();
+                this.showNotification('Panteon Uyandı', 'Sistem tanrıların emrini bekliyor.', 'divine');
+            } catch (error) {
+                console.error("KRİTİK BAŞLATMA HATASI:", error);
+                this.showNotification('Kritik Hata', 'Sistem başlatılamadı. Konsolu kontrol edin.', 'danger');
+            }
+        }
+
+        setupEventListeners() {
+            document.getElementById('start-btn').addEventListener('click', () => this.start());
+            document.getElementById('stop-btn').addEventListener('click', () => this.stop());
+            document.getElementById('header-main-bar').addEventListener('click', () => {
+                document.body.classList.toggle('header-collapsed');
+            });
+        }
+
+        start() {
+            if (this.isRunning) return;
+            this.isRunning = true;
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('stop-btn').disabled = false;
+            this.updateConnectionStatus(true);
+            this.showNotification('Kader Başladı', 'Tanrılar piyasaları izliyor.', 'success');
+        }
+
+        stop() {
+            if (!this.isRunning) return;
+            this.isRunning = false;
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('stop-btn').disabled = true;
+            this.updateConnectionStatus(false);
+            this.showNotification('Kader Durdu', 'Tanrılar dinlenmeye çekildi.', 'warning');
+        }
+
+        updateConnectionStatus(isConnected, text = '') {
+            const statusDot = document.getElementById('connection-status');
+            const statusText = document.getElementById('connection-text');
+            if (statusDot && statusText) {
+                statusDot.classList.toggle('online', isConnected);
+                statusText.textContent = isConnected ? 'BAĞLI' : (text || 'BAĞLANTI YOK');
+            }
+        }
+
+        showNotification(title, message, type = 'info') {
+            const container = document.getElementById('notifications-container');
+            if (!container) return;
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `<div class="notification-title">${title}</div><div>${message}</div>`;
+            container.prepend(notification);
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(-100%)';
+                setTimeout(() => notification.remove(), 500);
+            }, 5000);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        window.PanteonApp = new UltimateTradingCommandCenter();
+    });
+</script>

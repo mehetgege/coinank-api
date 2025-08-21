@@ -1,0 +1,361 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT5 Mobil Vadeli İşlemler Demo</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.0/dist/chartjs-chart-financial.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        .coin-selector {
+            margin: 10px 0;
+        }
+        .timeframes {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .timeframe-btn {
+            padding: 8px 16px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .timeframe-btn.active {
+            background-color: #0056b3;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .connect-btn, .disconnect-btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .connect-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        .disconnect-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        .price {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+        .trade-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .buy-btn, .sell-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+        }
+        .buy-btn {
+            background-color: #28a745;
+        }
+        .sell-btn {
+            background-color: #dc3545;
+        }
+        .position-info {
+            margin-top: 10px;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>GPT5 Mobil Vadeli İşlemler Demo</h2>
+        <div class="coin-selector">
+            <select id="coinSelect">
+                <option value="BTC">BTC</option>
+                <option value="ETH">ETH</option>
+                <option value="XRP">XRP</option>
+                <option value="LTC">LTC</option>
+            </select>
+        </div>
+        <div class="timeframes">
+            <button class="timeframe-btn" data-timeframe="1d">1d</button>
+            <button class="timeframe-btn" data-timeframe="5d">5d</button>
+            <button class="timeframe-btn" data-timeframe="1s">1s</button>
+            <button class="timeframe-btn" data-timeframe="1g">1g</button>
+        </div>
+        <div class="chart-container">
+            <canvas id="priceChart"></canvas>
+        </div>
+        <button class="connect-btn">Bağlan - GPT5</button>
+        <button class="disconnect-btn">Bağlantıyı Kes</button>
+        <div class="price">Fiyat: <span id="currentPrice">--</span></div>
+        <div class="trade-buttons">
+            <button class="buy-btn">AL</button>
+            <button class="sell-btn">SAT</button>
+        </div>
+        <div class="position-info">Pozisyon: <span id="position">yok</span></div>
+        <div class="position-info">Kar/Zarar: <span id="pnl">0.00 USD</span></div>
+    </div>
+
+    <script>
+        // Bağlantı durumu
+        let isConnected = false;
+        let currentPosition = null;
+        let currentPrice = 0;
+        let selectedCoin = 'BTC';
+
+        // Simüle edilmiş piyasa verisi (gerçek API ile değiştirin)
+        async function fetchMarketData(coin, timeframe) {
+            try {
+                // Örnek veri, gerçek API ile değiştirilmeli
+                const mockData = Array.from({ length: 20 }, (_, i) => {
+                    const interval = timeframe === '1d' ? 60000 : timeframe === '5d' ? 300000 : timeframe === '1s' ? 3600000 : 86400000;
+                    return {
+                        x: new Date(Date.now() - (20 - i) * interval),
+                        o: 100 + Math.random() * 10,
+                        h: 105 + Math.random() * 10,
+                        l: 95 + Math.random() * 10,
+                        c: 100 + Math.random() * 10
+                    };
+                });
+                console.log(`Veri alındı: ${coin}, ${timeframe}`, mockData);
+                return mockData;
+            } catch (error) {
+                console.error('Veri çekme hatası:', error);
+                return [];
+            }
+        }
+
+        // Chart.js yapılandırması
+        let chart;
+        try {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'candlestick',
+                data: {
+                    datasets: [{
+                        label: 'Fiyat',
+                        data: [],
+                        borderColor: '#007bff',
+                        backgroundColor: '#007bff'
+                    }, {
+                        label: 'Pozisyon',
+                        type: 'scatter',
+                        data: [],
+                        backgroundColor: '#28a745',
+                        pointRadius: 8,
+                        pointHoverRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'minute'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Zaman'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Fiyat (USD)'
+                            },
+                            beginAtZero: false
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Grafik oluşturma hatası:', error);
+        }
+
+        // Grafiği güncelle
+        async function updateChart(timeframe) {
+            if (!isConnected) {
+                console.log('Bağlantı yok, grafik güncellenmedi.');
+                return;
+            }
+            try {
+                const data = await fetchMarketData(selectedCoin, timeframe);
+                if (data.length === 0) {
+                    console.warn('Veri boş, grafik güncellenmedi.');
+                    return;
+                }
+                chart.data.datasets[0].data = data;
+                chart.options.scales.x.time.unit = timeframe === '1d' ? 'minute' : timeframe === '5d' ? 'minute' : timeframe === '1s' ? 'hour' : 'day';
+                document.getElementById('currentPrice').textContent = data[data.length - 1].c.toFixed(2);
+                currentPrice = data[data.length - 1].c;
+
+                // Pozisyon işaretini güncelle
+                if (currentPosition) {
+                    chart.data.datasets[1].data = [{
+                        x: currentPosition.time,
+                        y: currentPosition.price
+                    }];
+                } else {
+                    chart.data.datasets[1].data = [];
+                }
+                chart.update();
+                console.log(`Grafik güncellendi: ${timeframe}`);
+            } catch (error) {
+                console.error('Grafik güncelleme hatası:', error);
+            }
+        }
+
+        // Coin seçimi
+        document.getElementById('coinSelect').addEventListener('change', (e) => {
+            selectedCoin = e.target.value;
+            console.log(`Coin seçildi: ${selectedCoin}`);
+            updateChart(document.querySelector('.timeframe-btn.active').dataset.timeframe);
+        });
+
+        // Zaman dilimi düğmeleri
+        document.querySelectorAll('.timeframe-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                console.log(`Zaman dilimi seçildi: ${btn.dataset.timeframe}`);
+                updateChart(btn.dataset.timeframe);
+            });
+        });
+
+        // Bağlan/Bağlantıyı Kes
+        document.querySelector('.connect-btn').addEventListener('click', () => {
+            isConnected = true;
+            console.log('Bağlantı kuruldu.');
+            alert('Bağlantı kuruldu!');
+            updateChart(document.querySelector('.timeframe-btn.active').dataset.timeframe);
+        });
+
+        document.querySelector('.disconnect-btn').addEventListener('click', () => {
+            isConnected = false;
+            currentPosition = null;
+            document.getElementById('position').textContent = 'yok';
+            document.getElementById('pnl').textContent = '0.00 USD';
+            chart.data.datasets[1].data = [];
+            chart.update();
+            console.log('Bağlantı kesildi.');
+            alert('Bağlantı kesildi!');
+        });
+
+        // Al/Sat düğmeleri
+        document.querySelector('.buy-btn').addEventListener('click', () => {
+            if (isConnected && !currentPosition) {
+                currentPosition = { type: 'AL', price: currentPrice, time: new Date(), coin: selectedCoin };
+                document.getElementById('position').textContent = `AL @ ${currentPrice.toFixed(2)} (${selectedCoin})`;
+                console.log(`Pozisyon açıldı: AL ${currentPrice} ${selectedCoin}`);
+                updateChart(document.querySelector('.timeframe-btn.active').dataset.timeframe);
+            } else {
+                console.warn('Pozisyon açılmadı: Bağlantı yok veya zaten pozisyon var.');
+            }
+        });
+
+        document.querySelector('.sell-btn').addEventListener('click', () => {
+            if (isConnected && !currentPosition) {
+                currentPosition = { type: 'SAT', price: currentPrice, time: new Date(), coin: selectedCoin };
+                document.getElementById('position').textContent = `SAT @ ${currentPrice.toFixed(2)} (${selectedCoin})`;
+                console.log(`Pozisyon açıldı: SAT ${currentPrice} ${selectedCoin}`);
+                updateChart(document.querySelector('.timeframe-btn.active').dataset.timeframe);
+            } else {
+                console.warn('Pozisyon açılmadı: Bağlantı yok veya zaten pozisyon var.');
+            }
+        });
+
+        // Kar/Zarar güncelleme
+        setInterval(() => {
+            if (isConnected && currentPosition) {
+                const pnl = currentPosition.type === 'AL'
+                    ? (currentPrice - currentPosition.price)
+                    : (currentPosition.price - currentPrice);
+                document.getElementById('pnl').textContent = `${pnl.toFixed(2)} USD`;
+                console.log(`Kar/Zarar güncellendi: ${pnl.toFixed(2)} USD`);
+            }
+        }, 1000);
+
+        // Grafiği 1d zaman dilimiyle başlat
+        try {
+            document.querySelector('.timeframe-btn[data-timeframe="1d"]').classList.add('active');
+            console.log('Başlangıç: 1d zaman dilimi seçildi.');
+        } catch (error) {
+            console.error('Başlangıç hatası:', error);
+        }
+    </script>
+</body>
+</html>

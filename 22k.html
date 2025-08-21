@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Hibrit Futures WSS — Binance & MEXC</title>
+<style>
+  :root { --bg:#0b1020; --card:#131a2a; --muted:#93a4b7; --ok:#18c29c; --bad:#ff5d5d; --hi:#d9e3f0; --acc:#4b89ff;}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--hi);font:14px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial}
+  .wrap{max-width:1400px;margin:16px auto;padding:0 12px}
+  .grid{display:grid;gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .card{background:var(--card);border:1px solid #1f2a40;border-radius:14px;padding:14px;box-shadow:0 4px 20px rgba(0,0,0,.28)}
+  h2,h3{margin:6px 0 12px;font-size:16px;font-weight:600}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  input[type=text],select{background:#0f1526;border:1px solid #26314a;color:var(--hi);padding:10px 12px;border-radius:10px;outline:none;min-width:120px}
+  select{cursor:pointer}
+  button{background:var(--acc);border:0;color:white;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600;transition:background .2s}
+  button:hover{background:#5b94ff}
+  button.sec{background:#22304d;color:#cfe0ff;border:1px solid #2f3e61}
+  button.sec:hover{background:#2a3658}
+  .pill{padding:6px 10px;border-radius:999px;background:#0f1526;border:1px solid #26314a;color:var(--muted);font-size:12px;font-weight:500}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:13px}
+  th,td{padding:8px 10px;border-bottom:1px solid #1e2a46}
+  th{color:#c7d4ea;text-align:left;font-weight:600;background:rgba(15,21,38,.5)}
+  td.num{text-align:right;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .buy{color:var(--ok);font-weight:600} .sell{color:var(--bad);font-weight:600}
+  .box-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+  .mini{font-size:12px;color:var(--muted)}
+  .sticky-h{position:sticky;top:0;background:var(--card);z-index:10}
+  .side-by{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .badge{font-size:12px;padding:4px 8px;border-radius:7px;background:#1e2a46;color:#cfe0ff;border:1px solid #2b3c63;font-weight:600}
+  .controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .controls label{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+  .controls input[type=text]{min-width:80px;padding:6px 8px;font-size:12px}
+  .controls select{padding:6px 8px;font-size:12px;min-width:100px}
+  .table-container{max-height:400px;overflow-y:auto}
+  .connection-panel{background:rgba(75,137,255,.1);border:1px solid rgba(75,137,255,.3);border-radius:12px;padding:16px}
+  .exchange-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  
+  @media (max-width: 768px) {
+    .g2{grid-template-columns:1fr}
+    .side-by{grid-template-columns:1fr}
+    .exchange-grid{grid-template-columns:1fr}
+    .controls{flex-direction:column;align-items:stretch}
+    .box-title{flex-direction:column;align-items:stretch;text-align:center}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card connection-panel">
+    <div class="pill" style="margin-bottom:16px">Sembol gir: <b class="mono">btc</b>, <b class="mono">ETH</b> (USDT yazma)</div>
+    <div class="exchange-grid">
+      <div>
+        <h3>Binance USDⓈ-M Futures</h3>
+        <div class="row">
+          <input id="binSym" type="text" placeholder="örn: btc" />
+          <button id="binConnect">Bağlan</button>
+          <button class="sec" id="binDisconnect">Kes</button>
+          <span class="badge" id="binState">Hazır</span>
+        </div>
+      </div>
+      <div>
+        <h3>MEXC Perpetual</h3>
+        <div class="row">
+          <input id="mxcSym" type="text" placeholder="örn: eth" />
+          <button id="mxcConnect">Bağlan</button>
+          <button class="sec" id="mxcDisconnect">Kes</button>
+          <span class="badge" id="mxcState">Hazır</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <div class="box-title">
+        <h3>📊 Fiyat Bilgisi — Binance</h3>
+        <span class="mini" id="binTickerTs">—</span>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead class="sticky-h">
+            <tr><th>Sembol</th><th class="num">Son Fiyat</th><th class="num">En İyi Alış</th><th class="num">En İyi Satış</th></tr>
+          </thead>
+          <tbody id="binTickerBody"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="box-title">
+        <h3>📊 Fiyat Bilgisi — MEXC</h3>
+        <span class="mini" id="mxcTickerTs">—</span>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead class="sticky-h">
+            <tr><th>Sembol</th><th class="num">Son Fiyat</th><th class="num">En İyi Alış</th><th class="num">En İyi Satış</th></tr>
+          </thead>
+          <tbody id="mxcTickerBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <div class="box-title">
+        <h3>📈 Emir Defteri — Binance</h3>
+        <span class="mini" id="binDepthTs">—</span>
+      </div>
+      <div class="side-by">
+        <div>
+          <h4 style="margin:0 0 8px;color:var(--ok);font-size:14px">🔵 Alış Emirleri</h4>
+          <div class="table-container">
+            <table>
+              <thead class="sticky-h">
+                <tr><th class="num">Fiyat</th><th class="num">Miktar</th></tr>
+              </thead>
+              <tbody id="binBids"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h4 style="margin:0 0 8px;color:var(--bad);font-size:14px">🔴 Satış Emirleri</h4>
+          <div class="table-container">
+            <table>
+              <thead class="sticky-h">
+                <tr><th class="num">Fiyat</th><th class="num">Miktar</th></tr>
+              </thead>
+              <tbody id="binAsks"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="box-title">
+        <h3>📈 Emir Defteri — MEXC</h3>
+        <span class="mini" id="mxcDepthTs">—</span>
+      </div>
+      <div class="side-by">
+        <div>
+          <h4 style="margin:0 0 8px;color:var(--ok);font-size:14px">🔵 Alış Emirleri</h4>
+          <div class="table-container">
+            <table>
+              <thead class="sticky-h">
+                <tr><th class="num">Fiyat</th><th class="num">Miktar</th></tr>
+              </thead>
+              <tbody id="mxcBids"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h4 style="margin:0 0 8px;color:var(--bad);font-size:14px">🔴 Satış Emirleri</h4>
+          <div class="table-container">
+            <table>
+              <thead class="sticky-h">
+                <tr><th class="num">Fiyat</th><th class="num">Miktar</th></tr>
+              </thead>
+              <tbody id="mxcAsks"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <div class="box-title">
+        <h3>⚡ Canlı İşlemler — Binance</h3>
+        <div class="controls">
+          <label>Yön:
+            <select id="binSide">
+              <option value="all">Hepsi</option>
+              <option value="buy">Alış</option>
+              <option value="sell">Satış</option>
+            </select>
+          </label>
+          <label>Min Miktar: <input id="binMinQty" type="text" placeholder="0"></label>
+          <label>Max Satır: <input id="binMaxRows" type="text" value="50"></label>
+        </div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead class="sticky-h">
+            <tr><th>Zaman</th><th class="num">Fiyat</th><th class="num">Miktar</th><th>Yön</th></tr>
+          </thead>
+          <tbody id="binTrades"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="box-title">
+        <h3>⚡ Canlı İşlemler — MEXC</h3>
+        <div class="controls">
+          <label>Yön:
+            <select id="mxcSide">
+              <option value="all">Hepsi</option>
+              <option value="buy">Alış</option>
+              <option value="sell">Satış</option>
+            </select>
+          </label>
+          <label>Min Miktar: <input id="mxcMinQty" type="text" placeholder="0"></label>
+          <label>Max Satır: <input id="mxcMaxRows" type="text" value="50"></label>
+        </div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead class="sticky-h">
+            <tr><th>Zaman</th><th class="num">Fiyat</th><th class="num">Miktar</th><th>Yön</th></tr>
+          </thead>
+          <tbody id="mxcTrades"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ---------- Utils ----------
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n, d=2) => Number(n).toLocaleString('en-US',{maximumFractionDigits:d});
+  const nowHHMMSS = (tms) => {
+    const d = tms ? new Date(tms) : new Date();
+    return d.toLocaleTimeString('tr-TR',{hour12:false});
+  };
+  const clampRows = (tbody, max) => {
+    while (tbody.rows.length > max) tbody.deleteRow(tbody.rows.length-1);
+  };
+  const setState = (el, txt) => el.textContent = txt;
+
+  // ---------- Symbol Normalization ----------
+  const toBinance = (raw) => (raw || '').toUpperCase().replace(/[^A-Z]/g,'') + 'USDT';
+  const toMexc   = (raw) => (raw || '').toUpperCase().replace(/[^A-Z]/g,'') + '_USDT';
+
+  // ---------- DOM targets ----------
+  const dom = {
+    bin: {
+      state: $('binState'), tsTicker: $('binTickerTs'), tsDepth: $('binDepthTs'),
+      tBody: $('binTickerBody'), bids: $('binBids'), asks: $('binAsks'),
+      trades: $('binTrades'), side: $('binSide'), minQty: $('binMinQty'), maxRows: $('binMaxRows')
+    },
+    mxc: {
+      state: $('mxcState'), tsTicker: $('mxcTickerTs'), tsDepth: $('mxcDepthTs'),
+      tBody: $('mxcTickerBody'), bids: $('mxcBids'), asks: $('mxcAsks'),
+      trades: $('mxcTrades'), side: $('mxcSide'), minQty: $('mxcMinQty'), maxRows: $('mxcMaxRows')
+    }
+  };
+
+  // ---------- Binance Futures ----------
+  let wsBin = null, binSym = null;
+  function connectBinance(rawSym){
+    disconnectBinance();
+    binSym = toBinance(rawSym);
+    const streams = [
+      `${binSym.toLowerCase()}@bookTicker`,
+      `${binSym.toLowerCase()}@depth20@100ms`,
+      `${binSym.toLowerCase()}@trade`
+    ].join('/');
+    const url = `wss://fstream.binance.com/stream?streams=${streams}`;
+    wsBin = new WebSocket(url);
+    setState(dom.bin.state, 'Bağlanıyor…');
+    wsBin.onopen = () => setState(dom.bin.state, 'Bağlandı');
+    wsBin.onclose = () => setState(dom.bin.state, 'Kesildi');
+    wsBin.onerror = () => setState(dom.bin.state, 'Hata');
+
+    wsBin.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      if (!msg || !msg.stream) return;
+      const s = msg.stream;
+      const d = msg.data;
+      if (s.endsWith('@bookTicker')) {
+        dom.bin.tBody.innerHTML = `
+          <tr>
+            <td>${binSym}</td>
+            <td class="num">${fmt((Number(d.b)+Number(d.a))/2, d.a.includes('.')? d.a.split('.')[1].length : 2)}</td>
+            <td class="num buy">${fmt(d.b)}</td>
+            <td class="num sell">${fmt(d.a)}</td>
+          </tr>`;
+        dom.bin.tsTicker.textContent = nowHHMMSS(d.E);
+      }
+      if (s.includes('@depth20')) {
+        fillDepth(dom.bin.bids, d.bids, true);
+        fillDepth(dom.bin.asks, d.asks, false);
+        dom.bin.tsDepth.textContent = nowHHMMSS(d.E);
+      }
+      if (s.endsWith('@trade')) {
+        pushTrade('bin', {p:d.p, q:d.q, m:d.m, T:d.T});
+      }
+    };
+  }
+  function disconnectBinance(){
+    if (wsBin) { try { wsBin.close(); } catch(_){} wsBin=null; }
+    ['tBody','bids','asks','trades'].forEach(k => dom.bin[k].innerHTML='');
+  }
+
+  // ---------- MEXC Futures ----------
+  let wsMxc = null, mxcSym = null, pingTimer = null;
+  function connectMexc(rawSym){
+    disconnectMexc();
+    mxcSym = toMexc(rawSym);
+    const url = 'wss://contract.mexc.com/edge';
+    wsMxc = new WebSocket(url);
+    setState(dom.mxc.state, 'Bağlanıyor…');
+
+    wsMxc.onopen = () => {
+      setState(dom.mxc.state, 'Bağlandı');
+      sendMxc({ method:"sub.ticker", param:{ symbol:mxcSym }});
+      sendMxc({ method:"sub.depth.full", param:{ symbol:mxcSym, limit:20 }});
+      sendMxc({ method:"sub.deal",   param:{ symbol:mxcSym }});
+      pingTimer = setInterval(()=> sendMxc({method:"ping"}), 15000);
+    };
+    wsMxc.onclose = () => {
+      setState(dom.mxc.state, 'Kesildi');
+      if (pingTimer) clearInterval(pingTimer), pingTimer=null;
+    };
+    wsMxc.onerror = () => setState(dom.mxc.state, 'Hata');
+
+    wsMxc.onmessage = (e) => {
+      let msg; try { msg = JSON.parse(e.data); } catch { return; }
+      if (!msg || !msg.channel) return;
+      if (msg.channel === 'pong') return;
+      if (msg.channel === 'push.ticker' && msg.data) {
+        const t = msg.data;
+        dom.mxc.tBody.innerHTML = `
+          <tr>
+            <td>${mxcSym}</td>
+            <td class="num">${fmt(t.lastPrice ?? ((t.bid1+t.ask1)/2))}</td>
+            <td class="num buy">${fmt(t.bid1)}</td>
+            <td class="num sell">${fmt(t.ask1)}</td>
+          </tr>`;
+        dom.mxc.tsTicker.textContent = nowHHMMSS(t.timestamp || msg.ts);
+      }
+      if (msg.channel === 'push.depth' && msg.data) {
+        const d = msg.data;
+        const mapArr = (arr) => (arr||[]).map(x => [x[0], x[2]]);
+        fillDepth(dom.mxc.bids, mapArr(d.bids), true);
+        fillDepth(dom.mxc.asks, mapArr(d.asks), false);
+        dom.mxc.tsDepth.textContent = nowHHMMSS(msg.ts);
+      }
+      if (msg.channel === 'push.deal' && msg.data) {
+        const t = msg.data;
+        pushTrade('mxc', { p: t.p, q: t.v, m: t.T===2, T: t.t });
+      }
+    };
+  }
+  function sendMxc(obj){ try { wsMxc && wsMxc.readyState===1 && wsMxc.send(JSON.stringify(obj)); } catch{} }
+  function disconnectMexc(){
+    if (pingTimer) clearInterval(pingTimer), pingTimer=null;
+    if (wsMxc) { try { wsMxc.close(); } catch(_){} wsMxc=null; }
+    ['tBody','bids','asks','trades'].forEach(k => dom.mxc[k].innerHTML='');
+  }
+
+  // ---------- Shared renderers ----------
+  function fillDepth(tbody, arr, isBids){
+    const top = (arr||[]).slice(0,20);
+    const rows = top.map(([p,q])=>`<tr><td class="num ${isBids?'buy':'sell'}">${fmt(p)}</td><td class="num">${fmt(q,6)}</td></tr>`).join('');
+    tbody.innerHTML = rows;
+  }
+
+  function pushTrade(side, {p,q,m,T}){
+    const d = (side==='bin') ? dom.bin : dom.mxc;
+    const want = d.side.value;
+    const qty = Number(q||0);
+    const minQty = Number(d.minQty.value || 0);
+    const dir = m ? 'sell' : 'buy';
+    if ((want==='buy' && dir!=='buy') || (want==='sell' && dir!=='sell')) return;
+    if (qty < minQty) return;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${nowHHMMSS(T)}</td>
+      <td class="num ${dir==='buy'?'buy':'sell'}">${fmt(p)}</td>
+      <td class="num">${fmt(q,6)}</td>
+      <td class="${dir==='buy'?'buy':'sell'}">${dir==='buy'?'ALIŞ':'SATIŞ'}</td>`;
+    d.trades.tBodies ? d.trades.tBodies[0].prepend(tr) : d.trades.prepend(tr);
+    const maxRows = Math.max(1, parseInt(d.maxRows.value || '50',10));
+    clampRows(d.trades, maxRows);
+  }
+
+  // ---------- Event Bindings ----------
+  $('binConnect').onclick = () => connectBinance($('binSym').value.trim());
+  $('binDisconnect').onclick = () => disconnectBinance();
+  $('mxcConnect').onclick = () => connectMexc($('mxcSym').value.trim());
+  $('mxcDisconnect').onclick = () => disconnectMexc();
+
+  $('binSym').addEventListener('keydown', (e)=>{ if(e.key==='Enter') $('binConnect').click(); });
+  $('mxcSym').addEventListener('keydown', (e)=>{ if(e.key==='Enter') $('mxcConnect').click(); });
+})();
+</script>
+</body>
+</html>

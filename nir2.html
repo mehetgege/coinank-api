@@ -1,0 +1,1228 @@
+#ff5858; --war-mode-primary: #ffc107;
+        }
+        body.fullscreen-chart #super-top-ticker,
+        body.fullscreen-chart #signal-progress-bar-container,
+        body.fullscreen-chart .header,
+        body.fullscreen-chart .panel-title { display: none !important; }
+        body.fullscreen-chart .container { padding-top: 0 !important; height: 100vh !important; }
+        body.fullscreen-chart .main-grid { height: 100vh !important; margin: 0 !important; }
+        body.fullscreen-chart .center-panel { flex-grow: 1 !important; height: 100vh !important; border-radius: 0 !important; margin: 0 !important; }
+        body.fullscreen-chart .data-container { height: 100% !important; }
+        body.fullscreen-chart #chart-container-view, body.fullscreen-chart #live-chart { height: 100% !important; flex-grow: 1 !important; }
+        body.fullscreen-chart .heatmap-container { display: none !important; }
+        body.fullscreen-chart .chart-zoom-controls { background: rgba(0,0,0,0.7); }
+        body.fullscreen-chart #exit-fullscreen-btn { display: block !important; }
+        body.fullscreen-chart #chart-countdown-overlay { display: block !important; }
+        [data-theme="light"] { --background: var(--background-light); --panel-bg: var(--panel-bg-light); --text-main: var(--text-main-light); --text-secondary: var(--text-secondary-light); --border-color: var(--border-color-light); --input-bg: var(--input-bg-light); --hover-bg: var(--hover-bg-light); --primary: var(--primary-light); }
+        [data-theme="dark"] { --background: var(--background-dark); --panel-bg: var(--panel-bg-dark); --text-main: var(--text-main-dark); --text-secondary: var(--text-secondary-dark); --border-color: var(--border-color-dark); --input-bg: var(--input-bg-dark); --hover-bg: var(--hover-bg-dark); --primary: var(--primary-dark); }
+        [data-theme="war"] { --background: var(--war-mode-bg); --panel-bg: var(--war-mode-panel-bg); --text-main: var(--war-mode-text); --text-secondary: #ffaaaa; --border-color: var(--war-mode-border); --input-bg: rgba(255, 255, 255, 0.05); --hover-bg: rgba(255, 255, 255, 0.1); --primary: var(--war-mode-primary); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto Mono', monospace; font-size: 12px; background: var(--background); color: var(--text-main); overflow: hidden; transition: background 0.5s, color 0.5s; }
+        #super-top-ticker { display: flex; position: fixed; top: 0; left: 0; width: 100%; background: var(--panel-bg); border-bottom: 1px solid var(--border-color); padding: 2px 10px; z-index: 1100; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 700; height: var(--ticker-height); }
+        .super-top-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0;}
+        #ticker-bar-symbol { color: var(--primary); }
+        #ticker-bar-price { color: var(--text-main); font-size: 12px; }
+        .super-top-right-buttons { display: flex; gap: 5px; }
+        .container { display: flex; flex-direction: column; height: 100vh; padding-top: calc(var(--ticker-height) + var(--signal-bar-height)); }
+        .header { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.2); margin: 5px; position: relative; }
+        .header-top-bar { display: flex; align-items: center; width: 100%; padding: 5px 15px; min-height: var(--header-min-height); justify-content: space-between; cursor: pointer; font-weight: 700; font-size: 16px; color: var(--primary); }
+        .header-collapsible-content { transition: max-height 0.35s ease-in-out, opacity 0.3s ease, padding 0.35s ease, visibility 0.35s; max-height: 300px; opacity: 1; overflow: hidden; visibility: visible; padding: 0 15px 8px 15px; }
+        body.header-collapsed .header-collapsible-content { max-height: 0; opacity: 0; visibility: hidden; padding-top: 0; padding-bottom: 0; }
+        .main-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-bottom: 8px; }
+        .form-control { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 8px; font-family: 'Roboto Mono', monospace; }
+        .status { display: flex; align-items: center; gap: 5px; font-size: 11px; padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--negative); transition: background-color 0.5s; }
+        .status-dot.online { background: var(--positive); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 #28a745b3; } 70% { box-shadow: 0 0 0 6px #28a74500; } 100% { box-shadow: 0 0 0 0 #28a74500; } }
+        [data-theme="war"] .status-dot.online { background: var(--war-mode-primary); animation: war-pulse 1s infinite; }
+        @keyframes war-pulse { 0% { box-shadow: 0 0 0 0 #ffc107b3; } 70% { box-shadow: 0 0 0 6px #ffc10700; } 100% { box-shadow: 0 0 0 0 #28a74500; } }
+        .btn { padding: 4px 12px; border: 1px solid var(--border-color); background: var(--panel-bg); color: var(--text-main); border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+        .btn:hover { background: var(--hover-bg); border-color: var(--primary); }
+        .btn-success { background: var(--positive); color: white; border-color: var(--positive); } .btn-danger { background: var(--negative); color: white; border-color: var(--negative); }
+        .btn-tiny { padding: 2px 6px; font-size: 10px; line-height: 1; min-width: 0; white-space: nowrap; }
+        .main-grid { display: grid; grid-template-columns: 1fr; gap: 5px; flex-grow: 1; margin: 5px; overflow: hidden; height: calc(100% - var(--header-min-height) - 10px - var(--ticker-height) - var(--signal-bar-height)); }
+        body.header-collapsed .main-grid { height: calc(100vh - var(--ticker-height) - var(--signal-bar-height) - 10px); margin-top: 0; } 
+        .panel { display: flex; flex-direction: column; background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; position: relative;}
+        .panel-title { font-weight: 700; font-size: 13px; color: var(--primary); padding: 8px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;}
+        .panel-content { padding: 10px; overflow-y: auto; flex-grow: 1; }
+        .settings-group { margin-bottom: 15px; } .form-group { margin-bottom: 8px; } .form-label { display: block; font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
+        .checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px; padding: 4px 0;}
+        .price-display { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; width: 100%; border: 1px solid var(--border-color); border-radius: 4px; padding: 8px; font-size: 10px; margin-top: 8px; } 
+        .price-item .price-label { color: var(--text-secondary); } 
+        .price-item .price-value { font-size: 18px; font-weight: 700; }
+        .price-item.countdown { grid-column: 1 / span 2; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: 700; color: var(--primary); padding-top: 5px;}
+        .center-panel { display: grid; grid-template-rows: 1fr; gap: 5px; padding: 0 !important; } 
+        .data-container { display: grid; grid-template-rows: 1fr auto; overflow: hidden; height: 100%; } 
+        .data-grid { position: relative; overflow: hidden; min-height: 0; } 
+        #live-chart { width: 100%; height: 100%; } 
+        .heatmap-container { display: grid; grid-template-rows: auto 1fr; border-top: 1px solid var(--border-color); }
+        #orderbook-heatmap { width: 100%; height: 100%; display: block; }
+        .chart-zoom-controls { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; z-index: 100; }
+        .chart-zoom-controls .btn-tiny { background: rgba(1, 4, 9, 0.7); backdrop-filter: blur(2px); }
+        #exit-fullscreen-btn { position: absolute; top: 10px; right: 10px; z-index: 101; background: rgba(1, 4, 9, 0.7); color: white; border-radius: 4px; padding: 2px 6px; font-size: 16px; cursor: pointer; border: 1px solid var(--border-color); line-height: 1; }
+        #chart-countdown-overlay { position: absolute; top: 10px; left: 10px; z-index: 100; background: rgba(1, 4, 9, 0.7); padding: 4px 8px; border-radius: 4px; color: var(--primary); font-size: 14px; font-weight: bold; }
+        .data-table-container { width: 100%; height: 100%; overflow: auto; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .data-table th, .data-table td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap;}
+        .data-table th { font-weight: 700; position: sticky; top: 0; background: var(--panel-bg); z-index: 10;}
+        .data-table tr:hover { background: var(--hover-bg); }
+        .signal-buy { background-color: #28a74514; } .signal-sell { background-color: #dc354514; }
+        .signal-tp { background-color: #28a74533; } .signal-sl { background-color: #dc354533; }
+        .signal-pending { background-color: #ffc1071a; }
+        .stat-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border-color); font-size: 12px; }
+        .stat-item:last-child { border-bottom: none; } .stat-label { color: var(--text-secondary); } .stat-value { font-weight: 700; }
+        .btn-sm { padding: 1px 4px; font-size: 9px; margin-left: 4px; border-radius: 3px; cursor: pointer;}
+        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--text-secondary); border-radius: 3px; }
+        .notifications { position: fixed; bottom: 15px; left: 15px; z-index: 2000; width: 280px; }
+        .notification { background: rgba(22, 27, 34, 0.9); backdrop-filter: blur(4px); border: 1px solid var(--border-color); border-left-width: 4px; border-radius: 4px; padding: 8px 12px; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); margin-top: 8px; animation: slide-in 0.3s ease-out; }
+        @keyframes slide-in { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .notification.success { border-left-color: var(--positive); } 
+        .notification.danger { border-left-color: var(--negative); } 
+        .notification.warning { border-left-color: var(--neutral); }
+        aside#settings-panel, aside#analytics-panel { display: none !important; }
+        .hidden-view { display: none !important; } 
+        #log-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 2550; }
+        #log-modal-overlay.visible { display: flex; }
+        .log-modal-content { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; width: 95%; max-width: 1000px; height: 90%; display: flex; flex-direction: column; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+        .log-modal-header { padding: 10px 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 14px; color: var(--primary); }
+        .log-modal-header .close-btn { background: none; border: none; font-size: 20px; color: var(--text-secondary); cursor: pointer; padding: 0 5px; line-height: 1; }
+        .log-modal-body { padding: 0; overflow-y: auto; flex-grow: 1; }
+        #log-output { font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--text-secondary); padding: 10px; margin: 0; white-space: pre-wrap; word-break: break-all; }
+        #log-output .log-error { color: var(--negative); }
+        #log-output .log-warn { color: var(--neutral); }
+        #log-output .log-info { color: var(--positive); }
+        #settings-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 2500; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+        #settings-modal-overlay.visible { opacity: 1; visibility: visible; }
+        .settings-modal-content { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; width: 90%; max-width: 900px; max-height: 90%; display: flex; flex-direction: column; box-shadow: 0 8px 30px rgba(0,0,0,0.4); transform: translateY(20px); transition: transform 0.3s ease; }
+        #settings-modal-overlay.visible .settings-modal-content { transform: translateY(0); }
+        .settings-modal-header { padding: 12px 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 15px; color: var(--primary); }
+        .settings-modal-header .close-btn { background: none; border: none; font-size: 20px; color: var(--text-secondary); cursor: pointer; padding: 0 5px; line-height: 1; }
+        .settings-modal-header .close-btn:hover { color: var(--negative); }
+        .settings-modal-body { padding: 15px; overflow-y: auto; flex-grow: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .settings-modal-footer { padding: 12px 15px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; }
+        #signal-progress-bar-container { display: flex; gap: 5px; width: 100%; padding: 5px 10px; background: var(--panel-bg); border-bottom: 1px solid var(--border-color); justify-content: space-around; align-items: center; position: fixed; top: var(--ticker-height); left: 0; z-index: 1099; height: var(--signal-bar-height); }
+        .signal-bar-wrapper { flex: 1; text-align: center; }
+        .signal-bar-label { font-size: 10px; color: var(--text-secondary); margin-bottom: 3px; }
+        .signal-bar { width: 100%; height: 10px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 5px; overflow: hidden; position: relative; }
+        .signal-bar-fill { height: 100%; width: 0%; transition: width 0.2s ease-out; position: absolute; left: 0; top: 0; }
+        .signal-bar-fill.buy { background: linear-gradient(90deg, transparent, var(--positive)); }
+        .signal-bar-fill.sell { background: linear-gradient(90deg, transparent, var(--negative)); }
+        .signal-score-text { font-size: 9px; margin-top: 2px; color: var(--primary); }
+        .resize-handle { position: absolute; bottom: 0; left: 0; width: 100%; height: 8px; cursor: ns-resize; background: var(--border-color); z-index: 10; border-top: 1px solid var(--border-color); }
+        .center-panel.resizing { user-select: none; }
+
+        #pantheon-toggle-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
+        }
+        #pantheon-toggle-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--primary);
+        }
+        
+        .pantheon-ui {
+            position: fixed;
+            bottom: 80px; 
+            right: 20px;
+            background: rgba(22, 27, 34, 0.95);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px;
+            width: 180px; 
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.95) translateY(10px);
+        }
+        .pantheon-ui.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1) translateY(0);
+        }
+        .pantheon-header {
+            margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .pantheon-header span {
+            font-weight: 700; color: var(--primary); font-size: 11px;
+        }
+        .pantheon-close {
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 18px; cursor: pointer; line-height: 1; padding: 0 4px;
+        }
+        .pantheon-close:hover { color: var(--negative); }
+        .pantheon-gods {
+            display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px;
+        }
+        .god {
+            display: flex; align-items: center; padding: 4px;
+            border-radius: 4px; background: var(--input-bg); transition: all 0.2s ease;
+        }
+        .god:hover { background: var(--hover-bg); transform: translateX(2px); }
+        .god-icon { font-size: 12px; margin-right: 6px; width: 18px; text-align: center; }
+        .god-name { font-weight: 600; font-size: 10px; width: 55px; }
+        .god-power { font-size: 9px; width: 28px; text-align: right; margin-right: 5px; font-family: 'Roboto Mono', monospace;}
+        .god-progress { flex-grow: 1; height: 6px; background: var(--border-color); border-radius: 3px; overflow: hidden; }
+        .god-progress-fill { height: 100%; width: 0%; transition: width 0.3s ease, background-color 0.3s ease; }
+        
+        .metatron .god-progress-fill { background: var(--metatron-color); }
+        .uriel .god-progress-fill { background: var(--uriel-color); }
+        .raphael .god-progress-fill { background: var(--raphael-color); }
+        .gabriel .god-progress-fill { background: var(--gabriel-color); }
+        .michael .god-progress-fill { background: var(--michael-color); }
+        
+        .pantheon-abilities {
+            display: flex; gap: 5px; margin-top: 8px; padding-top: 8px;
+            border-top: 1px solid var(--border-color);
+        }
+        .ability {
+            flex: 1; background: var(--input-bg); border-radius: 4px; padding: 5px;
+            text-align: center; cursor: pointer; transition: all 0.2s ease; position: relative; overflow: hidden;
+        }
+        .ability:hover { transform: translateY(-2px); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); }
+        .ability-icon { font-size: 12px; margin-bottom: 2px; }
+        .ability-name { font-size: 9px; font-weight: 600; }
+        .ability-cooldown {
+            position: absolute; bottom: 0; left: 0;
+            height: 2px; background: var(--primary); width: 100%;
+            transform-origin: left; transform: scaleX(0); transition: transform 0.1s linear;
+        }
+        
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        .ability.active { animation: pulse 1.5s infinite; }
+
+        .btn, .panel-title, .header-top-bar, .signal-bar-label, .form-label {
+            user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
+        }
+
+        @media screen and (max-width: 768px) {
+            .desktop-only { display: none !important; }
+            .mobile-only { display: flex !important; align-items: center; }
+            .container { padding-top: calc(var(--ticker-height) + var(--signal-bar-height)); padding-bottom: var(--header-min-height); }
+            #signal-progress-bar-container { top: var(--ticker-height); }
+            .header { order: 2; position: fixed; bottom: 0; left: 0; right: 0; width: 100%; z-index: 1000; margin: 0; border-radius: 0; border: none; border-top: 1px solid var(--border-color); }
+            .header-top-bar { display: flex; justify-content: space-between; align-items: center; padding: 0 10px; min-height: var(--header-min-height); }
+            .header-center-title { cursor: pointer; flex-grow: 1; text-align: center; }
+            .header-left-controls, .header-right-controls { display: flex; gap: 8px; }
+            #mobile-toggle-controls-btn, .header-right-controls .btn { font-size: 16px; padding: 5px 10px; }
+            .header-center-title .header-title-text { display: none; }
+            .header-collapsible-content { padding: 0; }
+            .header-collapsible-content .main-controls { flex-direction: column; align-items: center; padding: 0; width: 100%; }
+            .form-control, .btn, .status { width: 100%; text-align: center; padding: 8px 10px; font-size: 11px; }
+            .status { justify-content: center; }
+            .price-display { grid-template-columns: repeat(2, 1fr); margin-top: 10px; }
+            .price-item .price-value { font-size: 14px; } 
+            .main-grid { order: 1; margin: 0; height: 100%; display: flex; flex-direction: column; }
+            .center-panel { order: 1; flex-grow: 1; height: 100%; border: none; border-radius: 0; background: transparent; box-shadow: none; margin: 0; }
+            .center-panel > .panel-title { display: none; }
+            .data-container { flex-direction: column; height: 100%; padding: 5px; }
+            .data-grid { height: 100%; flex-grow: 1; }
+            #live-chart { height: 100%; width: 100%; } 
+            .heatmap-container { height: 150px; flex-shrink: 0; margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 10px; }
+            .heatmap-container .panel-title { border-bottom: none; margin-bottom: 5px; }
+            .settings-modal-content { width: 95%; margin: 10px; }
+            .settings-modal-body { grid-template-columns: 1fr; gap: 15px; }
+            .super-top-right-buttons { display: none; }
+            .resize-handle { display: none; }
+            #chart-countdown-overlay { font-size: 12px; padding: 3px 6px; }
+            body.fullscreen-chart .main-grid { height: 100vh; }
+            body.fullscreen-chart .center-panel { height: 100vh; }
+            
+            .notification-control-panel {
+                display: none !important;
+            }
+            .visualization-controls {
+                display: flex !important;
+            }
+        }
+    </style>
+</head>
+<body class="header-collapsed"> 
+    <canvas id="effects-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></canvas> 
+    
+    <button id="pantheon-toggle-btn" title="Panteon Sistemini Aç/Kapat">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 1.25a3.5 3.5 0 1 0 0 7 3.5 3.5 0 1 0 0-7zM3.5 9.25a3.5 3.5 0 1 0 0 7 3.5 3.5 0 1 0 0-7zm17 0a3.5 3.5 0 1 0 0 7 3.5 3.5 0 1 0 0-7zM12 15.75a3.5 3.5 0 1 0 0 7 3.5 3.5 0 1 0 0-7z"></path></svg>
+    </button>
+    <div id="pantheon-ui" class="pantheon-ui">
+        <div class="pantheon-header">
+            <span>PANTEON SİSTEMİ</span>
+            <button class="pantheon-close">×</button>
+        </div>
+        
+        <div class="pantheon-gods">
+            <div class="god metatron" data-god="metatron">
+                <div class="god-icon">👁️</div>
+                <div class="god-name">Metatron</div>
+                <div class="god-power">0%</div>
+                <div class="god-progress">
+                    <div class="god-progress-fill"></div>
+                </div>
+            </div>
+            <div class="god uriel" data-god="uriel">
+                <div class="god-icon">⚔️</div>
+                <div class="god-name">Uriel</div>
+                <div class="god-power">0%</div>
+                <div class="god-progress">
+                    <div class="god-progress-fill"></div>
+                </div>
+            </div>
+            <div class="god raphael" data-god="raphael">
+                <div class="god-icon">💊</div>
+                <div class="god-name">Raphael</div>
+                <div class="god-power">0%</div>
+                <div class="god-progress">
+                    <div class="god-progress-fill"></div>
+                </div>
+            </div>
+            <div class="god gabriel" data-god="gabriel">
+                <div class="god-icon">📢</div>
+                <div class="god-name">Gabriel</div>
+                <div class="god-power">0%</div>
+                <div class="god-progress">
+                    <div class="god-progress-fill"></div>
+                </div>
+            </div>
+            <div class="god michael" data-god="michael">
+                <div class="god-icon">⚖️</div>
+                <div class="god-name">Michael</div>
+                <div class="god-power">0%</div>
+                <div class="god-progress">
+                    <div class="god-progress-fill"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="pantheon-abilities">
+            <div class="ability" id="ability-revelation" data-ability="revelation">
+                <div class="ability-icon">🔍</div>
+                <div class="ability-name">Vahiy</div>
+                <div class="ability-cooldown"></div>
+            </div>
+            <div class="ability" id="ability-valor" data-ability="valor">
+                <div class="ability-icon">🛡️</div>
+                <div class="ability-name">Cesaret</div>
+                <div class="ability-cooldown"></div>
+            </div>
+            <div class="ability" id="ability-restoration" data-ability="restoration">
+                <div class="ability-icon">💫</div>
+                <div class="ability-name">Şifa</div>
+                <div class="ability-cooldown"></div>
+            </div>
+        </div>
+    </div>
+    
+        <div id="super-top-ticker">
+        <div class="super-top-left">
+            <span id="ticker-bar-symbol"></span>
+            <span id="ticker-bar-price"></span>
+        </div>
+        <div class="super-top-right-buttons desktop-only">
+            <button id="main-controls-btn" class="btn btn-tiny">Komuta Merkezi</button>
+            <button id="chart-view-btn" class="btn btn-tiny">Grafik</button>
+            <button id="heatmap-view-btn" class="btn btn-tiny">Isı Haritası</button>
+            <button id="fullscreen-chart-btn" class="btn btn-tiny">Tam Ekran Grafik</button>
+            <button id="honor-board-btn" class="btn btn-tiny">Şeref Tablosu</button>
+            <button id="banned-board-btn" class="btn btn-tiny">Banlılar</button>
+            <button id="open-settings-modal-btn" class="btn btn-tiny">Ayarlar</button>
+        </div>
+        <div class="super-top-right-buttons mobile-only">
+            <button id="mobile-fullscreen-chart-btn" class="btn btn-tiny">Tam Ekran</button>
+            <button id="mobile-open-log-modal-btn" class="btn btn-tiny">📜 Log</button>
+            <button id="mobile-open-settings-modal-btn" class="btn btn-tiny btn-success">Ayarlar</button>
+        </div>
+    </div>
+
+    <div id="signal-progress-bar-container">
+        <div class="signal-bar-wrapper">
+            <div class="signal-bar-label">BUY SINYAL GÜCÜ</div>
+            <div class="signal-bar">
+                <div id="buy-signal-bar-fill" class="signal-bar-fill buy"></div>
+            </div>
+            <div id="buy-signal-score-text" class="signal-score-text">0.0</div>
+        </div>
+        <div class="signal-bar-wrapper">
+            <div class="signal-bar-label">SELL SINYAL GÜCÜ</div>
+            <div class="signal-bar">
+                <div id="sell-signal-bar-fill" class="signal-bar-fill sell"></div>
+            </div>
+            <div id="sell-signal-score-text" class="signal-score-text">0.0</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <div id="header-main-bar" class="header-top-bar">
+                <div class="header-left-controls">
+                    <button id="mobile-toggle-controls-btn" class="btn btn-tiny mobile-only" title="Kontrolleri Aç/Kapat">☰</button>
+                </div>
+                <div class="header-center-title" title="Paneli aç/kapatmak için çift tıkla">
+                    <span class="header-title-text">KOMUTA MERKEZİ KONTROLLERİ</span>
+                </div>
+                <div class="header-right-controls">
+                    <button id="mobile-chart-view-btn" class="btn btn-tiny mobile-only" title="Grafik">📈</button>
+                    <button id="mobile-heatmap-view-btn" class="btn btn-tiny mobile-only" title="Isı Haritası">🔥</button>
+                    <button id="mobile-honor-board-btn" class="btn btn-tiny mobile-only" title="Şeref Tablosu">🏆</button>
+                    <button id="mobile-banned-board-btn" class="btn btn-tiny mobile-only" title="Banlılar">BAN</button>
+                </div>
+            </div>
+            <div class="header-collapsible-content">
+                <div class="main-controls">
+                    <input type="text" id="symbol-input" class="form-control" placeholder="Örn: BTC, ETH, SOL">
+                    <select id="timeframe-select" class="form-control">
+                        <option value="1m">1m</option><option value="5m">5m</option><option value="15m" selected>15m</option><option value="1h">1h</option><option value="4h">4h</option>
+                    </select>
+                    <div class="status">
+                        <div id="connection-status" class="status-dot"></div>
+                        <span id="connection-text">BAĞLANTI YOK</span>
+                    </div>
+                    <button id="theme-toggle-btn" class="btn">Tema</button>
+                    <button id="start-btn" class="btn btn-success">SİSTEMİ BAŞLAT</button>
+                    <button id="stop-btn" class="btn btn-danger" disabled>DURDUR</button>
+                    <button id="clear-markers-btn" class="btn">Grafik Sinyallerini Sil</button> 
+                </div>
+                <div class="price-display">
+                    <div class="price-item"><div class="price-label">FİYAT</div><div class="price-value" id="current-price">-</div></div>
+                    <div class="price-item"><div class="price-label">24s DEĞİŞİM</div><div class="price-value" id="price-change-24h">-</div></div>
+                    <div class="price-item"><div class="price-label">24s HACİM</div><div class="price-value" id="volume-24h">-</div></div>
+                    <div class="price-item"><div class="price-label">VOLATİLİTE (ATR)</div><div class="price-value" id="atr-value">-</div></div>
+                    <div class="price-item countdown"><span id="candle-countdown">--:--</span></div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-grid">
+            <section class="center-panel panel">
+                <div class="data-container">
+                    <div class="data-grid" id="chart-container-view">
+                        <div id="live-chart"></div>
+                        <div class="chart-zoom-controls"> 
+                            <button id="chart-zoom-in" class="btn btn-tiny">+</button>
+                            <button id="chart-zoom-out" class="btn btn-tiny">-</button>
+                            <button id="chart-zoom-reset" class="btn btn-tiny">Sıfırla</button>
+                        </div>
+                        <button id="exit-fullscreen-btn" class="btn btn-tiny hidden-view" title="Tam Ekrandan Çık">&times;</button>
+                        <div id="chart-countdown-overlay" class="hidden-view">--:--</div>
+                    </div>
+                    <div class="heatmap-container" id="heatmap-container-view">
+                        <div class="panel-title" style="border-top: 1px solid var(--border-color); border-bottom: none;">EMİR DEFTERİ ISI HARİTASI</div>
+                        <canvas id="orderbook-heatmap"></canvas>
+                    </div>
+                </div>
+                <div class="resize-handle"></div>
+            </section>
+        </main>
+    </div>
+    
+    <div id="notifications-container" class="notifications"></div>
+
+    <div id="settings-modal-overlay">
+        <div class="settings-modal-content">
+            <div class="settings-modal-header">
+                <span>AYARLAR & OPTİMİZASYON</span>
+                <button class="close-btn" id="close-settings-modal-btn">&times;</button>
+            </div>
+            <div class="settings-modal-body">
+                <div class="settings-group">
+                    <div class="panel-title" style="margin-bottom: 10px;">Temel Parametreler</div>
+                    <div class="form-group"><label class="form-label">Min. Uyum Skoru (1-10)</label><input type="range" id="modal-confluence-threshold" class="form-control" min="1" max="10" value="3" step="1"></div>
+                    <div class="form-group"><label class="form-label">RSI Periyodu</label><input type="number" id="modal-param-rsi-period" class="form-control" value="14"></div>
+                    <div class="form-group"><label class="form-label">ATR Periyodu</label><input type="number" id="modal-param-atr-period" class="form-control" value="14"></div>
+                    <div class="form-group"><label class="form-label">Duvar Tespiti (BTC Miktarı)</label><input type="number" id="modal-param-wall-btc" class="form-control" value="20"></div>
+                    <div class="form-group"><label class="form-label">Risk/Ödül Oranı (R/R)</label><input type="number" id="modal-param-rr-ratio" class="form-control" value="1.5" step="0.1"></div>
+                </div>
+                <div class="settings-group">
+                    <div class="panel-title" style="margin-bottom: 10px;">Cooldown Ayarları</div>
+                    <div class="form-group"><label class="form-label">Genel Sinyal Cooldown (ms)</label><input type="number" id="modal-signal-cooldown-ms" class="form-control" value="15000" min="0" step="100"></div>
+                    <div class="form-group"><label class="form-label">Aynı Yön Sinyal Cooldown (ms)</label><input type="number" id="modal-same-direction-cooldown-ms" class="form-control" value="30000" min="0" step="100"></div>
+                    <div class="form-group"><label class="form-label">Ters Yön Cooldown (ms)</label><input type="number" id="modal-opposite-direction-cooldown-ms" class="form-control" value="20000" min="0" step="100"></div>
+                    <div class="form-group"><label class="form-label">Ters Yön Histerezis (+Puan)</label><input type="number" id="modal-reverse-hysteresis-points" class="form-control" value="2" min="0" step="1"></div>
+                    <div class="form-group"><label class="form-label">Proposal Timeout (ms)</label><input type="number" id="modal-proposal-timeout-ms" class="form-control" value="3000" min="500" step="100"></div>
+                    <div class="form-group"><label class="form-label">Strateji Teklifi Cooldown (ms)</label><input type="number" id="modal-strategy-proposal-cooldown-ms" class="form-control" value="10000" min="0" step="100"></div>
+                </div>
+                <div class="settings-group">
+                    <div class="panel-title" style="margin-bottom: 10px;">Gelişmiş Özellikler</div>
+                    <div class="form-group"><label class="checkbox-label"><input type="checkbox" id="modal-enable-spoof-detection" class="feature-toggle" checked> Spoof Tespiti</label></div>
+                    <div class="form-group"><label class="checkbox-label"><input type="checkbox" id="modal-enable-cusum-drift" class="feature-toggle" checked> CUSUM Sapma Tespiti</label></div>
+                    <div class="form-group"><label class="checkbox-label"><input type="checkbox" id="modal-enable-risk-guardian" class="feature-toggle" checked> Risk Koruyucu (Kill Switch)</label></div>
+                    <div class="form-group"><label class="checkbox-label"><input type="checkbox" id="modal-enable-auto-optimize" class="feature-toggle" checked> Oto-Optimizasyon</label></div>
+                    <div class="form-group"><label class="checkbox-label"><input type="checkbox" id="modal-enable-auto-toggle-strat" class="feature-toggle" checked> Stratejileri Oto-Ayarla</label></div>
+                    <div class="form-group"><label class="checkbox-label"><input type="checkbox" id="modal-enable-breakeven-trail" class="feature-toggle" checked> Maliyete Çek/Takip Eden SL</label></div>
+                    <div class="form-group"><label class="form-label">BE R Oranı</label><input type="number" id="modal-be-at-r" class="form-control" value="0.8" step="0.1"></div>
+                    <div class="form-group"><label class="form-label">Trailing Başlangıç R Oranı</label><input type="number" id="modal-trail-after-r" class="form-control" value="1.5" step="0.1"></div>
+                    <div class="form-group"><label class="form-label">Trailing Kârı R Oranı</label><input type="number" id="modal-trail-to-r" class="form-control" value="0.5" step="0.1"></div>
+                </div>
+                <div class="settings-group">
+                    <div class="panel-title" style="margin-bottom: 10px;">Sinyal Teyit & Gelişmiş Filtreleme</div>
+                    <div class="form-group"><label class="checkbox-label"><input type="checkbox" id="modal-enable-candle-confirm" class="feature-toggle" checked> Sinyal için Mum Kapanışını Bekle</label></div>
+                    <div class="form-group"><label class="checkbox-label"><input type="checkbox" id="modal-enable-mtf-confirm" class="feature-toggle" checked> Üst Zaman Dilimi Trend Teyidi</label></div>
+                    <div class="form-group">
+                        <label class="form-label">MTF Zaman Dilimi</label>
+                        <select id="modal-mtf-timeframe" class="form-control">
+                            <option value="5m">5m</option>
+                            <option value="15m" selected>15m</option>
+                            <option value="1h">1h</option>
+                            <option value="4h">4h</option>
+                        </select>
+                    </div>
+                     <div class="form-group"><label class="checkbox-label"><input type="checkbox" id="modal-enable-dynamic-sizing" class="feature-toggle" checked> Sinyal Gücüne Göre Dinamik Boyutlandırma</label></div>
+                    <hr style="border-color: var(--border-color); margin: 10px 0;">
+                    <div class="form-group"><label class="checkbox-label"><input type="checkbox" id="modal-enable-tts" class="feature-toggle" checked> Sesli Bildirimler</label></div>
+                    <div class="form-group">
+                        <label class="form-label">Ses Seçimi</label>
+                        <select id="modal-tts-voice-select" class="form-control"></select>
+                    </div>
+                </div>
+                <div class="settings-group" style="grid-column: 1 / -1;">
+                     <div class="panel-title" style="margin-bottom: 10px;">Aktif Stratejiler</div>
+                    <div id="modal-strategy-toggles" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 5px;"></div>
+                </div>
+                <div class="settings-group" style="grid-column: 1 / -1;">
+                    <div class="panel-title" style="margin-bottom: 10px;">Sinyal Geçmişi ve Analiz</div>
+                    <div class="data-table-container" style="max-height: 300px;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Zaman</th>
+                                    <th>Sembol</th>
+                                    <th>Tip</th>
+                                    <th>Fiyat</th>
+                                    <th>TP</th>
+                                    <th>SL</th>
+                                    <th>Skor</th>
+                                    <th>Katkı</th>
+                                    <th>Boyut</th>
+                                    <th>Durum</th>
+                                    <th>Not</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modal-signals-body"></tbody>
+                        </table>
+                    </div>
+                    <button id="modal-clear-signals-btn" class="btn btn-danger btn-sm" style="margin-top: 10px;">Tüm Sinyalleri Sil</button>
+                    <div id="modal-stats-container" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+            <div class="settings-modal-footer">
+                <button id="reset-all-settings-btn" class="btn btn-danger">AYARLARI SIFIRLA</button>
+                <button id="save-settings-btn" class="btn btn-success">AYARLARI KAYDET</button>
+            </div>
+        </div>
+    </div>
+    <div id="log-modal-overlay">
+        <div class="log-modal-content">
+            <div class="log-modal-header">
+                <span>SİSTEM LOGLARI & GÜNLÜK</span>
+                <div>
+                    <button id="export-logs-btn" class="btn btn-sm btn-success">Logları Dışa Aktar</button>
+                    <button class="close-btn" id="close-log-modal-btn">&times;</button>
+                </div>
+            </div>
+            <div class="log-modal-body">
+                <pre id="log-output"></pre>
+            </div>
+        </div>
+    </div>
+
+    <div id="honor-modal-overlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; z-index:2600; align-items:center; justify-content:center;">
+      <div style="background:var(--panel-bg); border:1px solid var(--border-color); border-radius:8px; width:90%; max-width:900px; max-height:90%; overflow:auto;">
+        <div style="padding:10px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+          <div style="font-weight:700; color:var(--primary)">Şeref Tablosu</div>
+          <button id="close-honor-modal" class="btn btn-tiny">Kapat</button>
+        </div>
+        <div id="honor-modal-body" style="padding:12px;"></div>
+      </div>
+    </div>
+
+<script>
+    function playSignal(type) {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            if (type === 'buy') {
+                oscillator.type = 'triangle'; oscillator.frequency.value = 1000;
+            } else if (type === 'sell') {
+                oscillator.type = 'square'; oscillator.frequency.value = 400;
+            } else if (type === 'combat') {
+                oscillator.type = 'sawtooth'; oscillator.frequency.value = 800; 
+                gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1);
+                oscillator.start(audioContext.currentTime); oscillator.stop(audioContext.currentTime + 1);
+                return;
+            }
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            oscillator.start(audioContext.currentTime); oscillator.stop(audioContext.currentTime + 0.5);
+        } catch (error) { console.log('Ses çalınamadı:', error); }
+    }
+    
+    function playSoundAlert(type, priority = 1) {
+        try {
+            if (!window.audioContext) {
+                window.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            const audioContext = window.audioContext;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            const filterNode = audioContext.createBiquadFilter();
+            oscillator.connect(filterNode);
+            filterNode.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            switch (type) {
+                case 'success':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(660, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(880, audioContext.currentTime + 0.1);
+                    filterNode.type = 'lowpass';
+                    filterNode.frequency.value = 1500;
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.4);
+                    break;
+                case 'warning':
+                case 'alert':
+                    oscillator.type = 'triangle';
+                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(330, audioContext.currentTime + 0.15);
+                    filterNode.type = 'bandpass';
+                    filterNode.frequency.value = 500;
+                    filterNode.Q.value = 3;
+                    gainNode.gain.setValueAtTime(0.25 * Math.min(priority/2, 1), audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                    break;
+                case 'error':
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(196, audioContext.currentTime + 0.2);
+                    filterNode.type = 'highpass';
+                    filterNode.frequency.value = 150;
+                    gainNode.gain.setValueAtTime(0.3 * Math.min(priority/2, 1), audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.6);
+                    break;
+                default:
+                    oscillator.type = 'sine';
+                    oscillator.frequency.value = 523.25;
+                    filterNode.type = 'lowpass';
+                    filterNode.frequency.value = 800;
+                    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+            }
+            if (priority >= 4) {
+                setTimeout(() => {
+                    const osc2 = audioContext.createOscillator();
+                    const gain2 = audioContext.createGain();
+                    osc2.connect(gain2);
+                    gain2.connect(audioContext.destination);
+                    osc2.type = 'sine';
+                    osc2.frequency.value = 880;
+                    gain2.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+                    osc2.start(audioContext.currentTime);
+                    osc2.stop(audioContext.currentTime + 0.15);
+                }, 300);
+            }
+        } catch (error) {
+            console.error('Ses sentezleme hatası:', error);
+        }
+    }
+
+    class AdvancedNotificationCenter {
+        constructor(app) {
+            this.app = app;
+            this.container = document.getElementById('notifications-container');
+            this.notifications = [];
+            this.maxHistory = 50;
+            this.maxVisibleNotifications = 10;
+            this.groupSimilarTimeWindow = 5000;
+            this.loadHistory();
+            this.categories = {
+                system: { icon: '🔧', sound: false },
+                trade: { icon: '📊', sound: true },
+                alert: { icon: '⚠️', sound: true },
+                success: { icon: '✅', sound: true },
+                error: { icon: '❌', sound: true }
+            };
+            this.soundEnabled = true;
+            this.priorityThreshold = 2;
+            this.initStyles();
+            this.initNotificationPanel();
+        }
+        
+        initStyles() {
+            if (!document.getElementById('notification-center-styles')) {
+                const style = document.createElement('style');
+                style.id = 'notification-center-styles';
+                style.textContent = `
+                    .notifications { position: fixed; bottom: 15px; left: 15px; z-index: 2000; width: 320px; max-height: 80vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 8px; }
+                    .notification { background: rgba(22, 27, 34, 0.95); backdrop-filter: blur(5px); border: 1px solid var(--border-color); border-left-width: 4px; border-radius: 6px; padding: 10px 12px; font-size: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.3); animation: slide-in 0.3s ease-out; transition: opacity 0.3s ease, transform 0.3s ease; overflow: hidden; }
+                    .notification-control-panel { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 5px 8px; margin-bottom: 8px; }
+                    .notification-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 11px; font-weight: bold; color: var(--text-secondary); }
+                    .notification-header div { display: flex; gap: 5px; }
+                    .notification-icon { font-size: 14px; margin-right: 8px; flex-shrink: 0; }
+                    .notification-priority { font-size: 9px; color: var(--primary); letter-spacing: 1px; }
+                    .notification-close { cursor: pointer; font-size: 16px; line-height: 1; opacity: 0.7; transition: opacity 0.2s; }
+                    .notification-close:hover { opacity: 1; }
+                    .notification-content { flex-grow: 1; line-height: 1.4; word-break: break-word; position: relative; }
+                    .notification-time { font-size: 9px; color: var(--text-secondary); margin-top: 2px; }
+                    .notification-count { position: absolute; top: -8px; right: -5px; background: var(--primary); color: #000; border-radius: 10px; padding: 1px 6px; font-size: 10px; font-weight: bold; }
+                    .notification.system { border-left-color: var(--text-secondary); }
+                    .notification.trade { border-left-color: var(--primary); }
+                    .notification.alert { border-left-color: var(--neutral); }
+                    .notification.success { border-left-color: var(--positive); }
+                    .notification.error { border-left-color: var(--negative); }
+                    .high-priority { border-left-width: 6px !important; animation: pulse-highlight 2s infinite; }
+                    @keyframes slide-in { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+                    @keyframes pulse-highlight { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
+                    #notification-history-modal .modal-body { max-height: 400px; overflow-y: auto; }
+                    .notification-filters { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
+                    .notification-filters .filter { padding: 3px 8px; border-radius: 12px; background: var(--panel-bg); border: 1px solid var(--border-color); font-size: 11px; cursor: pointer; }
+                    .notification-filters .filter.active { background: var(--primary); color: #000; }
+                    #notification-history-list { display: flex; flex-direction: column; gap: 8px; }
+                    @media screen and (max-width: 768px) {
+                        .notifications { width: 85%; max-width: 320px; }
+                        .notification { padding: 8px 10px; font-size: 11px; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
+        initNotificationPanel() {
+            if (!this.container) {
+                this.container = document.createElement('div');
+                this.container.id = 'notifications-container';
+                this.container.className = 'notifications';
+                document.body.appendChild(this.container);
+            }
+            const panel = document.createElement('div');
+            panel.className = 'notification-control-panel';
+            panel.innerHTML = `
+                <div class="notification-header">
+                    <span>BİLDİRİMLER</span>
+                    <div>
+                        <button id="notification-history-btn" class="btn btn-tiny" title="Bildirim Geçmişi">📋</button>
+                        <button id="clear-notifications" class="btn btn-tiny" title="Bildirimleri Temizle">🗑️</button>
+                        <button id="toggle-notification-sound" class="btn btn-tiny" title="Sesi Aç/Kapat">🔊</button>
+                    </div>
+                </div>
+            `;
+            this.container.appendChild(panel);
+            this.createHistoryModal();
+            const showHistoryAction = () => this.showHistory();
+            const clearAllAction = () => this.clearAll();
+            const toggleSoundAction = () => {
+                this.soundEnabled = !this.soundEnabled;
+                const newIcon = this.soundEnabled ? '🔊' : '🔇';
+                const soundBtnDesktop = document.getElementById('toggle-notification-sound');
+                if (soundBtnDesktop) soundBtnDesktop.innerHTML = newIcon;
+                const soundBtnMobile = document.getElementById('mobile-toggle-notification-sound');
+                if (soundBtnMobile) soundBtnMobile.innerHTML = newIcon;
+                this.notify('Bildirim sesleri ' + (this.soundEnabled ? 'açıldı' : 'kapatıldı'), 'system', 1);
+            };
+            document.getElementById('notification-history-btn').addEventListener('click', showHistoryAction);
+            document.getElementById('clear-notifications').addEventListener('click', clearAllAction);
+            document.getElementById('toggle-notification-sound').addEventListener('click', toggleSoundAction);
+            document.getElementById('mobile-notification-history-btn')?.addEventListener('click', showHistoryAction);
+            document.getElementById('mobile-clear-notifications')?.addEventListener('click', clearAllAction);
+            document.getElementById('mobile-toggle-notification-sound')?.addEventListener('click', toggleSoundAction);
+        }
+        
+        createHistoryModal() {
+            const existingModal = document.getElementById('notification-history-modal');
+            if (existingModal) existingModal.remove();
+            const modal = document.createElement('div');
+            modal.id = 'notification-history-modal';
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Bildirim Geçmişi</h3>
+                        <span class="close-modal">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="notification-filters">
+                            <button class="filter active" data-filter="all">Tümü</button>
+                            <button class="filter" data-filter="trade">İşlem</button>
+                            <button class="filter" data-filter="alert">Uyarı</button>
+                            <button class="filter" data-filter="success">Başarılı</button>
+                            <button class="filter" data-filter="error">Hata</button>
+                            <button class="filter" data-filter="system">Sistem</button>
+                        </div>
+                        <div id="notification-history-list"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="clear-notifications-history" class="btn btn-danger">Geçmişi Temizle</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.querySelector('.close-modal').addEventListener('click', () => { modal.style.display = 'none'; });
+            const filters = modal.querySelectorAll('.filter');
+            filters.forEach(filter => {
+                filter.addEventListener('click', (e) => {
+                    filters.forEach(f => f.classList.remove('active'));
+                    e.target.classList.add('active');
+                    this.filterHistory(e.target.getAttribute('data-filter'));
+                });
+            });
+            document.getElementById('clear-notifications-history').addEventListener('click', () => {
+                this.clearHistory();
+                this.notify('Bildirim geçmişi temizlendi', 'system', 1);
+                modal.style.display = 'none';
+            });
+        }
+        
+        notify(message, category = 'system', priority = 2, timeout = 5000) {
+            if (!this.container) return;
+            if (!this.categories[category]) category = 'system';
+            if (this.shouldGroupWithSimilar(message, category)) return;
+            const notificationId = 'notify-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+            const timestamp = new Date();
+            const notification = document.createElement('div');
+            notification.id = notificationId;
+            notification.className = `notification ${category}`;
+            notification.setAttribute('data-id', notificationId);
+            if (priority >= 4) notification.classList.add('high-priority');
+            const catInfo = this.categories[category];
+            notification.innerHTML = `
+                <div class="notification-header">
+                    <span class="notification-icon">${catInfo.icon}</span>
+                    <span class="notification-priority">${'•'.repeat(priority)}</span>
+                    <span class="notification-close">&times;</span>
+                </div>
+                <div class="notification-content">
+                    ${message}
+                    <div class="notification-time">${timestamp.toLocaleTimeString()}</div>
+                </div>
+            `;
+            const controlPanel = this.container.querySelector('.notification-control-panel');
+            if (controlPanel && controlPanel.nextSibling) {
+                this.container.insertBefore(notification, controlPanel.nextSibling);
+            } else {
+                this.container.appendChild(notification);
+            }
+            this.addToHistory({ id: notificationId, message, category, priority, timestamp });
+            if (this.soundEnabled && priority >= this.priorityThreshold) {
+                this.playNotificationSound(category, priority);
+            }
+            const closeBtn = notification.querySelector('.notification-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => { notification.remove(); });
+            }
+            this.cleanupOldNotifications();
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(-100%)';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, timeout);
+            return notification;
+        }
+        
+        shouldGroupWithSimilar(message, category) {
+            const now = Date.now();
+            const similar = this.notifications.find(n => 
+                n.category === category && 
+                this.isSimilarMessage(n.message, message) && 
+                (now - new Date(n.timestamp).getTime() < this.groupSimilarTimeWindow)
+            );
+            if (similar) {
+                const existingNotification = document.querySelector(`.notification[data-id="${similar.id}"]`);
+                if (existingNotification) {
+                    const countBadge = existingNotification.querySelector('.notification-count');
+                    if (countBadge) {
+                        countBadge.textContent = (parseInt(countBadge.textContent) || 1) + 1;
+                    } else {
+                        const contentDiv = existingNotification.querySelector('.notification-content');
+                        if (contentDiv) {
+                            contentDiv.innerHTML += `<span class="notification-count">2</span>`;
+                        }
+                    }
+                    similar.timestamp = new Date();
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        isSimilarMessage(msg1, msg2) {
+            if (msg1 === msg2) return true;
+            const normalized1 = msg1.replace(/\d+(\.\d+)?%?/g, 'X');
+            const normalized2 = msg2.replace(/\d+(\.\d+)?%?/g, 'X');
+            return normalized1 === normalized2;
+        }
+        
+        addToHistory(notification) {
+            this.notifications.unshift(notification);
+            if (this.notifications.length > this.maxHistory) {
+                this.notifications = this.notifications.slice(0, this.maxHistory);
+            }
+            this.saveHistory();
+        }
+        
+        playNotificationSound(category, priority) {
+            try {
+                if (this.app.settings?.features?.enableTts && priority >= 3 && this.categories[category].sound) {
+                    if (typeof this.app.playSignal === 'function') {
+                        if (category === 'error' || category === 'alert') this.app.playSignal('alert');
+                        else if (category === 'success' || category === 'trade') this.app.playSignal('combat');
+                        return;
+                    }
+                }
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                switch(category) {
+                    case 'success':
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+                        oscillator.frequency.setValueAtTime(1320, audioContext.currentTime + 0.1);
+                        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.3);
+                        break;
+                    case 'alert':
+                    case 'error':
+                        oscillator.type = 'triangle';
+                        oscillator.frequency.setValueAtTime(660, audioContext.currentTime);
+                        oscillator.frequency.setValueAtTime(330, audioContext.currentTime + 0.15);
+                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.4);
+                        break;
+                    case 'trade':
+                        oscillator.type = 'sawtooth';
+                        oscillator.frequency.setValueAtTime(priority >= 4 ? 880 : 440, audioContext.currentTime);
+                        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.2);
+                        break;
+                    default:
+                        oscillator.type = 'sine';
+                        oscillator.frequency.value = 440;
+                        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.1);
+                }
+            } catch (error) {
+                console.error('Bildirim sesi çalınamadı:', error);
+            }
+        }
+        
+        cleanupOldNotifications() {
+            const notifElements = Array.from(this.container.querySelectorAll('.notification')).filter(el => !el.classList.contains('notification-control-panel'));
+            if (notifElements.length > this.maxVisibleNotifications) {
+                const toRemove = notifElements.slice(this.maxVisibleNotifications);
+                toRemove.forEach(el => el.remove());
+            }
+        }
+        
+        clearAll() {
+            const notifications = this.container.querySelectorAll('.notification');
+            notifications.forEach(notification => {
+                if (!notification.classList.contains('notification-control-panel')) {
+                    notification.remove();
+                }
+            });
+        }
+        
+        clearHistory() { this.notifications = []; this.saveHistory(); }
+        
+        saveHistory() {
+            try { localStorage.setItem('utc_notifications', JSON.stringify(this.notifications)); } catch (e) { console.error('Failed to save notification history', e); }
+        }
+        
+        loadHistory() {
+            try {
+                const saved = localStorage.getItem('utc_notifications');
+                if (saved) {
+                    this.notifications = JSON.parse(saved);
+                    this.notifications.forEach(n => {
+                        if (typeof n.timestamp === 'string') {
+                            n.timestamp = new Date(n.timestamp);
+                        }
+                    });
+                }
+            } catch (e) { this.notifications = []; }
+        }
+        
+        showHistory() {
+            const modal = document.getElementById('notification-history-modal');
+            if (!modal) return;
+            this.filterHistory('all');
+            modal.style.display = 'block';
+        }
+        
+        filterHistory(filter = 'all') {
+            const historyList = document.getElementById('notification-history-list');
+            if (!historyList) return;
+            historyList.innerHTML = '';
+            const filtered = filter === 'all' ? [...this.notifications] : this.notifications.filter(n => n.category === filter);
+            if (filtered.length === 0) {
+                historyList.innerHTML = '<div class="empty-state">Bu kategoride bildirim bulunmuyor.</div>';
+                return;
+            }
+            filtered.forEach(n => {
+                const item = document.createElement('div');
+                item.className = `notification ${n.category}`;
+                const catInfo = this.categories[n.category] || this.categories.system;
+                const dateStr = new Date(n.timestamp).toLocaleString();
+                item.innerHTML = `
+                    <div class="notification-header">
+                        <span class="notification-icon">${catInfo.icon}</span>
+                        <span class="notification-priority">${'•'.repeat(n.priority || 1)}</span>
+                    </div>
+                    <div class="notification-content">
+                        ${n.message}
+                        <div class="notification-time">${dateStr}</div>
+                    </div>
+                `;
+                historyList.appendChild(item);
+            });
+        }
+    }
+
+    class ChartManager {
+        constructor(chartContainerId) {
+            this.chartContainer = document.getElementById(chartContainerId);
+            if (!this.chartContainer) throw new Error("Chart container bulunamadı!");
+            this.chart = null; this.series = {}; this.signalMarkers = [];
+            this.bbandsSeries = null;
+            this._initChart();
+        }
+        _initChart() {
+            this.chart = LightweightCharts.createChart(this.chartContainer, this._getChartOptions());
+            this.series.candles = this.chart.addCandlestickSeries(this._getCandlestickOptions());
+            this.series.volume = this.chart.addHistogramSeries(this._getVolumeOptions());
+            const lineStyle = { color: 'rgba(255, 255, 0, 0.6)', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dotted };
+            this.series.bbUpper = this.chart.addLineSeries(lineStyle);
+            this.series.bbMiddle = this.chart.addLineSeries(lineStyle);
+            this.series.bbLower = this.chart.addLineSeries(lineStyle);
+            window.addEventListener('resize', () => { 
+                if (this.chart && this.chartContainer.clientWidth > 0 && this.chartContainer.clientHeight > 0) {
+                    this.chart.resize(this.chartContainer.clientWidth, this.chartContainer.clientHeight);
+                }
+            });
+            this.chart.timeScale().subscribeVisibleLogicalRangeChange(logicalRange => {
+                if (logicalRange) {
+                    localStorage.setItem('utc_chart_view', JSON.stringify(logicalRange));
+                }
+            });
+        }
+
+        restoreView() {
+            const savedView = localStorage.getItem('utc_chart_view');
+            if (savedView) {
+                try {
+                    const logicalRange = JSON.parse(savedView);
+                    this.chart.timeScale().setVisibleLogicalRange(logicalRange);
+                } catch (e) {
+                    console.error("Kaydedilmiş grafik görünümü yüklenemedi:", e);
+                    this.chart.timeScale().fitContent();
+                }
+            } else {
+                this.chart.timeScale().fitContent();
+            }
+        }
+
+        updateTheme() {
+            if(!this.chart) return;
+            this.chart.applyOptions(this._getChartOptions());
+            this.series.candles.applyOptions(this._getCandlestickOptions());
+            this.series.volume.applyOptions(this._getVolumeOptions());
+            const lineStyle = { color: 'rgba(255, 255, 0, 0.6)', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dotted };
+            this.series.bbUpper.applyOptions(lineStyle);
+            this.series.bbMiddle.applyOptions(lineStyle);
+            this.series.bbLower.applyOptions(lineStyle);
+        }
+        setData(candles) {
+            if (!this.series.candles) return;
+            const candleData = candles.map(c => ({ time: c.time / 1000, open: c.open, high: c.high, low: c.low, close: c.close }));
+            const volumeData = candles.map(c => ({ time: c.time / 1000, value: c.volume, color: c.close >= c.open ? 'rgba(40, 167, 69, 0.5)' : 'rgba(220, 53, 69, 0.5)' }));
+            this.series.candles.setData(candleData);
+            this.series.volume.setData(volumeData);
+            this.restoreView();
+        }
+
+        drawBollingerBands(bbandsData) {
+            if (!this.series.bbUpper || !bbandsData) return;
+            const mapToChartTime = (d) => ({ time: d.time / 1000, value: d.value });
+            this.series.bbUpper.setData(bbandsData.upper.map(mapToChartTime));
+            this.series.bbMiddle.setData(bbandsData.middle.map(mapToChartTime));
+            this.series.bbLower.setData(bbandsData.lower.map(mapToChartTime));
+        }
+
+        updateRealtime(kline) {
+             if (!this.series.candles) return;
+             const candle = { time: kline.t / 1000, open: parseFloat(kline.o), high: parseFloat(kline.h), low: parseFloat(kline.l), close: parseFloat(kline.c) };
+             const volume = { time: kline.t / 1000, value: parseFloat(kline.v), color: candle.close >= candle.open ? 'rgba(40, 167, 69, 0.5)' : 'rgba(220, 53, 69, 0.5)' };
+             this.series.candles.update(candle);
+             this.series.volume.update(volume);
+        }
+        
+        addSignalMarker(signal) {
+            if (!this.series.candles) return;
+            const styles = getComputedStyle(document.body);
+            const isMobile = window.innerWidth <= 768;
+            let text = '';
+
+            if (isMobile) {
+                text = `S:${typeof signal.score === 'number' ? signal.score.toFixed(1) : signal.score}`;
+            } else {
+                text = `Skor: ${typeof signal.score === 'number' ? signal.score.toFixed(1) : signal.score} @ ${this._formatMarkerPrice(signal.price)}`;
+                if (signal.recommendedSize) {
+                    text += ` | ${signal.recommendedSize}`;
+                }
+            }
+
+            const marker = {
+                id: signal.id,
+                time: signal.timestamp / 1000,
+                position: signal.direction === 'buy' ? 'belowBar' : 'aboveBar',
+                color: signal.direction === 'buy' ? styles.getPropertyValue('--positive').trim() : styles.getPropertyValue('--negative').trim(),
+                shape: signal.direction === 'buy' ? 'arrowUp' : 'arrowDown',
+                text: text
+            };
+            if (signal.status === 'pending') {
+                marker.color = styles.getPropertyValue('--neutral').trim();
+                marker.shape = 'circle';
+            }
+            
+            this.signalMarkers = this.signalMarkers.filter(m => m.id !== signal.id);
+            this.signalMarkers.push(marker);
+
+            while (this.signalMarkers.length > 3) {
+                this.signalMarkers.shift();
+            }
+
+            this.series.candles.setMarkers(this.signalMarkers);
+        }
+
+        clearMarkers() { if (!this.series.candles) return; this.signalMarkers = []; this.series.candles.setMarkers([]); }
+        zoom(factor) {
+            if (!this.chart) return;
+            const timeScale = this.chart.timeScale();
+            const currentLogicalRange = timeScale.getVisibleLogicalRange();
+            if (!currentLogicalRange) return;
+            const newLogicalRange = { from: currentLogicalRange.from * factor, to: currentLogicalRange.to * factor };
+            timeScale.setVisibleLogicalRange(newLogicalRange);
+        }
+        zoomIn() { this.zoom(0.9); }
+        zoomOut() { this.zoom(1.1); }
+        resetZoom() { 
+            if (this.chart) {
+                this.chart.timeScale().fitContent(); 
+                localStorage.removeItem('utc_chart_view');
+            }
+        }
+
+        _getDecimalPlacesBasedOnPrice(price) { if(!price) return 2; if (price > 1000) return 2; if (price > 1) return 3; if (price > 0.01) return 4; return 6; }
+        _formatMarkerPrice(price) { const d = this._getDecimalPlacesBasedOnPrice(price); return price.toFixed(d); }
+        _getChartOptions() {
+            const styles = getComputedStyle(document.body);
+            return {
+                width: this.chartContainer.clientWidth, height: this.chartContainer.clientHeight,
+                layout: { backgroundColor: 'transparent', textColor: styles.getPropertyValue('--text-main').trim(), fontFamily: "'Roboto Mono', monospace" },
+                grid: { vertLines: { color: styles.getPropertyValue('--border-color').trim() }, horzLines: { color: styles.getPropertyValue('--border-color').trim() } },
+                crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+                timeScale: { borderColor: styles.getPropertyValue('--border-color').trim(), timeVisible: true, secondsVisible: false, rightOffset: 10 }
+            };
+        }
+        _getCandlestickOptions() {
+             const styles = getComputedStyle(document.body);
+             return { 
+                upColor: styles.getPropertyValue('--positive').trim(), downColor: styles.getPropertyValue('--negative').trim(),
+                borderVisible: false, wickUpColor: styles.getPropertyValue('--positive').trim(), wickDownColor: styles.getPropertyValue('--negative').trim(),
+                priceFormat: { type: 'price', precision: 6, minMove: 0.000001 }
+             };
+        }
+        _getVolumeOptions() { return { priceFormat: { type: 'volume' }, priceScaleId: '', scaleMargins: { top: 0.8, bottom: 0 } }; }
+    }
+
+
+    class HeatmapManager {
+        constructor(canvasId) {
+            this.canvas = document.getElementById(canvasId);
+            if (!this.canvas) throw new Error("Heatmap canvas bulunamadı!");
+            this.ctx = this.canvas.getContext('2d');
+            this._resizeCanvas();
+            window.addEventListener('resize', () => this._resizeCanvas());
+        }
+        draw(orderBook, symbolPrice) {
+            if (!orderBook.bids || !Array.isArray(orderBook.bids) || orderBook.bids.length === 0 || !orderBook.asks || !Array.isArray(orderBook.asks) || orderBook.asks.length === 0) {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                return;
+            }
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            const asks = orderBook.asks.slice().reverse(); const bids = orderBook.bids;
+            const allLevels = [...bids, ...asks]; const maxQty = Math.max(...allLevels.map(l => l[1]));
+            this._drawSection(asks, 'asks', maxQty, symbolPrice); this._drawSection(bids, 'bids', maxQty, symbolPrice);
+        }
+        updateTheme() { this._resizeCanvas(); }
+        _drawSection(levels, type, maxQty, symbolPrice) {
+            const styles = getComputedStyle(document.body);
+            const baseColor = type === 'asks' ? styles.getPropertyValue('--negative').trim() : styles.getPropertyValue('--positive').trim();
+            if (levels.length === 0) return;
+            const heightPerLevel = (this.canvas.height / 2) / levels.length;
+            const priceDecimals = this._getDecimalPlaces(symbolPrice);
+            const labelSkipInterval = heightPerLevel < 12 ? Math.ceil(12 / heightPerLevel) : 1;
+            levels.forEach((level, index) => {
+                const [price, qty] = level;
+                const intensity = Math.min(Math.sqrt(qty / maxQty), 1.0);
+                this.ctx.fillStyle = this._hexToRgba(baseColor, intensity * 0.6 + 0.1);
+                const y = type === 'asks' ? index * heightPerLevel : (this.canvas.height / 2) + (index * heightPerLevel);
+                const barWidth = this.canvas.width * intensity;
+                this.ctx.fillRect(0, y, barWidth, heightPerLevel);
+                if (index % labelSkipInterval === 0) {
+                    this.ctx.fillStyle = intensity > 0.5 ? '#FFFFFF' : styles.getPropertyValue('--text-secondary').trim();
+                    this.ctx.font = '10px "Roboto Mono"'; this.ctx.textAlign = 'left';
+                    this.ctx.fillText(`${(qty).toFixed(2)} @ ${price.toFixed(priceDecimals)}`, 10, y + heightPerLevel - 3);
+                }
+            });
+        }
+        _getDecimalPlaces(price) { if (!price) return 2; if (price > 1000) return 2; if (price > 1) return 3; if (price > 0.01) return 4; return 6; }
+        _hexToRgba(hex, alpha) {
+            if(!hex.startsWith('#')) return `rgba(120,120,120,${alpha})`;
+            let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+        _resizeCanvas() { 
+            if(this.canvas.parentElement) {
+                this.canvas.width = this.canvas.parentElement.clientWidth; 
+                this.canvas.height = this.canvas.parentElement.clientHeight; 
+            }
+        }
+    }

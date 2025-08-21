@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panteon Sistemi - En Gelişmiş Versiyon</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #121212; color: #fff; margin: 0; padding: 0; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        nav { background-color: #1f1f1f; padding: 10px; display: flex; justify-content: space-around; }
+        nav a { color: #ffd700; text-decoration: none; }
+        .section { margin: 20px 0; padding: 15px; background-color: #1f1f1f; border-radius: 8px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
+        .progress-bar { background-color: #333; border-radius: 5px; height: 20px; }
+        .progress { background-color: #ffd700; height: 100%; border-radius: 5px; transition: width 0.3s ease; }
+        button { background-color: #ffd700; color: #121212; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #e6c200; }
+        table { width: 100%; border-collapse: collapse; }
+        table th, table td { border: 1px solid #333; padding: 8px; text-align: left; }
+        .heatmap { background-color: #333; padding: 20px; text-align: center; }
+        .icon { font-size: 24px; margin-right: 10px; }
+        /* Dark Theme Enhancements */
+        .dark-theme { background-color: #0a0a0a; color: #ddd; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Panteon Sistemi (Birleştirilmiş ve Geliştirilmiş) -->
+        <div class="section" id="panteon-system">
+            <h2>PANTEON SİSTEMİ</h2>
+            <div class="panteon-grid">
+                <div>
+                    <span class="icon">👁️</span> Metatron <div class="progress-bar"><div class="progress" style="width: 0%;"></div></div> 0%
+                </div>
+                <div>
+                    <span class="icon">⚔️</span> Uriel <div class="progress-bar"><div class="progress" style="width: 0%;"></div></div> 0%
+                </div>
+                <div>
+                    <span class="icon">💊</span> Raphael <div class="progress-bar"><div class="progress" style="width: 0%;"></div></div> 0%
+                </div>
+                <div>
+                    <span class="icon">📢</span> Gabriel <div class="progress-bar"><div class="progress" style="width: 0%;"></div></div> 0%
+                </div>
+                <div>
+                    <span class="icon">⚖️</span> Michael <div class="progress-bar"><div class="progress" style="width: 0%;"></div></div> 0%
+                </div>
+            </div>
+            <div class="panteon-powers">
+                <div><span class="icon">🔮</span> Vahiy</div>
+                <div><span class="icon">🛡️</span> Cesaret</div>
+                <div><span class="icon">💫</span> Şifa</div>
+            </div>
+            <p>Sinyaller güç topluyor... (Animasyonlu Güncelleme)</p>
+        </div>
+
+        <!-- Navigasyon (Birleştirilmiş) -->
+        <nav>
+            <a href="#">Komuta Merkezi</a>
+            <a href="#">Grafik</a>
+            <a href="#">Isı Haritası</a>
+            <a href="#">Tam Ekran Grafik</a>
+            <a href="#">Şeref Tablosu</a>
+            <a href="#">Banlılar</a>
+            <a href="#">Ayarlar</a>
+        </nav>
+
+        <!-- Metrikler (Buy/Sell Sinyal Gücü + Öncekiler) -->
+        <div class="section">
+            <h3>BUY SINYAL GÜCÜ: 0.0</h3>
+            <h3>SELL SINYAL GÜCÜ: 0.0</h3>
+            <h3>METATRON GÜVENİ: 0.0</h3>
+            <h3>URIEL CESARETİ: 0.0</h3>
+        </div>
+
+        <!-- Komuta Merkezi Kontrolleri -->
+        <div class="section">
+            <h3>KOMUTA MERKEZİ KONTROLLERİ</h3>
+            <div>Timeframes: 1m 5m 15m 1h 4h</div>
+            <div>BAĞLANTI YOK (Gerçek Zamanlı Güncelleme)</div>
+            <button>Tema Değiştir</button>
+            <button>SİSTEMİ BAŞLAT</button>
+            <button>DURDUR</button>
+            <button>Grafik Sinyallerini Sil</button>
+            <div>FİYAT: - | 24s DEĞİŞİM: - | 24s HACİM: - | VOLATİLİTE (ATR): - | --:--</div>
+        </div>
+
+        <!-- Isı Haritası -->
+        <div class="section heatmap">
+            <h3>EMİR DEFTERİ ISI HARİTASI</h3>
+            <button>+</button> <button>-</button> <button>Sıfırla</button>
+            <p>--:--</p>
+        </div>
+
+        <!-- Ayarlar & Optimizasyon (Geliştirilmiş) -->
+        <div class="section">
+            <h3>AYARLAR & OPTİMİZASYON</h3>
+            <div>Temel Parametreler: Min. Uyum Skoru, RSI Periyodu, ATR Periyodu, Duvar Tespiti, R/R</div>
+            <div>Cooldown Ayarları: Genel, Aynı Yön, Ters Yön, Histerezis, Timeout</div>
+            <div>Gelişmiş Özellikler: Spoof Tespiti, CUSUM, Kill Switch, Oto-Optimizasyon, Trailing SL, BE R Oranı (Yeni: AI Tahmin Entegrasyonu)</div>
+            <div>Sinyal Teyit: Mum Kapanışı, MTF, Dinamik Boyutlandırma, Sesli Bildirimler</div>
+            <div>Aktif Stratejiler</div>
+            <table>
+                <thead><tr><th>Zaman</th><th>Sembol</th><th>Tip</th><th>Fiyat</th><th>TP</th><th>SL</th><th>Skor</th><th>Katkı</th><th>Boyut</th><th>Durum</th><th>Not</th></tr></thead>
+                <tbody><tr><td colspan="11">Sinyal Tarihi (Grafik Entegrasyonu)</td></tr></tbody>
+            </table>
+            <button>Tüm Sinyalleri Sil</button>
+            <button>AYARLARI SIFIRLA</button>
+            <button>AYARLARI KAYDET</button>
+            <button>Yeni: Ayarları Import/Export</button>
+        </div>
+
+        <!-- Sistem Logları -->
+        <div class="section">
+            <h3>SİSTEM LOGLARI & GÜNLÜK</h3>
+            <button>Logları Dışa Aktar</button>
+            <div>Log İçeriği...</div>
+        </div>
+
+        <!-- Şeref Tablosu -->
+        <div class="section">
+            <h3>Şeref Tablosu</h3>
+            <button>Kapat</button>
+            <table>
+                <thead><tr><th>Sıra</th><th>Kullanıcı</th><th>Puan</th></tr></thead>
+                <tbody><tr><td>1</td><td>Örnek</td><td>100</td></tr></tbody>
+            </table>
+        </div>
+
+        <!-- Panteon'un İradesi (mona.html'den Entegre) -->
+        <div class="section">
+            <h3>PANTEON'UN İRADESİ</h3>
+            <div>METATRON: İNANÇLI 100</div>
+            <div>URIEL: İNANÇLI 100</div>
+            <div>RAPHAEL: İNANÇLI 100</div>
+            <span class="icon">🛡️ ⚖️ ⚔️</span>
+        </div>
+    </div>
+
+    <script>
+        // Dinamik Güncellemeler (Geliştirme)
+        function updateProgress() {
+            document.querySelectorAll('.progress').forEach(bar => {
+                bar.style.width = Math.random() * 100 + '%';
+            });
+        }
+        setInterval(updateProgress, 5000); // Her 5 saniyede güncelle
+
+        // Tema Değiştirme
+        document.querySelector('button[onclick="toggleTheme()"]').onclick = function() {
+            document.body.classList.toggle('dark-theme');
+        };
+    </script>
+</body>
+</html>

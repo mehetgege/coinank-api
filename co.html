@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Coinank API - Tek HTML</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    input, button, textarea { width: 100%; padding: 10px; margin: 6px 0; font-family: monospace; }
+    textarea { height: 420px; }
+    small { color: #666; }
+  </style>
+</head>
+<body>
+  <h1>Coinank Likidasyon Verisi (Tek HTML)</h1>
+  <p>
+    Bu sayfa, proxy.cors.sh üzerinden Coinank API'ına istek atar. Eğer proxy limit verir veya kapanırsa hata görebilirsin.
+  </p>
+
+  <div class="row">
+    <div>
+      <label>Exchange</label>
+      <input id="exchange" value="Binance">
+    </div>
+    <div>
+      <label>Symbol</label>
+      <input id="symbol" value="ORDIUSDT">
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label>Interval</label>
+      <input id="interval" value="1d">
+    </div>
+    <div>
+      <label>proxy.cors.sh API key (opsiyonel)</label>
+      <input id="corsKey" placeholder="Boş bırakabilirsin (403/429 alırsan key ekle)">
+      <small>Gerekirse cors.sh üzerinden ücretsiz key alıp buraya gir.</small>
+    </div>
+  </div>
+
+  <details>
+    <summary>Header'ları göster/gizle (gerekirse düzenle)</summary>
+    <label>coinank-apikey</label>
+    <input id="apikey" value="LWIzMWUtYzU0Ny1kMjk5LWI2ZDA3Yjc2MzFhYmEyYzkwM2NjfDI4NjYzMzE4ODAzMzEzNDc=">
+    <label>token</label>
+    <input id="token" value="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwMjMwOGVkNTc3ZWQ0YjAyOGQxZTdlN2I3ZjE0ZTdiYiIsImlhdCI6MTc1NTIyMDExMn0.afXUrcg3aoNslxZpOOsxOqLmgsvQA1Mor59ri1boJasq32JZgiLN6pZoj0ohIHDtCWpO7EjzLu1m9qSm3JFz9Q">
+  </details>
+
+  <button id="btn">Veriyi Çek</button>
+  <textarea id="result" readonly>Hazır...</textarea>
+
+  <script>
+    async function fetchData() {
+      const result = document.getElementById('result');
+      result.value = 'Veri çekiliyor...';
+
+      const exchange = document.getElementById('exchange').value.trim() || 'Binance';
+      const symbol   = document.getElementById('symbol').value.trim()   || 'ORDIUSDT';
+      const interval = document.getElementById('interval').value.trim() || '1d';
+      const apikey   = document.getElementById('apikey').value.trim();
+      const token    = document.getElementById('token').value.trim();
+      const corsKey  = document.getElementById('corsKey').value.trim();
+
+      const targetUrl = `https://api.coinank.com/api/liqMap/getLiqMap?exchange=${encodeURIComponent(exchange)}&symbol=${encodeURIComponent(symbol)}&interval=${encodeURIComponent(interval)}`;
+
+      // Coinank'a iletilecek header'lar (proxy bunları hedefe forward ediyor)
+      const headersForTarget = {
+        'accept': 'application/json, text/plain, */*',
+        'coinank-apikey': apikey,
+        'token': token,
+        'client': 'web',
+        'web-version': '101',
+        // Aşağıdakiler çoğu zaman gerekmiyor ama bazen iş görüyor:
+        'origin': 'https://coinank.com',
+        'referer': 'https://coinank.com/'
+      };
+
+      const proxyUrl = `https://proxy.cors.sh/${targetUrl}`;
+
+      const proxyHeaders = {
+        'x-cors-headers': JSON.stringify(headersForTarget)
+      };
+      // Eğer cors.sh için API key'in varsa header'a ekle
+      if (corsKey) proxyHeaders['x-cors-api-key'] = corsKey;
+
+      try {
+        const res = await fetch(proxyUrl, { headers: proxyHeaders });
+        const text = await res.text();
+        // JSON ise formatla, değilse düz göster
+        try {
+          result.value = JSON.stringify(JSON.parse(text), null, 2);
+        } catch {
+          result.value = text;
+        }
+        if (!res.ok) {
+          result.value = `Hata: HTTP ${res.status}\n\n${result.value}`;
+        }
+      } catch (err) {
+        result.value = `İstek başarısız: ${err.message}`;
+      }
+    }
+
+    document.getElementById('btn').addEventListener('click', fetchData);
+    // Otomatik dene
+    fetchData();
+  </script>
+</body>
+</html>

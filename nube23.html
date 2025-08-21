@@ -1,0 +1,3236 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ULTIMATE TRADING KOMUTA MERKEZİ v3.2 | PANTEON'UN KADERİ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+    
+    <style>
+        :root {
+            --background-dark: #0d1117;
+            --panel-bg-dark: #161b22;
+            --text-main-dark: #c9d1d9;
+            --text-secondary-dark: #8b949e;
+            --border-color-dark: #30363d;
+            --input-bg-dark: #010409;
+            --hover-bg-dark: #21262d;
+            --primary-dark: #58a6ff;
+            
+            --positive: #28a745;
+            --negative: #dc3545;
+            --neutral: #ffc107;
+            --divine: #ffd700;
+            
+            --ticker-height: 30px;
+            --header-min-height: 40px;
+        }
+        
+        [data-theme="dark"] {
+            --background: var(--background-dark);
+            --panel-bg: var(--panel-bg-dark);
+            --text-main: var(--text-main-dark);
+            --text-secondary: var(--text-secondary-dark);
+            --border-color: var(--border-color-dark);
+            --input-bg: var(--input-bg-dark);
+            --hover-bg: var(--hover-bg-dark);
+            --primary: var(--primary-dark);
+        }
+        
+        [data-theme="war"] {
+            --background: linear-gradient(145deg, #4d0000 0%, #000000 75%);
+            --panel-bg: rgba(255, 0, 0, 0.08);
+            --border-color: #8B0000;
+            --text-main: #ff5858;
+            --primary: #ffc107;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 12px;
+            background: var(--background);
+            color: var(--text-main);
+            overflow: hidden;
+            transition: background 0.5s, color 0.5s;
+        }
+        
+        /* Particle Container */
+        #particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        
+        /* Panteon Panel */
+        .panteon-panel {
+            position: fixed;
+            top: calc(var(--ticker-height) + 10px);
+            right: 10px;
+            width: 280px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .panteon-header {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--divine);
+            text-align: center;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .elci-card {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .elci-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        
+        .elci-name {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        
+        .elci-mode {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        
+        .elci-mode.inancli {
+            background: var(--positive);
+            color: white;
+        }
+        
+        .elci-mode.supheci {
+            background: var(--neutral);
+            color: black;
+        }
+        
+        .elci-mode.kiyamet {
+            background: var(--negative);
+            color: white;
+        }
+        
+        .elci-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+        
+        /* Kehanet Panel */
+        .kehanet-panel {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 200px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            z-index: 1000;
+        }
+        
+        .kehanet-header {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--divine);
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        
+        .kehanet-buttons {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+        
+        .kehanet-btn {
+            padding: 8px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--divine);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .kehanet-btn:hover {
+            background: var(--hover-bg);
+            transform: scale(1.1);
+        }
+        
+        /* Super Top Ticker */
+        #super-top-ticker {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 2px 10px;
+            z-index: 1100;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 700;
+            height: var(--ticker-height);
+        }
+        
+        .super-top-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #ticker-bar-symbol {
+            color: var(--primary);
+        }
+        
+        #ticker-bar-price {
+            color: var(--text-main);
+            font-size: 12px;
+        }
+        
+        .super-top-right-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-tiny {
+            padding: 2px 6px;
+            font-size: 10px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .btn-tiny:hover {
+            background: var(--hover-bg);
+        }
+        
+        .btn-holy {
+            background: var(--divine);
+            color: black;
+            border-color: var(--divine);
+        }
+        
+        /* Main Container */
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding-top: var(--ticker-height);
+        }
+        
+        /* Header */
+        .header {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            margin: 5px;
+            position: relative;
+        }
+        
+        .header-top-bar {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 5px 15px;
+            min-height: var(--header-min-height);
+            justify-content: space-between;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--primary);
+        }
+        
+        .header-collapsible-content {
+            transition: max-height 0.35s ease-in-out;
+            max-height: 300px;
+            opacity: 1;
+            overflow: hidden;
+            padding: 0 15px 8px 15px;
+        }
+        
+        body.header-collapsed .header-collapsible-content {
+            max-height: 0;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        
+        .main-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding-bottom: 8px;
+        }
+        
+        .form-control {
+            background: var(--input-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-family: 'Roboto Mono', monospace;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--negative);
+        }
+        
+        .status-dot.online {
+            background: var(--positive);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 #28a745b3; }
+            70% { box-shadow: 0 0 0 6px #28a74500; }
+            100% { box-shadow: 0 0 0 0 #28a74500; }
+        }
+        
+        .btn {
+            padding: 4px 12px;
+            border: 1px solid var(--border-color);
+            background: var(--panel-bg);
+            color: var(--text-main);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--primary);
+        }
+        
+        .btn-success {
+            background: var(--positive);
+            color: white;
+            border-color: var(--positive);
+        }
+        
+        .btn-danger {
+            background: var(--negative);
+            color: white;
+            border-color: var(--negative);
+        }
+        
+        /* Price Display */
+        .price-display {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 10px;
+            margin-top: 8px;
+        }
+        
+        .price-item .price-label {
+            color: var(--text-secondary);
+        }
+        
+        .price-item .price-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .countdown-timer {
+            color: var(--neutral);
+            font-size: 11px;
+            margin-top: 2px;
+        }
+        
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 250px 1fr 300px;
+            gap: 5px;
+            flex-grow: 1;
+            margin: 5px;
+            overflow: hidden;
+        }
+        
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .panel-title {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--primary);
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-content {
+            padding: 10px;
+            overflow-y: auto;
+            height: calc(100% - 40px);
+        }
+        
+        /* Strategies Panel */
+        .strategies-tabs {
+            display: flex;
+            gap: 2px;
+            padding: 5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 4px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            color: var(--text-secondary);
+            font-size: 10px;
+            cursor: pointer;
+        }
+        
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .strategy-item {
+            padding: 6px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        
+        .strategy-item:hover {
+            background: var(--hover-bg);
+        }
+        
+        .strategy-item.active {
+            border-color: var(--positive);
+        }
+        
+        .strategy-item.imprisoned {
+            opacity: 0.5;
+            border-color: var(--negative);
+        }
+        
+        /* Chart Panel */
+        #live-chart {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .chart-zoom-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            z-index: 100;
+        }
+        
+        /* Signals Panel */
+        .signal-card {
+            padding: 8px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+        
+        .signal-card.buy {
+            border-left: 3px solid var(--positive);
+        }
+        
+        .signal-card.sell {
+            border-left: 3px solid var(--negative);
+        }
+        
+        /* Settings Modal */
+        #settings-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2500;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+        
+        #settings-modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .settings-modal-content {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .settings-modal-header {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--primary);
+        }
+        
+        .settings-modal-body {
+            padding: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .settings-modal-footer {
+            padding: 12px 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .setting-group {
+            background: var(--input-bg);
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .setting-group-title {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        
+        .form-group {
+            margin-bottom: 8px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-bottom: 3px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 4px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            color: var(--text-main);
+            font-size: 11px;
+        }
+        
+        /* Notifications */
+        .notifications {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            z-index: 2000;
+            width: 320px;
+        }
+        
+        .notification {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-left-width: 5px;
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        
+        .notification.success {
+            border-left-color: var(--positive);
+        }
+        
+        .notification.danger {
+            border-left-color: var(--negative);
+        }
+        
+        .notification.warning {
+            border-left-color: var(--neutral);
+        }
+        
+        .notification.divine {
+            border-left-color: var(--divine);
+        }
+        
+        /* Mobile */
+        @media screen and (max-width: 768px) {
+            .panteon-panel,
+            .kehanet-panel {
+                display: none;
+            }
+            
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .price-display {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle Effects Container -->
+    <div id="particles-container"></div>
+    
+    <!-- Panteon Panel -->
+    <div class="panteon-panel" id="panteon-panel">
+        <div class="panteon-header">⚡ PANTEON ELÇİLERİ ⚡</div>
+        <div class="elci-container">
+            <div class="elci-card">
+                <div class="elci-header">
+                    <span class="elci-name">METATRON</span>
+                    <span class="elci-mode inancli" id="metatron-mode">İNANÇLI</span>
+                </div>
+                <div class="elci-stats">
+                    <span>İtibar: <span id="metatron-itibar">100</span></span>
+                    <span>Gardiyan: <span id="metatron-gardiyan">8</span></span>
+                </div>
+            </div>
+            <div class="elci-card">
+                <div class="elci-header">
+                    <span class="elci-name">URIEL</span>
+                    <span class="elci-mode inancli" id="uriel-mode">İNANÇLI</span>
+                </div>
+                <div class="elci-stats">
+                    <span>İtibar: <span id="uriel-itibar">100</span></span>
+                    <span>Gardiyan: <span id="uriel-gardiyan">9</span></span>
+                </div>
+            </div>
+            <div class="elci-card">
+                <div class="elci-header">
+                    <span class="elci-name">RAPHAEL</span>
+                    <span class="elci-mode inancli" id="raphael-mode">İNANÇLI</span>
+                </div>
+                <div class="elci-stats">
+                    <span>İtibar: <span id="raphael-itibar">100</span></span>
+                    <span>İyileşen: <span id="raphael-healed">0</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Kehanet Panel -->
+    <div class="kehanet-panel" id="kehanet-panel">
+        <div class="kehanet-header">ZEUS'UN FISILTILARI</div>
+        <div class="kehanet-buttons">
+            <button class="kehanet-btn" id="kehanet-shield" title="Koruma">🛡️</button>
+            <button class="kehanet-btn" id="kehanet-balance" title="Denge">⚖️</button>
+            <button class="kehanet-btn" id="kehanet-sword" title="Saldırı">⚔️</button>
+        </div>
+    </div>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Super Top Ticker -->
+        <div id="super-top-ticker">
+            <div class="super-top-left">
+                <span id="ticker-bar-symbol">BTC/USDT</span>
+                <span id="ticker-bar-price">-</span>
+                <span id="ticker-bar-change" style="margin-left: 10px;">-</span>
+            </div>
+            <div class="super-top-right-buttons">
+                <button class="btn-tiny btn-holy" id="kutsal-su-btn">KUTSAL SU</button>
+                <button class="btn-tiny" id="kurban-et-btn" style="background: var(--negative); color: white;">KURBAN ET</button>
+                <button class="btn-tiny" id="main-controls-btn">Kontroller</button>
+                <button class="btn-tiny" id="open-settings-btn">KUTSAL KİTAP</button>
+            </div>
+        </div>
+        
+        <!-- Header -->
+        <header class="header">
+            <div class="header-top-bar" id="header-main-bar">
+                <span>PANTEON KOMUTA MERKEZİ</span>
+                <span style="font-size: 11px; color: var(--text-secondary);">v3.2</span>
+            </div>
+            <div class="header-collapsible-content">
+                <div class="main-controls">
+                    <input type="text" id="symbol-input" class="form-control" placeholder="Sembol">
+                    <select id="timeframe-select" class="form-control">
+                        <option value="1m">1m</option>
+                        <option value="5m">5m</option>
+                        <option value="15m" selected>15m</option>
+                        <option value="1h">1h</option>
+                        <option value="4h">4h</option>
+                    </select>
+                    <div class="status">
+                        <div id="connection-status" class="status-dot"></div>
+                        <span id="connection-text">BAĞLANTI YOK</span>
+                    </div>
+                    <button id="start-btn" class="btn btn-success">KADERİ BAŞLAT</button>
+                    <button id="stop-btn" class="btn btn-danger" disabled>KADERİ DURDUR</button>
+                </div>
+                <div class="price-display">
+                    <div class="price-item">
+                        <div class="price-label">FİYAT</div>
+                        <div class="price-value" id="current-price">-</div>
+                        <div class="countdown-timer" id="candle-countdown">-</div>
+                    </div>
+                    <div class="price-item">
+                        <div class="price-label">24s DEĞİŞİM</div>
+                        <div class="price-value" id="price-change-24h">-</div>
+                    </div>
+                    <div class="price-item">
+                        <div class="price-label">24s HACİM</div>
+                        <div class="price-value" id="volume-24h">-</div>
+                    </div>
+                    <div class="price-item">
+                        <div class="price-label">ATR</div>
+                        <div class="price-value" id="atr-value">-</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Grid -->
+        <main class="main-grid">
+            <!-- Left Panel - Strategies -->
+            <aside class="panel">
+                <div class="panel-title">
+                    <span>GARDİYANLAR</span>
+                    <span id="active-strategy-count">0</span>
+                </div>
+                <div class="strategies-tabs">
+                    <button class="tab-btn active" data-tab="seref">ŞEREF</button>
+                    <button class="tab-btn" data-tab="ameliyat">AMELİYAT</button>
+                    <button class="tab-btn" data-tab="zindan">ZİNDAN</button>
+                </div>
+                <div class="panel-content">
+                    <div id="strategies-seref"></div>
+                    <div id="strategies-ameliyat" style="display:none;"></div>
+                    <div id="strategies-zindan" style="display:none;"></div>
+                </div>
+            </aside>
+            
+            <!-- Center - Chart -->
+            <section class="panel">
+                <div class="panel-title">KADER HARİTASI</div>
+                <div style="position: relative; height: calc(100% - 40px);">
+                    <div id="live-chart"></div>
+                    <div class="chart-zoom-controls">
+                        <button class="btn-tiny" id="chart-zoom-in">+</button>
+                        <button class="btn-tiny" id="chart-zoom-out">-</button>
+                        <button class="btn-tiny" id="chart-reset">⟲</button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Right Panel - Signals -->
+            <aside class="panel">
+                <div class="panel-title">
+                    <span>İLAHİ MÜDAHALELER</span>
+                    <span id="signal-count">0</span>
+                </div>
+                <div class="panel-content" id="signals-container"></div>
+            </aside>
+        </main>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal-overlay">
+        <div class="settings-modal-content">
+            <div class="settings-modal-header">
+                <span>📜 KUTSAL KİTAP 📜</span>
+                <button class="btn" id="close-settings-btn">✕</button>
+            </div>
+            <div class="settings-modal-body">
+                <div class="setting-group">
+                    <div class="setting-group-title">İLAHİ PARAMETRELER</div>
+                    <div class="form-group">
+                        <label class="form-label">Minimum Uyum Skoru</label>
+                        <input type="range" id="confluence-threshold" class="form-input" min="1" max="10" value="3">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Minimum Gardiyan Sayısı</label>
+                        <input type="number" id="min-contributors" class="form-input" value="2">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Risk/Ödül Oranı</label>
+                        <input type="number" id="rr-ratio" class="form-input" value="1.5" step="0.1">
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <div class="setting-group-title">İTİBAR SİSTEMİ</div>
+                    <div class="form-group">
+                        <label class="form-label">TP İtibar Ödülü</label>
+                        <input type="number" id="tp-reputation" class="form-input" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">SL İtibar Cezası</label>
+                        <input type="number" id="sl-reputation" class="form-input" value="-2">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Durgunluk Süresi (saat)</label>
+                        <input type="number" id="idle-hours" class="form-input" value="4">
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <div class="setting-group-title">GÖRSEL VE SES</div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="enable-particles" checked> Parçacık Efektleri</label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="enable-sounds" checked> Ses Efektleri</label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="enable-tts" checked> TTS (Sesli Bildirim)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-modal-footer">
+                <button class="btn btn-danger" id="reset-universe-btn">EVRENİ SIFIRLA</button>
+                <button class="btn btn-success" id="save-settings-btn">KADERİ MÜHÜRLE</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notifications -->
+    <div class="notifications" id="notifications"></div>
+    
+    <script>
+    // ================================================
+    // PANTEON'UN KADERİ v3.2 - EKSIKSIZ KOD
+    // ================================================
+    
+    /**
+     * IndexedDB Manager
+     */
+    class DBManager {
+        constructor() {
+            this.dbName = 'PanteonDB';
+            this.version = 1;
+            this.db = null;
+        }
+        
+        async init() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(this.dbName, this.version);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    this.db = request.result;
+                    resolve();
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    
+                    if (!db.objectStoreNames.contains('settings')) {
+                        db.createObjectStore('settings', { keyPath: 'id' });
+                    }
+                    
+                    if (!db.objectStoreNames.contains('panteonState')) {
+                        db.createObjectStore('panteonState', { keyPath: 'id' });
+                    }
+                    
+                    if (!db.objectStoreNames.contains('strategyStats')) {
+                        db.createObjectStore('strategyStats', { keyPath: 'name' });
+                    }
+                    
+                    if (!db.objectStoreNames.contains('signalHistory')) {
+                        const signalStore = db.createObjectStore('signalHistory', { 
+                            keyPath: 'id', 
+                            autoIncrement: true 
+                        });
+                        signalStore.createIndex('timestamp', 'timestamp', { unique: false });
+                    }
+                };
+            });
+        }
+        
+        async save(storeName, data) {
+            const transaction = this.db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            return store.put(data);
+        }
+        
+        async get(storeName, key) {
+            const transaction = this.db.transaction([storeName], 'readonly');
+            const store = transaction.objectStore(storeName);
+            return new Promise((resolve) => {
+                const request = store.get(key);
+                request.onsuccess = () => resolve(request.result);
+            });
+        }
+        
+        async getAll(storeName) {
+            const transaction = this.db.transaction([storeName], 'readonly');
+            const store = transaction.objectStore(storeName);
+            return new Promise((resolve) => {
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result);
+            });
+        }
+        
+        async clear(storeName) {
+            const transaction = this.db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            return store.clear();
+        }
+    }
+    
+    /**
+     * TTS Manager - Sesli Bildirimler
+     */
+    class TTSManager {
+        constructor() {
+            this.enabled = true;
+            this.voice = null;
+            this.rate = 1.0;
+            this.pitch = 1.0;
+            this.volume = 0.8;
+            this.init();
+        }
+        
+        init() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.onvoiceschanged = () => {
+                    const voices = window.speechSynthesis.getVoices();
+                    this.voice = voices.find(v => v.lang.startsWith('tr')) || 
+                                voices.find(v => v.lang.startsWith('en')) ||
+                                voices[0];
+                };
+            }
+        }
+        
+        speak(text, priority = 'normal') {
+            if (!this.enabled || !window.speechSynthesis) return;
+            
+            if (priority === 'high') {
+                window.speechSynthesis.cancel();
+            }
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            if (this.voice) {
+                utterance.voice = this.voice;
+            }
+            
+            utterance.rate = this.rate;
+            utterance.pitch = this.pitch;
+            utterance.volume = this.volume;
+            
+            window.speechSynthesis.speak(utterance);
+        }
+        
+        speakSignal(signal) {
+            const direction = signal.direction === 'buy' ? 'Alım' : 'Satım';
+            const price = signal.price.toFixed(2);
+            const score = signal.score.toFixed(1);
+            
+            this.speak(`${direction} sinyali. Fiyat ${price}. Skor ${score}`, 'high');
+        }
+        
+        speakDivine(message) {
+            this.pitch = 0.8;
+            this.rate = 0.9;
+            this.speak(message, 'high');
+            setTimeout(() => {
+                this.pitch = 1.0;
+                this.rate = 1.0;
+            }, 100);
+        }
+    }
+    
+    /**
+     * Effects Manager - tsparticles Efektleri
+     */
+    class EffectsManager {
+        constructor() {
+            this.particles = null;
+            this.effectIntensity = 'medium';
+            this.soundEnabled = true;
+        }
+        
+        async init() {
+            this.particles = await tsparticles.load('particles-container', {
+                particles: {
+                    number: { value: 0 },
+                    color: { value: '#ffffff' },
+                    shape: { type: 'circle' },
+                    opacity: { value: 1 },
+                    size: { value: 3 },
+                    move: {
+                        enable: true,
+                        speed: 2,
+                        direction: 'none',
+                        random: true,
+                        straight: false,
+                        outModes: { default: 'destroy' }
+                    }
+                },
+                interactivity: {
+                    detectsOn: 'canvas',
+                    events: { resize: true }
+                },
+                detectRetina: true
+            });
+        }
+        
+        async triggerBuyEffect(price) {
+            if (!this.particles) return;
+            
+            const intensity = this.getIntensityMultiplier();
+            
+            for (let i = 0; i < 30 * intensity; i++) {
+                setTimeout(() => {
+                    this.particles.addParticle({
+                        x: Math.random() * window.innerWidth,
+                        y: window.innerHeight,
+                        color: { value: '#00ff88' },
+                        size: { value: Math.random() * 5 + 2 },
+                        move: {
+                            speed: Math.random() * 5 + 2,
+                            angle: { value: 270, offset: Math.random() * 30 - 15 }
+                        }
+                    });
+                }, i * 20);
+            }
+            
+            if (this.soundEnabled) {
+                this.playSound('buy');
+            }
+        }
+        
+        async triggerSellEffect(price) {
+            if (!this.particles) return;
+            
+            const intensity = this.getIntensityMultiplier();
+            
+            for (let i = 0; i < 30 * intensity; i++) {
+                setTimeout(() => {
+                    this.particles.addParticle({
+                        x: Math.random() * window.innerWidth,
+                        y: 0,
+                        color: { value: '#ff3366' },
+                        size: { value: Math.random() * 5 + 2 },
+                        move: {
+                            speed: Math.random() * 5 + 2,
+                            angle: { value: 90, offset: Math.random() * 30 - 15 }
+                        }
+                    });
+                }, i * 20);
+            }
+            
+            if (this.soundEnabled) {
+                this.playSound('sell');
+            }
+        }
+        
+        async triggerTPEffect() {
+            if (!this.particles) return;
+            
+            const intensity = this.getIntensityMultiplier();
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            
+            for (let i = 0; i < 50 * intensity; i++) {
+                const angle = (Math.PI * 2 * i) / (50 * intensity);
+                const speed = Math.random() * 10 + 5;
+                
+                this.particles.addParticle({
+                    x: centerX,
+                    y: centerY,
+                    color: { value: '#ffd700' },
+                    size: { value: Math.random() * 8 + 3 },
+                    move: {
+                        speed: speed,
+                        angle: { value: angle * 180 / Math.PI }
+                    }
+                });
+            }
+            
+            if (this.soundEnabled) {
+                this.playSound('victory');
+            }
+        }
+        
+        async triggerSLEffect() {
+            if (!this.particles) return;
+            
+            const intensity = this.getIntensityMultiplier();
+            
+            for (let i = 0; i < 40 * intensity; i++) {
+                setTimeout(() => {
+                    this.particles.addParticle({
+                        x: Math.random() * window.innerWidth,
+                        y: Math.random() * window.innerHeight,
+                        color: { value: '#ff0000' },
+                        size: { value: Math.random() * 6 + 2 },
+                        move: {
+                            speed: Math.random() * 8 + 2,
+                            direction: 'outside',
+                            straight: true
+                        }
+                    });
+                }, i * 10);
+            }
+            
+            if (this.soundEnabled) {
+                this.playSound('defeat');
+            }
+        }
+        
+        async triggerDivineIntervention(type) {
+            if (!this.particles) return;
+            
+            const colors = {
+                shield: '#00aaff',
+                balance: '#ffaa00',
+                sword: '#ff3366'
+            };
+            
+            const color = colors[type] || '#ffd700';
+            const intensity = this.getIntensityMultiplier();
+            
+            for (let i = 0; i < 100 * intensity; i++) {
+                const angle = (i / 10) * Math.PI;
+                const radius = i * 2;
+                const x = window.innerWidth / 2 + Math.cos(angle) * radius;
+                const y = window.innerHeight / 2 + Math.sin(angle) * radius;
+                
+                setTimeout(() => {
+                    this.particles.addParticle({
+                        x: x,
+                        y: y,
+                        color: { value: color },
+                        size: { value: Math.random() * 10 + 5 },
+                        move: { enable: false }
+                    });
+                }, i * 10);
+            }
+            
+            if (this.soundEnabled) {
+                this.playSound('divine');
+            }
+        }
+        
+        getIntensityMultiplier() {
+            const intensities = {
+                low: 0.5,
+                medium: 1,
+                high: 1.5,
+                insane: 3
+            };
+            return intensities[this.effectIntensity] || 1;
+        }
+        
+        playSound(type) {
+            if (!this.soundEnabled) return;
+            
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            const sounds = {
+                buy: { frequency: 800, type: 'sine', duration: 0.3 },
+                sell: { frequency: 400, type: 'square', duration: 0.3 },
+                victory: { frequency: 1200, type: 'triangle', duration: 0.5 },
+                defeat: { frequency: 200, type: 'sawtooth', duration: 0.5 },
+                divine: { frequency: 600, type: 'sine', duration: 1 }
+            };
+            
+            const sound = sounds[type] || sounds.divine;
+            
+            oscillator.frequency.value = sound.frequency;
+            oscillator.type = sound.type;
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + sound.duration);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + sound.duration);
+        }
+    }
+    
+    /**
+     * Multi-Timeframe Manager
+     */
+    class MultiTimeframeManager {
+        constructor(app) {
+            this.app = app;
+            this.timeframes = ['1m', '5m', '15m', '1h', '4h'];
+            this.htfData = {};
+            this.htfCandles = {};
+            this.htfIndicators = {};
+            this.sockets = {};
+        }
+        
+        async initialize(symbol) {
+            console.log('🕐 Multi-timeframe analiz başlatılıyor...');
+            
+            for (const tf of this.timeframes) {
+                if (tf === this.app.currentTimeframe) continue;
+                
+                await this.fetchTimeframeData(symbol, tf);
+                this.subscribeToTimeframe(symbol, tf);
+            }
+        }
+        
+        async fetchTimeframeData(symbol, timeframe) {
+            try {
+                const url = `https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${timeframe}&limit=100`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                this.htfCandles[timeframe] = data.map(d => ({
+                    time: d[0],
+                    open: parseFloat(d[1]),
+                    high: parseFloat(d[2]),
+                    low: parseFloat(d[3]),
+                    close: parseFloat(d[4]),
+                    volume: parseFloat(d[5])
+                }));
+                
+                this.calculateHTFIndicators(timeframe);
+                
+            } catch (error) {
+                console.error(`HTF data error for ${timeframe}:`, error);
+            }
+        }
+        
+        calculateHTFIndicators(timeframe) {
+            const candles = this.htfCandles[timeframe];
+            if (!candles || candles.length < 20) return;
+            
+            const closes = candles.map(c => c.close);
+            
+            const lastClose = closes[closes.length - 1];
+            const sma20 = closes.slice(-20).reduce((a, b) => a + b, 0) / 20;
+            
+            let trend = 'neutral';
+            let strength = 0;
+            
+            if (lastClose > sma20 * 1.01) {
+                trend = 'bullish';
+                strength = ((lastClose - sma20) / sma20) * 100;
+            } else if (lastClose < sma20 * 0.99) {
+                trend = 'bearish';
+                strength = ((sma20 - lastClose) / sma20) * 100;
+            }
+            
+            this.htfData[timeframe] = {
+                trend,
+                strength: Math.min(100, Math.abs(strength)),
+                lastUpdate: Date.now()
+            };
+        }
+        
+        subscribeToTimeframe(symbol, timeframe) {
+            const symbolLower = symbol.toLowerCase();
+            const ws = new WebSocket(`wss://fstream.binance.com/ws/${symbolLower}@kline_${timeframe}`);
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                const kline = data.k;
+                
+                if (kline.x) {
+                    const newCandle = {
+                        time: kline.t,
+                        open: parseFloat(kline.o),
+                        high: parseFloat(kline.h),
+                        low: parseFloat(kline.l),
+                        close: parseFloat(kline.c),
+                        volume: parseFloat(kline.v)
+                    };
+                    
+                    if (this.htfCandles[timeframe]) {
+                        this.htfCandles[timeframe].push(newCandle);
+                        if (this.htfCandles[timeframe].length > 100) {
+                            this.htfCandles[timeframe].shift();
+                        }
+                        this.calculateHTFIndicators(timeframe);
+                    }
+                }
+            };
+            
+            ws.onerror = (error) => {
+                console.error(`HTF WebSocket error for ${timeframe}:`, error);
+            };
+            
+            this.sockets[timeframe] = ws;
+        }
+        
+        getHTFConfluenceScore(direction) {
+            let score = 0;
+            let alignedTimeframes = 0;
+            
+            for (const [tf, data] of Object.entries(this.htfData)) {
+                if (!data || Date.now() - data.lastUpdate > 60000) continue;
+                
+                const weight = tf === '4h' ? 2 : tf === '1h' ? 1.5 : 1;
+                
+                if (direction === 'buy' && data.trend === 'bullish') {
+                    score += weight * (data.strength / 100);
+                    alignedTimeframes++;
+                } else if (direction === 'sell' && data.trend === 'bearish') {
+                    score += weight * (data.strength / 100);
+                    alignedTimeframes++;
+                }
+            }
+            
+            if (alignedTimeframes >= 3) {
+                score *= 1.5;
+            }
+            
+            return score;
+        }
+        
+        cleanup() {
+            for (const ws of Object.values(this.sockets)) {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.close();
+                }
+            }
+            this.sockets = {};
+        }
+    }
+    
+    /**
+     * Order Flow Imbalance Tracker
+     */
+    class OrderFlowImbalance {
+        constructor() {
+            this.trades = [];
+            this.windowMs = 5000;
+            this.deltaVolume = { buy: 0, sell: 0 };
+            this.cumulativeDelta = 0;
+            this.deltaHistory = [];
+        }
+        
+        addTrade(trade) {
+            const now = Date.now();
+            
+            this.trades.push({
+                ...trade,
+                timestamp: now,
+                dollarVolume: trade.price * trade.quantity
+            });
+            
+            this.trades = this.trades.filter(t => now - t.timestamp < this.windowMs);
+            
+            this.calculateDelta();
+        }
+        
+        calculateDelta() {
+            this.deltaVolume = { buy: 0, sell: 0 };
+            
+            for (const trade of this.trades) {
+                if (trade.isBuyerMaker) {
+                    this.deltaVolume.sell += trade.dollarVolume;
+                } else {
+                    this.deltaVolume.buy += trade.dollarVolume;
+                }
+            }
+            
+            const delta = this.deltaVolume.buy - this.deltaVolume.sell;
+            this.cumulativeDelta += delta;
+            
+            this.deltaHistory.push({
+                timestamp: Date.now(),
+                delta,
+                cumulative: this.cumulativeDelta
+            });
+            
+            if (this.deltaHistory.length > 100) {
+                this.deltaHistory.shift();
+            }
+        }
+        
+        getImbalance() {
+            const total = this.deltaVolume.buy + this.deltaVolume.sell;
+            if (total === 0) return 0;
+            
+            return (this.deltaVolume.buy - this.deltaVolume.sell) / total;
+        }
+        
+        getImbalanceScore() {
+            const imbalance = this.getImbalance();
+            
+            if (Math.abs(imbalance) < 0.2) return 0;
+            if (imbalance > 0.7) return 3;
+            if (imbalance > 0.5) return 2;
+            if (imbalance > 0.2) return 1;
+            if (imbalance < -0.7) return -3;
+            if (imbalance < -0.5) return -2;
+            if (imbalance < -0.2) return -1;
+            
+            return 0;
+        }
+    }
+    
+    /**
+     * Spoof Detector
+     */
+    class SpoofDetector {
+        constructor(app) {
+            this.app = app;
+            this.wallHistory = new Map();
+            this.spoofEvents = [];
+            this.wallThreshold = 20;
+            this.spoofScore = 0;
+        }
+        
+        trackOrderBook(orderBook) {
+            const now = Date.now();
+            const currentPrice = this.app.marketData.price || 0;
+            const btcPrice = this.app.marketData.btcPrice || 70000;
+            
+            if (!currentPrice) return;
+            
+            const walls = this.detectWalls(orderBook, currentPrice, btcPrice);
+            
+            for (const wall of walls) {
+                const key = `${wall.side}_${wall.price}`;
+                const history = this.wallHistory.get(key);
+                
+                if (history) {
+                    const sizeChange = wall.size - history.lastSize;
+                    const sizeChangePercent = Math.abs(sizeChange) / history.lastSize;
+                    const timeDiff = (now - history.lastUpdate) / 1000;
+                    
+                    if (timeDiff < 2 && sizeChangePercent > 0.5) {
+                        this.recordSpoofEvent({
+                            price: wall.price,
+                            side: wall.side,
+                            changePercent: sizeChangePercent,
+                            timeDiff,
+                            severity: sizeChangePercent > 0.8 ? 'high' : 'medium'
+                        });
+                    }
+                    
+                    history.lastSize = wall.size;
+                    history.lastUpdate = now;
+                    
+                } else {
+                    this.wallHistory.set(key, {
+                        price: wall.price,
+                        side: wall.side,
+                        firstSeen: now,
+                        lastUpdate: now,
+                        lastSize: wall.size
+                    });
+                }
+            }
+            
+            this.cleanupWallHistory();
+            this.updateSpoofScore();
+        }
+        
+        detectWalls(orderBook, currentPrice, btcPrice) {
+            const walls = [];
+            const threshold = (this.wallThreshold * btcPrice) / currentPrice;
+            
+            for (let i = 0; i < Math.min(20, orderBook.asks.length); i++) {
+                const [price, qty] = orderBook.asks[i];
+                const distance = (price - currentPrice) / currentPrice;
+                
+                if (qty > threshold && distance < 0.02) {
+                    walls.push({
+                        price,
+                        size: qty,
+                        side: 'ask',
+                        distance: distance * 100
+                    });
+                }
+            }
+            
+            for (let i = 0; i < Math.min(20, orderBook.bids.length); i++) {
+                const [price, qty] = orderBook.bids[i];
+                const distance = (currentPrice - price) / currentPrice;
+                
+                if (qty > threshold && distance < 0.02) {
+                    walls.push({
+                        price,
+                        size: qty,
+                        side: 'bid',
+                        distance: distance * 100
+                    });
+                }
+            }
+            
+            return walls;
+        }
+        
+        recordSpoofEvent(event) {
+            this.spoofEvents.push({
+                ...event,
+                timestamp: Date.now()
+            });
+            
+            this.spoofEvents = this.spoofEvents.filter(e => 
+                Date.now() - e.timestamp < 60000
+            );
+        }
+        
+        updateSpoofScore() {
+            const recentEvents = this.spoofEvents.filter(e => 
+                Date.now() - e.timestamp < 30000
+            );
+            
+            let score = 0;
+            for (const event of recentEvents) {
+                if (event.severity === 'high') score += 2;
+                else if (event.severity === 'medium') score += 1;
+            }
+            
+            this.spoofScore = Math.min(10, score);
+        }
+        
+        getSpoofPenalty() {
+            if (this.spoofScore >= 8) return 3;
+            if (this.spoofScore >= 5) return 2;
+            if (this.spoofScore >= 3) return 1;
+            return 0;
+        }
+        
+        cleanupWallHistory() {
+            const now = Date.now();
+            
+            for (const [key, history] of this.wallHistory.entries()) {
+                if (now - history.lastUpdate > 60000) {
+                    this.wallHistory.delete(key);
+                }
+            }
+        }
+    }
+    
+    /**
+     * CUSUM Drift Detector
+     */
+    class CUSUMDriftDetector {
+        constructor() {
+            this.cusum_pos = 0;
+            this.cusum_neg = 0;
+            this.threshold = 5;
+            this.drift = 0.5;
+        }
+        
+        update(isWin) {
+            const value = isWin ? 1 : 0;
+            const mean = 0.5;
+            const deviation = value - mean;
+            
+            this.cusum_pos = Math.max(0, this.cusum_pos + deviation - this.drift);
+            this.cusum_neg = Math.max(0, this.cusum_neg - deviation - this.drift);
+            
+            return this.cusum_pos > this.threshold || this.cusum_neg > this.threshold;
+        }
+        
+        reset() {
+            this.cusum_pos = 0;
+            this.cusum_neg = 0;
+        }
+    }
+    
+    /**
+     * Session Profiler
+     */
+    class SessionProfiler {
+        getCurrentSession() {
+            const hour = new Date().getUTCHours();
+            
+            if (hour >= 8 && hour < 16) return 'europe';
+            if (hour >= 13 && hour < 22) return 'america';
+            return 'asia';
+        }
+        
+        getSessionMultipliers() {
+            const session = this.getCurrentSession();
+            
+            const multipliers = {
+                asia: { threshold: 1.1, cooldown: 1.1, rrRatio: 0.9 },
+                europe: { threshold: 1, cooldown: 1, rrRatio: 1 },
+                america: { threshold: 0.9, cooldown: 0.9, rrRatio: 1.1 }
+            };
+            
+            return multipliers[session] || { threshold: 1, cooldown: 1, rrRatio: 1 };
+        }
+    }
+    
+    /**
+     * Risk Guardian
+     */
+    class RiskGuardian {
+        constructor(app) {
+            this.app = app;
+            this.killSwitchActive = false;
+            this.maxSignalsWindow = [];
+        }
+        
+        checkKillSwitch() {
+            const recent = this.app.signals.slice(0, 30);
+            
+            if (recent.length < 10) return false;
+            
+            const wins = recent.filter(s => s.status === 'tp').length;
+            const losses = recent.filter(s => s.status === 'sl').length;
+            const total = wins + losses;
+            
+            if (total === 0) return false;
+            
+            const winRate = wins / total;
+            
+            if (winRate < 0.25) {
+                this.activateKillSwitch();
+                return true;
+            }
+            
+            return false;
+        }
+        
+        activateKillSwitch() {
+            this.killSwitchActive = true;
+            this.app.stop();
+            
+            this.app.showNotification(
+                '⚠️ KILL SWITCH',
+                'Sistem otomatik olarak durduruldu! Düşük başarı oranı.',
+                'danger'
+            );
+            
+            setTimeout(() => {
+                this.killSwitchActive = false;
+            }, 600000); // 10 dakika
+        }
+        
+        checkFrequencyLimit() {
+            const now = Date.now();
+            const fiveMinAgo = now - 300000;
+            
+            this.maxSignalsWindow = this.maxSignalsWindow.filter(t => t > fiveMinAgo);
+            
+            if (this.maxSignalsWindow.length >= 3) {
+                return 1; // Penalty
+            }
+            
+            return 0;
+        }
+        
+        recordSignal() {
+            this.maxSignalsWindow.push(Date.now());
+        }
+    }
+    
+    /**
+     * Panteon Manager
+     */
+    class PanteonManager {
+        constructor(app) {
+            this.app = app;
+            
+            this.elciler = {
+                metatron: {
+                    name: 'METATRON',
+                    itibar: 100,
+                    mode: 'inancli',
+                    gardiyanlar: [],
+                    stats: { tp: 0, sl: 0 }
+                },
+                uriel: {
+                    name: 'URIEL',
+                    itibar: 100,
+                    mode: 'inancli',
+                    gardiyanlar: [],
+                    stats: { tp: 0, sl: 0 }
+                },
+                raphael: {
+                    name: 'RAPHAEL',
+                    itibar: 100,
+                    mode: 'inancli',
+                    healedCount: 0,
+                    stats: { healed: 0 }
+                }
+            };
+            
+            this.gardiyanAssignments = {
+                metatron: [
+                    'WallBounce', 'VelocityScalping', 'OrderFlowMomentum',
+                    'BreakoutPattern', 'MarketStructure', 'SmartMoneyConcepts',
+                    'SuperTrend', 'InstitutionalOrderFlow'
+                ],
+                uriel: [
+                    'RsiDivergence', 'LiquidityGaps', 'FibonacciRetracement',
+                    'SupportResistance', 'VolumeProfile', 'DivergenceDetection',
+                    'MicroSpreadArbitrage', 'VWAPReversion', 'BollingerReversion'
+                ]
+            };
+            
+            this.lastActivityTime = Date.now();
+        }
+        
+        init() {
+            for (const [elci, gardiyanList] of Object.entries(this.gardiyanAssignments)) {
+                this.elciler[elci].gardiyanlar = gardiyanList;
+            }
+            
+            this.startIdleCheck();
+            this.updateUI();
+        }
+        
+        updateReputation(result, contributors) {
+            const isTP = result === 'tp';
+            
+            if (isTP) {
+                const contributingElciler = new Set();
+                
+                for (const contributor of contributors) {
+                    const elci = this.findElciByGardiyan(contributor.strategy);
+                    if (elci) {
+                        contributingElciler.add(elci);
+                    }
+                }
+                
+                for (const elciName of contributingElciler) {
+                    this.elciler[elciName].itibar += 1;
+                    this.elciler[elciName].stats.tp++;
+                }
+                
+                this.elciler.raphael.itibar += 0.5;
+                
+            } else {
+                for (const elciName of Object.keys(this.elciler)) {
+                    this.elciler[elciName].itibar -= 2;
+                    
+                    if (elciName !== 'raphael') {
+                        this.elciler[elciName].stats.sl++;
+                    }
+                }
+                
+                const responsibleElciler = new Set();
+                for (const contributor of contributors) {
+                    const elci = this.findElciByGardiyan(contributor.strategy);
+                    if (elci) {
+                        responsibleElciler.add(elci);
+                    }
+                }
+                
+                for (const elciName of responsibleElciler) {
+                    this.elciler[elciName].itibar -= 3;
+                }
+            }
+            
+            this.updateModes();
+            this.updateUI();
+            this.lastActivityTime = Date.now();
+        }
+        
+        updateModes() {
+            for (const elci of Object.values(this.elciler)) {
+                const oldMode = elci.mode;
+                
+                if (elci.itibar >= 80) {
+                    elci.mode = 'inancli';
+                } else if (elci.itibar >= 40) {
+                    elci.mode = 'supheci';
+                } else {
+                    elci.mode = 'kiyamet';
+                }
+                
+                if (oldMode !== elci.mode) {
+                    this.app.showNotification(
+                        'MOD DEĞİŞİMİ',
+                        `${elci.name} artık ${elci.mode.toUpperCase()} modunda!`,
+                        elci.mode === 'kiyamet' ? 'danger' : 
+                        elci.mode === 'supheci' ? 'warning' : 'success'
+                    );
+                }
+            }
+        }
+        
+        startIdleCheck() {
+            setInterval(() => {
+                const now = Date.now();
+                const idleHours = (now - this.lastActivityTime) / (1000 * 60 * 60);
+                
+                if (idleHours >= 4) {
+                    for (const elci of Object.values(this.elciler)) {
+                        elci.itibar = Math.max(0, elci.itibar - 1);
+                    }
+                    
+                    this.updateModes();
+                    this.updateUI();
+                    
+                    this.app.showNotification(
+                        'DURGUNLUK CEZASI',
+                        'Panteon 4 saattir hareketsiz! Tüm Elçiler -1 itibar kaybetti.',
+                        'warning'
+                    );
+                    
+                    this.lastActivityTime = now;
+                }
+            }, 60000);
+        }
+        
+        findElciByGardiyan(gardiyanName) {
+            for (const [elciName, gardiyanList] of Object.entries(this.gardiyanAssignments)) {
+                if (gardiyanList.includes(gardiyanName)) {
+                    return elciName;
+                }
+            }
+            return null;
+        }
+        
+        getElciMultiplier(elciName) {
+            const elci = this.elciler[elciName];
+            if (!elci) return 1;
+            
+            switch (elci.mode) {
+                case 'inancli': return 1.2;
+                case 'supheci': return 0.9;
+                case 'kiyamet': return 0.7;
+                default: return 1;
+            }
+        }
+        
+        healGardiyan(gardiyanName) {
+            const strategy = this.app.strategies[gardiyanName];
+            if (!strategy) return;
+            
+            strategy.stats = {
+                proposals: Math.floor(strategy.stats.proposals * 0.5),
+                contributions: Math.floor(strategy.stats.contributions * 0.5),
+                wins: Math.floor(strategy.stats.wins * 0.5),
+                losses: Math.floor(strategy.stats.losses * 0.5)
+            };
+            
+            this.elciler.raphael.healedCount++;
+            this.elciler.raphael.stats.healed++;
+            
+            this.app.showNotification(
+                'İYİLEŞTİRME',
+                `RAPHAEL ${gardiyanName} stratejisini iyileştirdi!`,
+                'success'
+            );
+        }
+        
+        updateUI() {
+            for (const [elciName, elci] of Object.entries(this.elciler)) {
+                const itibarEl = document.getElementById(`${elciName}-itibar`);
+                if (itibarEl) {
+                    itibarEl.textContent = Math.round(elci.itibar);
+                }
+                
+                const modeEl = document.getElementById(`${elciName}-mode`);
+                if (modeEl) {
+                    modeEl.textContent = elci.mode.toUpperCase();
+                    modeEl.className = `elci-mode ${elci.mode}`;
+                }
+                
+                if (elciName === 'raphael') {
+                    const healedEl = document.getElementById('raphael-healed');
+                    if (healedEl) {
+                        healedEl.textContent = elci.healedCount;
+                    }
+                } else {
+                    const gardiyanEl = document.getElementById(`${elciName}-gardiyan`);
+                    if (gardiyanEl) {
+                        gardiyanEl.textContent = elci.gardiyanlar.length;
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * TheOracle - Mahşerin Dört Atlısı
+     */
+    class TheOracle {
+        constructor(app) {
+            this.app = app;
+            
+            this.horsemen = {
+                war: { active: false, threshold: 5 },
+                famine: { active: false, threshold: 70 },
+                pestilence: { active: false, threshold: 0.5 },
+                death: { active: false, threshold: -10 }
+            };
+        }
+        
+        detectHorsemen() {
+            const indicators = this.app.indicators;
+            const marketData = this.app.marketData;
+            
+            if (indicators.atr && marketData.price) {
+                const volatility = (indicators.atr / marketData.price) * 100;
+                const wasActive = this.horsemen.war.active;
+                this.horsemen.war.active = volatility > this.horsemen.war.threshold;
+                
+                if (!wasActive && this.horsemen.war.active) {
+                    this.announceHorseman('war');
+                }
+            }
+            
+            if (indicators.rsi) {
+                const wasActive = this.horsemen.famine.active;
+                this.horsemen.famine.active = indicators.rsi > this.horsemen.famine.threshold;
+                
+                if (!wasActive && this.horsemen.famine.active) {
+                    this.announceHorseman('famine');
+                }
+            }
+        }
+        
+        announceHorseman(horseman) {
+            const messages = {
+                war: 'SAVAŞ ATLISI GELDİ! Yüksek volatilite.',
+                famine: 'KITLIK ATLISI GELDİ! Aşırı alım.',
+                pestilence: 'SALGIN ATLISI GELDİ! Likidite sorunu.',
+                death: 'ÖLÜM ATLISI GELDİ! Kritik kayıp.'
+            };
+            
+            this.app.showNotification(
+                'MAHŞERİN ATLISI',
+                messages[horseman],
+                'danger'
+            );
+            
+            if (this.app.ttsManager && this.app.ttsManager.enabled) {
+                this.app.ttsManager.speak(messages[horseman], 'high');
+            }
+        }
+    }
+    
+    /**
+     * Base Strategy Class
+     */
+    class BaseStrategy {
+        constructor(app, name) {
+            this.app = app;
+            this.name = name;
+            this.status = 'active';
+            this.lastProposalTime = {};
+            this.cooldownMs = 10000;
+            this.stats = {
+                proposals: 0,
+                contributions: 0,
+                wins: 0,
+                losses: 0
+            };
+        }
+        
+        propose(direction, reason, score) {
+            const now = Date.now();
+            const key = `${this.app.currentSymbol}-${direction}`;
+            
+            if (now - (this.lastProposalTime[key] || 0) < this.cooldownMs) {
+                return;
+            }
+            
+            if (this.status !== 'active') {
+                return;
+            }
+            
+            const elci = this.app.panteonManager.findElciByGardiyan(this.name);
+            const elciMultiplier = this.app.panteonManager.getElciMultiplier(elci);
+            const adjustedScore = score * elciMultiplier;
+            
+            this.app.confluenceEngine.propose(this.name, direction, reason, adjustedScore);
+            this.lastProposalTime[key] = now;
+            this.stats.proposals++;
+        }
+        
+        analyzeOrderBook(orderBook) {}
+        processTrade(trade) {}
+        analyze() {}
+    }
+    
+    // 19 Orijinal Strateji
+    class WallBounceStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'WallBounce');
+            this.DISTANCE_THRESHOLD_PERCENT = 0.05 / 100;
+        }
+        
+        analyzeOrderBook(orderBook) {
+            const currentPrice = this.app.marketData.price;
+            if (!currentPrice) return;
+            
+            const btcPrice = this.app.marketData.btcPrice || 70000;
+            const wallQuantityThreshold = (this.app.settings.params.wallBtc * btcPrice) / currentPrice;
+            
+            for (const [price, qty] of orderBook.asks) {
+                if (qty > wallQuantityThreshold) {
+                    const distance = (price - currentPrice) / currentPrice;
+                    if (distance > 0 && distance < this.DISTANCE_THRESHOLD_PERCENT) {
+                        this.propose('sell', `Satış Duvarı ${price.toFixed(2)}`, 3);
+                        return;
+                    }
+                }
+            }
+            
+            for (const [price, qty] of orderBook.bids) {
+                if (qty > wallQuantityThreshold) {
+                    const distance = (currentPrice - price) / currentPrice;
+                    if (distance > 0 && distance < this.DISTANCE_THRESHOLD_PERCENT) {
+                        this.propose('buy', `Alış Duvarı ${price.toFixed(2)}`, 3);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+    
+    class VelocityScalpingStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'VelocityScalping');
+            this.pricePoints = [];
+            this.VELOCITY_WINDOW_MS = 2000;
+            this.MIN_POINTS = 20;
+            this.VELOCITY_THRESHOLD_PERCENT = 0.10 / 100;
+        }
+        
+        processTrade(trade) {
+            const now = Date.now();
+            this.pricePoints.push({ time: now, price: trade.price });
+            this.pricePoints = this.pricePoints.filter(p => now - p.time < this.VELOCITY_WINDOW_MS);
+            
+            if (this.pricePoints.length < this.MIN_POINTS) return;
+            
+            const firstPoint = this.pricePoints[0];
+            const lastPoint = this.pricePoints[this.pricePoints.length - 1];
+            const priceChange = (lastPoint.price - firstPoint.price) / firstPoint.price;
+            
+            if (priceChange > this.VELOCITY_THRESHOLD_PERCENT) {
+                this.propose('buy', `Fiyat Hızı: +${(priceChange * 100).toFixed(2)}%`, 4);
+                this.pricePoints = [];
+            } else if (priceChange < -this.VELOCITY_THRESHOLD_PERCENT) {
+                this.propose('sell', `Fiyat Hızı: ${(priceChange * 100).toFixed(2)}%`, 4);
+                this.pricePoints = [];
+            }
+        }
+    }
+    
+    class RsiDivergenceStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'RsiDivergence');
+        }
+        
+        analyze() {
+            const candles = this.app.candles;
+            const rsiValues = this.app.indicators.rsi;
+            
+            if (!rsiValues || rsiValues.length < 14 || !candles || candles.length < 14) return;
+            
+            const lastCandle = candles[candles.length - 1];
+            const prevCandle = candles[candles.length - 14];
+            const lastRsi = rsiValues[rsiValues.length - 1];
+            const prevRsi = rsiValues[rsiValues.length - 14];
+            
+            if (!lastCandle || !prevCandle || !isFinite(lastRsi) || !isFinite(prevRsi)) return;
+            
+            if (lastCandle.high > prevCandle.high && lastRsi < prevRsi) {
+                this.propose('sell', 'RSI Ayı Uyuşmazlığı', 5);
+            }
+            
+            if (lastCandle.low < prevCandle.low && lastRsi > prevRsi) {
+                this.propose('buy', 'RSI Boğa Uyuşmazlığı', 5);
+            }
+        }
+    }
+    
+    class OrderFlowMomentumStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'OrderFlowMomentum');
+            this.trades = [];
+            this.WINDOW_MS = 5000;
+        }
+        
+        processTrade(trade) {
+            const now = Date.now();
+            this.trades.push({ ...trade, timestamp: now });
+            this.trades = this.trades.filter(t => now - t.timestamp < this.WINDOW_MS);
+            
+            if (this.trades.length < 50) return;
+            
+            const buys = this.trades.filter(t => !t.isBuyerMaker).reduce((sum, t) => sum + t.quantity, 0);
+            const sells = this.trades.filter(t => t.isBuyerMaker).reduce((sum, t) => sum + t.quantity, 0);
+            const total = buys + sells;
+            
+            if (total === 0) return;
+            
+            if (buys / total > 0.7) {
+                this.propose('buy', `Alıcı Akışı: %${(buys / total * 100).toFixed(0)}`, 4);
+                this.trades = [];
+            } else if (sells / total > 0.7) {
+                this.propose('sell', `Satıcı Akışı: %${(sells / total * 100).toFixed(0)}`, 4);
+                this.trades = [];
+            }
+        }
+    }
+    
+    class LiquidityGapsStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'LiquidityGaps');
+            this.GAP_THRESHOLD_PERCENT = 0.1 / 100;
+        }
+        
+        analyzeOrderBook(orderBook) {
+            for (let i = 0; i < orderBook.asks.length - 1; i++) {
+                const gap = orderBook.asks[i + 1][0] - orderBook.asks[i][0];
+                if ((gap / orderBook.asks[i][0]) > this.GAP_THRESHOLD_PERCENT) {
+                    this.propose('buy', `Likidite Boşluğu ${orderBook.asks[i][0].toFixed(2)}`, 3);
+                    return;
+                }
+            }
+            
+            for (let i = 0; i < orderBook.bids.length - 1; i++) {
+                const gap = orderBook.bids[i][0] - orderBook.bids[i + 1][0];
+                if ((gap / orderBook.bids[i][0]) > this.GAP_THRESHOLD_PERCENT) {
+                    this.propose('sell', `Likidite Boşluğu ${orderBook.bids[i][0].toFixed(2)}`, 3);
+                    return;
+                }
+            }
+        }
+    }
+    
+    class BreakoutPatternStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'BreakoutPattern');
+            this.LOOKBACK = 30;
+            this.VOL_SPIKE = 1.4;
+            this.BREAK_PCT = 0.03 / 100;
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            if (c.length < this.LOOKBACK + 1) return;
+            
+            const recent = c.slice(-this.LOOKBACK - 1);
+            const highs = recent.map(x => x.high);
+            const lows = recent.map(x => x.low);
+            const vols = recent.map(x => x.volume);
+            
+            const last = recent[recent.length - 1];
+            const maxH = Math.max(...highs.slice(0, -1));
+            const minL = Math.min(...lows.slice(0, -1));
+            const volSma = vols.slice(0, -1).reduce((a, b) => a + b, 0) / (vols.length - 1);
+            
+            if (last.close > maxH * (1 + this.BREAK_PCT) && last.volume > volSma * this.VOL_SPIKE) {
+                this.propose('buy', 'Aralık Üstü Hacimli Kırılım', 4);
+            } else if (last.close < minL * (1 - this.BREAK_PCT) && last.volume > volSma * this.VOL_SPIKE) {
+                this.propose('sell', 'Aralık Altı Hacimli Kırılım', 4);
+            }
+        }
+    }
+    
+    class SupportResistanceStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'SupportResistance');
+            this.LOOKBACK = 60;
+            this.THRESH = 0.15 / 100;
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            if (c.length < this.LOOKBACK) return;
+            
+            const slice = c.slice(-this.LOOKBACK);
+            const last = slice[slice.length - 1];
+            const maxH = Math.max(...slice.map(x => x.high));
+            const minL = Math.min(...slice.map(x => x.low));
+            
+            const distTop = (maxH - last.close) / last.close;
+            const distBot = (last.close - minL) / last.close;
+            
+            if (distTop >= 0 && distTop < this.THRESH && last.close < last.open) {
+                this.propose('sell', 'Direnç Bölgesi Reddi', 3);
+            }
+            
+            if (distBot >= 0 && distBot < this.THRESH && last.close > last.open) {
+                this.propose('buy', 'Destek Bölgesi Tepkisi', 3);
+            }
+        }
+    }
+    
+    class FibonacciRetracementStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'FibonacciRetracement');
+            this.LOOKBACK = 120;
+            this.TOL = 0.2 / 100;
+            this.levels = [0.382, 0.5, 0.618];
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            if (c.length < this.LOOKBACK) return;
+            
+            const slice = c.slice(-this.LOOKBACK);
+            let high = -Infinity, low = Infinity;
+            
+            slice.forEach(k => {
+                if (k.high > high) high = k.high;
+                if (k.low < low) low = k.low;
+            });
+            
+            if (!isFinite(high) || !isFinite(low) || high === low) return;
+            
+            const last = slice[slice.length - 1];
+            const retr = (last.close - low) / (high - low);
+            
+            for (const L of this.levels) {
+                if (Math.abs(retr - L) < this.TOL) {
+                    this.propose(retr > 0.5 ? 'sell' : 'buy', `Fibo ${Math.round(L * 100)}%`, 3);
+                    break;
+                }
+            }
+        }
+    }
+    
+    class VolumeProfileStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'VolumeProfile');
+            this.PERIOD = 20;
+            this.SPIKE = 2.0;
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            if (c.length < this.PERIOD + 1) return;
+            
+            const last = c[c.length - 1];
+            const vols = c.slice(-this.PERIOD - 1, -1).map(x => x.volume);
+            const volSma = vols.reduce((a, b) => a + b, 0) / vols.length;
+            
+            if (last.volume > volSma * this.SPIKE) {
+                const range = last.high - last.low;
+                if (range <= 0) return;
+                
+                if ((last.close - last.low) / range > 0.7) {
+                    this.propose('buy', 'Hacim Spike - Üst Kapanış', 3);
+                } else if ((last.high - last.close) / range > 0.7) {
+                    this.propose('sell', 'Hacim Spike - Alt Kapanış', 3);
+                }
+            }
+        }
+    }
+    
+    class SmartMoneyConceptsStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'SmartMoneyConcepts');
+            this.GAP_MIN_PCT = 0.05 / 100;
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            if (c.length < 3) return;
+            
+            const a = c[c.length - 3];
+            const b = c[c.length - 2];
+            const d = c[c.length - 1];
+            
+            if ((d.low - a.high) / Math.max(1e-8, d.low) > this.GAP_MIN_PCT) {
+                this.propose('buy', 'Bullish FVG', 4);
+            }
+            
+            if ((a.low - d.high) / Math.max(1e-8, d.high) > this.GAP_MIN_PCT) {
+                this.propose('sell', 'Bearish FVG', 4);
+            }
+        }
+    }
+    
+    class DivergenceDetectionStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'DivergenceDetection');
+        }
+        
+        analyze() {
+            const rsi = this.app.indicators.rsi;
+            if (!rsi || !Array.isArray(rsi)) return;
+            
+            const lastRsi = rsi[rsi.length - 1];
+            
+            if (lastRsi > 70) {
+                this.propose('sell', 'RSI Aşırı Alım', 4);
+            } else if (lastRsi < 30) {
+                this.propose('buy', 'RSI Aşırı Satım', 4);
+            }
+        }
+    }
+    
+    class MarketStructureStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'MarketStructure');
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            if (c.length < 10) return;
+            
+            const last = c[c.length - 1];
+            const prev = c[c.length - 2];
+            
+            if (last.close > prev.high) {
+                this.propose('buy', 'Yapı Kırılımı (BOS Up)', 4);
+            } else if (last.close < prev.low) {
+                this.propose('sell', 'Yapı Kırılımı (BOS Down)', 4);
+            }
+        }
+    }
+    
+    class InstitutionalOrderFlowStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'InstitutionalOrderFlow');
+            this.TOP_N = 5;
+            this.IMB_THRESHOLD = 2.0;
+        }
+        
+        analyzeOrderBook(orderBook) {
+            if (!orderBook.bids.length || !orderBook.asks.length) return;
+            
+            const topB = orderBook.bids.slice(0, this.TOP_N).reduce((s, [, q]) => s + q, 0);
+            const topA = orderBook.asks.slice(0, this.TOP_N).reduce((s, [, q]) => s + q, 0);
+            
+            if (topB / Math.max(1e-8, topA) > this.IMB_THRESHOLD) {
+                this.propose('buy', 'Orderbook İmbalansı (Bid)', 3);
+            } else if (topA / Math.max(1e-8, topB) > this.IMB_THRESHOLD) {
+                this.propose('sell', 'Orderbook İmbalansı (Ask)', 3);
+            }
+        }
+    }
+    
+    class MicroSpreadArbitrageStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'MicroSpreadArbitrage');
+            this.SPREAD_PCT = 0.08 / 100;
+        }
+        
+        analyzeOrderBook(orderBook) {
+            if (!orderBook.bids.length || !orderBook.asks.length) return;
+            
+            const bestBid = orderBook.bids[0][0];
+            const bestAsk = orderBook.asks[0][0];
+            const mid = (bestAsk + bestBid) / 2;
+            const spreadPct = (bestAsk - bestBid) / mid;
+            
+            if (spreadPct > this.SPREAD_PCT) {
+                const current = this.app.marketData.price || mid;
+                if (current < mid) {
+                    this.propose('buy', 'Geniş Spread - Mean Reversion', 2);
+                } else {
+                    this.propose('sell', 'Geniş Spread - Mean Reversion', 2);
+                }
+            }
+        }
+    }
+    
+    class VWAPReversionStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'VWAPReversion');
+            this.MULT = 1.0;
+        }
+        
+        analyze() {
+            const price = this.app.marketData.price;
+            const vwap = this.app.indicators.vwap;
+            const atr = this.app.indicators.atr;
+            
+            if (!price || !vwap || !atr) return;
+            
+            const dev = atr / price;
+            const diffPct = (price - vwap) / vwap;
+            
+            if (diffPct > this.MULT * dev) {
+                this.propose('sell', 'VWAP Üstü Sapma', 3);
+            }
+            if (diffPct < -this.MULT * dev) {
+                this.propose('buy', 'VWAP Altı Sapma', 3);
+            }
+        }
+    }
+    
+    class SuperTrendStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'SuperTrend');
+            this.MULT = 3.0;
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            const atr = this.app.indicators.atr;
+            
+            if (!atr || c.length < 2) return;
+            
+            const last = c[c.length - 1];
+            const m = (last.high + last.low) / 2;
+            const upper = m + this.MULT * atr;
+            const lower = m - this.MULT * atr;
+            
+            if (last.close > upper) {
+                this.propose('buy', 'SuperTrend Kırılım', 4);
+            } else if (last.close < lower) {
+                this.propose('sell', 'SuperTrend Kırılım', 4);
+            }
+        }
+    }
+    
+    class BollingerReversionStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'BollingerReversion');
+            this.PERIOD = 20;
+            this.MULT = 2;
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            if (c.length < this.PERIOD) return;
+            
+            const closes = c.slice(-this.PERIOD).map(x => x.close);
+            const sma = closes.reduce((a, b) => a + b, 0) / closes.length;
+            const variance = closes.reduce((sum, close) => sum + Math.pow(close - sma, 2), 0) / closes.length;
+            const stdDev = Math.sqrt(variance);
+            
+            const upper = sma + (stdDev * this.MULT);
+            const lower = sma - (stdDev * this.MULT);
+            
+            const last = c[c.length - 1];
+            
+            if (last.close > upper) {
+                this.propose('sell', 'Bollinger Üst Bant', 3);
+            } else if (last.close < lower) {
+                this.propose('buy', 'Bollinger Alt Bant', 3);
+            }
+            
+            // Bollinger bantlarını grafiğe ekle
+            if (this.app.chart && this.app.bollingerSeries) {
+                this.app.bollingerSeries.update({
+                    time: last.time / 1000,
+                    upper: upper,
+                    middle: sma,
+                    lower: lower
+                });
+            }
+        }
+    }
+    
+    /**
+     * Enhanced Confluence Engine
+     */
+    class EnhancedConfluenceEngine {
+        constructor(app) {
+            this.app = app;
+            this.proposals = [];
+            this.lastSignalTime = 0;
+        }
+        
+        propose(strategy, direction, reason, score) {
+            const now = Date.now();
+            
+            this.proposals = this.proposals.filter(p => 
+                p.strategy !== strategy && (now - p.timestamp) < 3000
+            );
+            
+            this.proposals.push({
+                strategy,
+                direction,
+                reason,
+                score,
+                timestamp: now
+            });
+            
+            this.checkConfluence();
+        }
+        
+        checkConfluence() {
+            const now = Date.now();
+            
+            if (now - this.lastSignalTime < 15000) return;
+            
+            const buyProposals = this.proposals.filter(p => p.direction === 'buy');
+            const sellProposals = this.proposals.filter(p => p.direction === 'sell');
+            
+            const minContributors = this.app.settings.minContributors || 2;
+            
+            if (buyProposals.length < minContributors && sellProposals.length < minContributors) {
+                return;
+            }
+            
+            // HTF Confluence
+            let htfBonus = 0;
+            if (this.app.mtfManager) {
+                htfBonus = this.app.mtfManager.getHTFConfluenceScore('buy') - 
+                          this.app.mtfManager.getHTFConfluenceScore('sell');
+            }
+            
+            // OFI Score
+            let ofiScore = 0;
+            if (this.app.ofiTracker) {
+                ofiScore = this.app.ofiTracker.getImbalanceScore();
+            }
+            
+            // Spoof Penalty
+            let spoofPenalty = 0;
+            if (this.app.spoofDetector) {
+                spoofPenalty = this.app.spoofDetector.getSpoofPenalty();
+            }
+            
+            const buyScore = buyProposals.reduce((sum, p) => sum + p.score, 0) + 
+                            (htfBonus > 0 ? htfBonus : 0) + 
+                            (ofiScore > 0 ? ofiScore : 0) - 
+                            spoofPenalty;
+                            
+            const sellScore = sellProposals.reduce((sum, p) => sum + p.score, 0) + 
+                             (htfBonus < 0 ? -htfBonus : 0) + 
+                             (ofiScore < 0 ? -ofiScore : 0) - 
+                             spoofPenalty;
+            
+            const threshold = this.app.settings.confluenceThreshold || 3;
+            
+            if (buyScore >= threshold && buyScore > sellScore && buyProposals.length >= minContributors) {
+                this.generateSignal('buy', buyProposals);
+            } else if (sellScore >= threshold && sellScore > buyScore && sellProposals.length >= minContributors) {
+                this.generateSignal('sell', sellProposals);
+            }
+        }
+        
+        generateSignal(direction, contributors) {
+            const signal = {
+                id: `sig_${Date.now()}`,
+                timestamp: Date.now(),
+                symbol: this.app.currentSymbol,
+                direction,
+                price: this.app.marketData.price || 0,
+                score: contributors.reduce((sum, c) => sum + c.score, 0),
+                contributors: contributors.map(c => ({
+                    strategy: c.strategy,
+                    reason: c.reason,
+                    score: c.score
+                })),
+                status: 'active'
+            };
+            
+            this.calculateTpSl(signal);
+            this.app.addSignal(signal);
+            
+            this.proposals = [];
+            this.lastSignalTime = Date.now();
+            
+            if (this.app.riskGuardian) {
+                this.app.riskGuardian.recordSignal();
+            }
+        }
+        
+        calculateTpSl(signal) {
+            const atr = this.app.indicators.atr || signal.price * 0.01;
+            const rrRatio = this.app.settings.rrRatio || 1.5;
+            
+            if (signal.direction === 'buy') {
+                signal.sl = signal.price - atr;
+                signal.tp = signal.price + (atr * rrRatio);
+            } else {
+                signal.sl = signal.price + atr;
+                signal.tp = signal.price - (atr * rrRatio);
+            }
+        }
+    }
+    
+    /**
+     * MAIN APPLICATION
+     */
+    class UltimateTradingCommandCenter {
+        constructor() {
+            this.version = '3.2.0';
+            this.isRunning = false;
+            this.currentSymbol = 'BTCUSDT';
+            this.currentTimeframe = '15m';
+            
+            this.marketData = {
+                price: 0,
+                change24h: 0,
+                volume24h: 0,
+                btcPrice: 70000
+            };
+            
+            this.orderBook = {
+                bids: [],
+                asks: []
+            };
+            
+            this.candles = [];
+            this.trades = [];
+            
+            this.indicators = {
+                rsi: [],
+                atr: null,
+                vwap: null,
+                bbands: null
+            };
+            
+            this.signals = [];
+            this.stats = { total: 0, tp: 0, sl: 0 };
+            
+            this.settings = {
+                confluenceThreshold: 3,
+                minContributors: 2,
+                rrRatio: 1.5,
+                params: {
+                    rsiPeriod: 14,
+                    atrPeriod: 14,
+                    wallBtc: 20
+                },
+                enableParticles: true,
+                enableSounds: true,
+                enableTTS: true
+            };
+            
+            this.sockets = {};
+            this.chart = null;
+            this.candleSeries = null;
+            this.volumeSeries = null;
+            this.bollingerSeries = null;
+            
+            this.dbManager = null;
+            this.ttsManager = null;
+            this.effectsManager = null;
+            this.panteonManager = null;
+            this.oracle = null;
+            this.confluenceEngine = null;
+            this.mtfManager = null;
+            this.ofiTracker = null;
+            this.spoofDetector = null;
+            this.cusumDetector = null;
+            this.sessionProfiler = null;
+            this.riskGuardian = null;
+            
+            this.strategies = {};
+            this.activeStrategies = {};
+            
+            this.intervals = {
+                render: null,
+                analysis: null,
+                countdown: null
+            };
+            
+            this.headerCollapsed = false;
+            
+            this.init();
+        }
+        
+        async init() {
+            console.log('🏛️ PANTEON\'UN KADERİ v3.2 BAŞLATILIYOR...');
+            
+            try {
+                // Database
+                this.dbManager = new DBManager();
+                await this.dbManager.init();
+                
+                // TTS
+                this.ttsManager = new TTSManager();
+                
+                // Effects
+                this.effectsManager = new EffectsManager();
+                await this.effectsManager.init();
+                
+                // Panteon
+                this.panteonManager = new PanteonManager(this);
+                this.panteonManager.init();
+                
+                // Oracle
+                this.oracle = new TheOracle(this);
+                
+                // Advanced Features
+                this.mtfManager = new MultiTimeframeManager(this);
+                this.ofiTracker = new OrderFlowImbalance();
+                this.spoofDetector = new SpoofDetector(this);
+                this.cusumDetector = new CUSUMDriftDetector();
+                this.sessionProfiler = new SessionProfiler();
+                this.riskGuardian = new RiskGuardian(this);
+                
+                // Confluence
+                this.confluenceEngine = new EnhancedConfluenceEngine(this);
+                
+                // Strategies
+                this.initStrategies();
+                
+                // Chart
+                this.initChart();
+                
+                // UI
+                this.initUI();
+                
+                // Event Listeners
+                this.setupEventListeners();
+                
+                // Countdown
+                this.startCountdown();
+                
+                this.showNotification(
+                    'PANTEON UYANDI',
+                    'Sistem başarıyla başlatıldı!',
+                    'divine'
+                );
+                
+                this.effectsManager.triggerDivineIntervention('shield');
+                
+            } catch (error) {
+                console.error('❌ Başlatma hatası:', error);
+                this.showNotification(
+                    'HATA',
+                    'Sistem başlatılamadı: ' + error.message,
+                    'danger'
+                );
+            }
+        }
+        
+        initStrategies() {
+            this.strategies = {
+                WallBounce: new WallBounceStrategy(this),
+                VelocityScalping: new VelocityScalpingStrategy(this),
+                RsiDivergence: new RsiDivergenceStrategy(this),
+                OrderFlowMomentum: new OrderFlowMomentumStrategy(this),
+                LiquidityGaps: new LiquidityGapsStrategy(this),
+                BreakoutPattern: new BreakoutPatternStrategy(this),
+                SupportResistance: new SupportResistanceStrategy(this),
+                FibonacciRetracement: new FibonacciRetracementStrategy(this),
+                VolumeProfile: new VolumeProfileStrategy(this),
+                SmartMoneyConcepts: new SmartMoneyConceptsStrategy(this),
+                DivergenceDetection: new DivergenceDetectionStrategy(this),
+                MarketStructure: new MarketStructureStrategy(this),
+                InstitutionalOrderFlow: new InstitutionalOrderFlowStrategy(this),
+                MicroSpreadArbitrage: new MicroSpreadArbitrageStrategy(this),
+                VWAPReversion: new VWAPReversionStrategy(this),
+                SuperTrend: new SuperTrendStrategy(this),
+                BollingerReversion: new BollingerReversionStrategy(this)
+            };
+            
+            this.updateActiveStrategies();
+        }
+        
+        updateActiveStrategies() {
+            this.activeStrategies = {};
+            
+            for (const [key, strategy] of Object.entries(this.strategies)) {
+                if (strategy.status === 'active') {
+                    this.activeStrategies[key] = strategy;
+                }
+            }
+            
+            const count = Object.keys(this.activeStrategies).length;
+            const el = document.getElementById('active-strategy-count');
+            if (el) el.textContent = count;
+        }
+        
+        initChart() {
+            const chartContainer = document.getElementById('live-chart');
+            
+            this.chart = LightweightCharts.createChart(chartContainer, {
+                width: chartContainer.clientWidth,
+                height: chartContainer.clientHeight,
+                layout: {
+                    backgroundColor: 'transparent',
+                    textColor: getComputedStyle(document.body).getPropertyValue('--text-main')
+                },
+                grid: {
+                    vertLines: {
+                        color: getComputedStyle(document.body).getPropertyValue('--border-color')
+                    },
+                    horzLines: {
+                        color: getComputedStyle(document.body).getPropertyValue('--border-color')
+                    }
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal
+                },
+                rightPriceScale: {
+                    borderColor: getComputedStyle(document.body).getPropertyValue('--border-color')
+                },
+                timeScale: {
+                    borderColor: getComputedStyle(document.body).getPropertyValue('--border-color'),
+                    timeVisible: true,
+                    secondsVisible: false
+                }
+            });
+            
+            this.candleSeries = this.chart.addCandlestickSeries({
+                upColor: getComputedStyle(document.body).getPropertyValue('--positive'),
+                downColor: getComputedStyle(document.body).getPropertyValue('--negative'),
+                borderVisible: false,
+                wickUpColor: getComputedStyle(document.body).getPropertyValue('--positive'),
+                wickDownColor: getComputedStyle(document.body).getPropertyValue('--negative')
+            });
+            
+            this.volumeSeries = this.chart.addHistogramSeries({
+                color: getComputedStyle(document.body).getPropertyValue('--primary'),
+                priceFormat: {
+                    type: 'volume'
+                },
+                priceScaleId: '',
+                scaleMargins: {
+                    top: 0.8,
+                    bottom: 0
+                }
+            });
+            
+            // Bollinger Bands için line series eklenebilir
+            
+            window.addEventListener('resize', () => {
+                this.chart.resize(chartContainer.clientWidth, chartContainer.clientHeight);
+            });
+        }
+        
+        initUI() {
+            document.getElementById('symbol-input').value = this.currentSymbol.replace('USDT', '');
+            document.getElementById('ticker-bar-symbol').textContent = this.currentSymbol.replace('USDT', '/USDT');
+            document.getElementById('timeframe-select').value = this.currentTimeframe;
+            
+            this.renderStrategies();
+            this.setupTabs();
+        }
+        
+        setupEventListeners() {
+            // Main controls
+            document.getElementById('start-btn').addEventListener('click', () => this.start());
+            document.getElementById('stop-btn').addEventListener('click', () => this.stop());
+            
+            // Symbol & Timeframe
+            document.getElementById('symbol-input').addEventListener('change', (e) => {
+                let symbol = e.target.value.toUpperCase();
+                if (!symbol.endsWith('USDT')) symbol += 'USDT';
+                this.changeSymbol(symbol);
+            });
+            
+            document.getElementById('timeframe-select').addEventListener('change', (e) => {
+                this.changeTimeframe(e.target.value);
+            });
+            
+            // Header collapse
+            document.getElementById('header-main-bar').addEventListener('dblclick', () => {
+                this.toggleHeader();
+            });
+            
+            document.getElementById('main-controls-btn').addEventListener('click', () => {
+                this.toggleHeader();
+            });
+            
+            // Zeus whispers
+            document.getElementById('kehanet-shield').addEventListener('click', () => {
+                this.divineIntervention('shield');
+            });
+            
+            document.getElementById('kehanet-balance').addEventListener('click', () => {
+                this.divineIntervention('balance');
+            });
+            
+            document.getElementById('kehanet-sword').addEventListener('click', () => {
+                this.divineIntervention('sword');
+            });
+            
+            // Holy actions
+            document.getElementById('kutsal-su-btn').addEventListener('click', () => {
+                this.holyWater();
+            });
+            
+            document.getElementById('kurban-et-btn').addEventListener('click', () => {
+                this.sacrifice();
+            });
+            
+            // Settings
+            document.getElementById('open-settings-btn').addEventListener('click', () => {
+                this.openSettings();
+            });
+            
+            document.getElementById('close-settings-btn').addEventListener('click', () => {
+                this.closeSettings();
+            });
+            
+            document.getElementById('save-settings-btn').addEventListener('click', () => {
+                this.saveSettings();
+            });
+            
+            document.getElementById('reset-universe-btn').addEventListener('click', () => {
+                this.resetUniverse();
+            });
+            
+            // Chart controls
+            document.getElementById('chart-zoom-in').addEventListener('click', () => {
+                this.zoomChart(0.9);
+            });
+            
+            document.getElementById('chart-zoom-out').addEventListener('click', () => {
+                this.zoomChart(1.1);
+            });
+            
+            document.getElementById('chart-reset').addEventListener('click', () => {
+                this.resetChart();
+            });
+        }
+        
+        setupTabs() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const tab = e.target.dataset.tab;
+                    
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    
+                    document.getElementById('strategies-seref').style.display = tab === 'seref' ? 'block' : 'none';
+                    document.getElementById('strategies-ameliyat').style.display = tab === 'ameliyat' ? 'block' : 'none';
+                    document.getElementById('strategies-zindan').style.display = tab === 'zindan' ? 'block' : 'none';
+                });
+            });
+        }
+        
+        async start() {
+            if (this.isRunning) return;
+            
+            this.isRunning = true;
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('stop-btn').disabled = false;
+            
+            this.updateConnectionStatus(true);
+            
+            await this.fetchInitialData();
+            this.connectWebSockets();
+            
+            // MTF initialization
+            if (this.settings.enableMTF) {
+                await this.mtfManager.initialize(this.currentSymbol);
+            }
+            
+            this.intervals.analysis = setInterval(() => this.runAnalysis(), 5000);
+            this.intervals.render = setInterval(() => this.render(), 1000);
+            
+            this.showNotification(
+                'KADER BAŞLADI',
+                'Tanrılar piyasaları izliyor.',
+                'success'
+            );
+            
+            if (this.ttsManager && this.settings.enableTTS) {
+                this.ttsManager.speakDivine('Kader başladı. Tanrılar piyasaları izliyor.');
+            }
+        }
+        
+        async stop() {
+            if (!this.isRunning) return;
+            
+            this.isRunning = false;
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('stop-btn').disabled = true;
+            
+            this.updateConnectionStatus(false);
+            
+            this.disconnectWebSockets();
+            
+            if (this.mtfManager) {
+                this.mtfManager.cleanup();
+            }
+            
+            Object.values(this.intervals).forEach(interval => {
+                if (interval) clearInterval(interval);
+            });
+            
+            this.showNotification(
+                'KADER DURDU',
+                'Tanrılar dinlenmeye çekildi.',
+                'warning'
+            );
+        }
+        
+        async fetchInitialData() {
+            try {
+                const url = `https://fapi.binance.com/fapi/v1/klines?symbol=${this.currentSymbol}&interval=${this.currentTimeframe}&limit=500`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                this.candles = data.map(d => ({
+                    time: d[0],
+                    open: parseFloat(d[1]),
+                    high: parseFloat(d[2]),
+                    low: parseFloat(d[3]),
+                    close: parseFloat(d[4]),
+                    volume: parseFloat(d[5])
+                }));
+                
+                this.candleSeries.setData(this.candles.map(c => ({
+                    time: c.time / 1000,
+                    open: c.open,
+                    high: c.high,
+                    low: c.low,
+                    close: c.close
+                })));
+                
+                const volumeData = this.candles.map(c => ({
+                    time: c.time / 1000,
+                    value: c.volume,
+                    color: c.close >= c.open ? 
+                        getComputedStyle(document.body).getPropertyValue('--positive') :
+                        getComputedStyle(document.body).getPropertyValue('--negative')
+                }));
+                
+                this.volumeSeries.setData(volumeData);
+                
+                this.calculateIndicators();
+                
+            } catch (error) {
+                console.error('Data fetch error:', error);
+                this.showNotification('HATA', 'Veri alınamadı', 'danger');
+            }
+        }
+        
+        connectWebSockets() {
+            const symbolLower = this.currentSymbol.toLowerCase();
+            const streams = [
+                `${symbolLower}@ticker`,
+                `${symbolLower}@depth20@100ms`,
+                `${symbolLower}@aggTrade`,
+                `${symbolLower}@kline_${this.currentTimeframe}`
+            ];
+            
+            const ws = new WebSocket(`wss://fstream.binance.com/stream?streams=${streams.join('/')}`);
+            
+            ws.onopen = () => {
+                console.log('✅ WebSocket bağlandı');
+            };
+            
+            ws.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                this.handleMarketData(message.stream, message.data);
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket hatası:', error);
+            };
+            
+            ws.onclose = () => {
+                if (this.isRunning) {
+                    setTimeout(() => this.connectWebSockets(), 5000);
+                }
+            };
+            
+            this.sockets.main = ws;
+        }
+        
+        handleMarketData(stream, data) {
+            const streamType = stream.split('@')[1];
+            
+            if (streamType === 'ticker') {
+                this.marketData = {
+                    ...this.marketData,
+                    price: parseFloat(data.c),
+                    change24h: parseFloat(data.P),
+                    volume24h: parseFloat(data.q)
+                };
+                
+                this.checkPositions();
+                
+            } else if (streamType.startsWith('depth')) {
+                this.orderBook = {
+                    bids: data.b.map(([p, q]) => [parseFloat(p), parseFloat(q)]),
+                    asks: data.a.map(([p, q]) => [parseFloat(p), parseFloat(q)])
+                };
+                
+                if (this.spoofDetector) {
+                    this.spoofDetector.trackOrderBook(this.orderBook);
+                }
+                
+                for (const strategy of Object.values(this.activeStrategies)) {
+                    if (strategy.analyzeOrderBook) {
+                        strategy.analyzeOrderBook(this.orderBook);
+                    }
+                }
+                
+            } else if (streamType === 'aggTrade') {
+                const trade = {
+                    price: parseFloat(data.p),
+                    quantity: parseFloat(data.q),
+                    isBuyerMaker: data.m
+                };
+                
+                if (this.ofiTracker) {
+                    this.ofiTracker.addTrade(trade);
+                }
+                
+                for (const strategy of Object.values(this.activeStrategies)) {
+                    if (strategy.processTrade) {
+                        strategy.processTrade(trade);
+                    }
+                }
+                
+            } else if (streamType.startsWith('kline')) {
+                const kline = data.k;
+                
+                const candle = {
+                    time: kline.t / 1000,
+                    open: parseFloat(kline.o),
+                    high: parseFloat(kline.h),
+                    low: parseFloat(kline.l),
+                    close: parseFloat(kline.c)
+                };
+                
+                this.candleSeries.update(candle);
+                
+                const volume = {
+                    time: kline.t / 1000,
+                    value: parseFloat(kline.v),
+                    color: candle.close >= candle.open ?
+                        getComputedStyle(document.body).getPropertyValue('--positive') :
+                        getComputedStyle(document.body).getPropertyValue('--negative')
+                };
+                
+                this.volumeSeries.update(volume);
+                
+                if (kline.x) {
+                    const newCandle = {
+                        time: kline.t,
+                        open: parseFloat(kline.o),
+                        high: parseFloat(kline.h),
+                        low: parseFloat(kline.l),
+                        close: parseFloat(kline.c),
+                        volume: parseFloat(kline.v)
+                    };
+                    
+                    const lastCandle = this.candles[this.candles.length - 1];
+                    if (lastCandle && lastCandle.time === newCandle.time) {
+                        this.candles[this.candles.length - 1] = newCandle;
+                    } else {
+                        this.candles.push(newCandle);
+                        if (this.candles.length > 500) {
+                            this.candles.shift();
+                        }
+                    }
+                    
+                    this.calculateIndicators();
+                }
+            }
+        }
+        
+        calculateIndicators() {
+            // RSI
+            const period = this.settings.params.rsiPeriod;
+            const closes = this.candles.map(c => c.close);
+            
+            if (closes.length >= period) {
+                const rsi = [];
+                let avgGain = 0;
+                let avgLoss = 0;
+                
+                for (let i = 1; i <= period; i++) {
+                    const diff = closes[i] - closes[i - 1];
+                    if (diff > 0) avgGain += diff;
+                    else avgLoss -= diff;
+                }
+                
+                avgGain /= period;
+                avgLoss /= period;
+                
+                rsi.push(100 - (100 / (1 + avgGain / avgLoss)));
+                
+                for (let i = period + 1; i < closes.length; i++) {
+                    const diff = closes[i] - closes[i - 1];
+                    avgGain = (avgGain * (period - 1) + (diff > 0 ? diff : 0)) / period;
+                    avgLoss = (avgLoss * (period - 1) + (diff < 0 ? -diff : 0)) / period;
+                    rsi.push(100 - (100 / (1 + avgGain / avgLoss)));
+                }
+                
+                this.indicators.rsi = rsi;
+            }
+            
+            // ATR
+            if (this.candles.length >= period) {
+                const trs = [];
+                for (let i = 1; i < this.candles.length; i++) {
+                    const high = this.candles[i].high;
+                    const low = this.candles[i].low;
+                    const prevClose = this.candles[i - 1].close;
+                    
+                    trs.push(Math.max(
+                        high - low,
+                        Math.abs(high - prevClose),
+                        Math.abs(low - prevClose)
+                    ));
+                }
+                
+                this.indicators.atr = trs.slice(-period).reduce((a, b) => a +

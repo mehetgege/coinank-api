@@ -1,0 +1,4726 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="olympus">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ULTIMATE TRADING KOMUTA MERKEZİ v3.2 | PANTEON'UN KADERİ</title>
+    
+    <!-- External Dependencies -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+    
+    <style>
+        /* ===============================================
+           PANTEON THEME - TANRISAL TASARIM
+           =============================================== */
+        
+        :root {
+            /* Typography */
+            --font-divine: 'Cinzel', serif;
+            --font-primary: 'Orbitron', monospace;
+            --font-secondary: 'Roboto Mono', monospace;
+            
+            /* Olympus Theme Colors */
+            --olympus-bg-primary: linear-gradient(135deg, #0a0a1f 0%, #1a1a3e 100%);
+            --olympus-bg-secondary: rgba(20, 20, 40, 0.95);
+            --olympus-bg-tertiary: rgba(30, 30, 60, 0.9);
+            --olympus-border: rgba(100, 100, 200, 0.3);
+            --olympus-text-primary: #e8e8ff;
+            --olympus-text-secondary: #a8a8ff;
+            --olympus-text-divine: #ffd700;
+            
+            /* Divine Status Colors */
+            --divine-success: #00ff88;
+            --divine-danger: #ff3366;
+            --divine-warning: #ffaa00;
+            --divine-info: #00aaff;
+            --divine-holy: #ffd700;
+            
+            /* Glow Effects */
+            --glow-divine: 0 0 30px rgba(255, 215, 0, 0.6);
+            --glow-success: 0 0 20px rgba(0, 255, 136, 0.5);
+            --glow-danger: 0 0 20px rgba(255, 51, 102, 0.5);
+            --glow-warning: 0 0 20px rgba(255, 170, 0, 0.5);
+            --glow-info: 0 0 20px rgba(0, 170, 255, 0.5);
+            
+            /* Animations */
+            --transition-divine: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Global Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-secondary);
+            background: var(--olympus-bg-primary);
+            color: var(--olympus-text-primary);
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+        
+        /* Particle Container for Visual Effects */
+        #particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        
+        /* ===============================================
+           PANTEON PANEL - TANRILARIN EVİ
+           =============================================== */
+        
+        .panteon-panel {
+            position: fixed;
+            top: 35px;
+            right: 20px;
+            width: 320px;
+            background: var(--olympus-bg-secondary);
+            border: 2px solid var(--olympus-border);
+            border-radius: 12px;
+            padding: 15px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--glow-divine);
+        }
+        
+        .panteon-header {
+            font-family: var(--font-divine);
+            font-size: 18px;
+            font-weight: 900;
+            text-align: center;
+            color: var(--divine-holy);
+            margin-bottom: 15px;
+            text-shadow: var(--glow-divine);
+            letter-spacing: 2px;
+        }
+        
+        .elci-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .elci-card {
+            background: var(--olympus-bg-tertiary);
+            border: 1px solid var(--olympus-border);
+            border-radius: 8px;
+            padding: 12px;
+            transition: var(--transition-divine);
+        }
+        
+        .elci-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(100, 100, 200, 0.3);
+        }
+        
+        .elci-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .elci-name {
+            font-family: var(--font-divine);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--olympus-text-primary);
+        }
+        
+        .elci-mode {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .elci-mode.inancli {
+            background: var(--divine-success);
+            color: #000;
+        }
+        
+        .elci-mode.supheci {
+            background: var(--divine-warning);
+            color: #000;
+        }
+        
+        .elci-mode.kiyamet {
+            background: var(--divine-danger);
+            color: #fff;
+        }
+        
+        .elci-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--olympus-text-secondary);
+        }
+        
+        .elci-stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .elci-itibar {
+            font-weight: 700;
+            color: var(--divine-holy);
+        }
+        
+        /* ===============================================
+           KEHANET PANELİ - ZEUS'UN FISILTILARI
+           =============================================== */
+        
+        .kehanet-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 280px;
+            background: var(--olympus-bg-secondary);
+            border: 2px solid var(--divine-holy);
+            border-radius: 12px;
+            padding: 15px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--glow-divine);
+        }
+        
+        .kehanet-header {
+            font-family: var(--font-divine);
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            color: var(--divine-holy);
+            margin-bottom: 10px;
+        }
+        
+        .kehanet-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        
+        .kehanet-btn {
+            padding: 10px;
+            background: var(--olympus-bg-tertiary);
+            border: 1px solid var(--divine-holy);
+            border-radius: 6px;
+            color: var(--divine-holy);
+            font-size: 20px;
+            cursor: pointer;
+            transition: var(--transition-divine);
+            text-align: center;
+        }
+        
+        .kehanet-btn:hover {
+            background: var(--divine-holy);
+            color: var(--olympus-bg-primary);
+            transform: scale(1.1);
+        }
+        
+        .kehanet-btn[title]::after {
+            content: attr(title);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--olympus-bg-tertiary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .kehanet-btn:hover::after {
+            opacity: 1;
+        }
+        
+        /* ===============================================
+           MAIN COMMAND CENTER LAYOUT
+           =============================================== */
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Super Top Ticker */
+        #super-top-ticker {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--olympus-bg-secondary);
+            border-bottom: 2px solid var(--olympus-border);
+            padding: 5px 15px;
+            z-index: 1100;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 700;
+            height: 35px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .super-top-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        #ticker-bar-symbol {
+            color: var(--divine-holy);
+            font-family: var(--font-primary);
+            font-size: 14px;
+        }
+        
+        #ticker-bar-price {
+            color: var(--olympus-text-primary);
+            font-size: 16px;
+            font-weight: 900;
+        }
+        
+        .super-top-right-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--olympus-bg-secondary);
+            border: 2px solid var(--olympus-border);
+            border-radius: 12px;
+            margin: 45px 10px 10px 10px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .header-top-bar {
+            font-family: var(--font-divine);
+            font-size: 24px;
+            font-weight: 900;
+            text-align: center;
+            color: var(--divine-holy);
+            margin-bottom: 15px;
+            text-shadow: var(--glow-divine);
+            letter-spacing: 3px;
+            cursor: pointer;
+        }
+        
+        .main-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .form-control {
+            background: var(--olympus-bg-tertiary);
+            color: var(--olympus-text-primary);
+            border: 1px solid var(--olympus-border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-family: var(--font-secondary);
+            font-size: 12px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--divine-info);
+            box-shadow: var(--glow-info);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--olympus-bg-tertiary), var(--olympus-bg-secondary));
+            border: 2px solid var(--olympus-border);
+            color: var(--olympus-text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: var(--font-primary);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: var(--transition-divine);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(100,100,200,0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #00aa44, var(--divine-success));
+            border-color: var(--divine-success);
+            color: #000;
+            box-shadow: var(--glow-success);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #cc0033, var(--divine-danger));
+            border-color: var(--divine-danger);
+            color: #fff;
+            box-shadow: var(--glow-danger);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #cc8800, var(--divine-warning));
+            border-color: var(--divine-warning);
+            color: #000;
+            box-shadow: var(--glow-warning);
+        }
+        
+        .btn-holy {
+            background: linear-gradient(135deg, #ffaa00, var(--divine-holy));
+            border-color: var(--divine-holy);
+            color: #000;
+            box-shadow: var(--glow-divine);
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--olympus-bg-tertiary);
+            border: 1px solid var(--olympus-border);
+            border-radius: 6px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--divine-danger);
+            transition: background-color 0.5s;
+        }
+        
+        .status-dot.online {
+            background: var(--divine-success);
+            animation: divine-pulse 2s infinite;
+        }
+        
+        @keyframes divine-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 136, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+        
+        /* Price Display */
+        .price-display {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--olympus-bg-tertiary);
+            border: 1px solid var(--olympus-border);
+            border-radius: 8px;
+        }
+        
+        .price-item {
+            text-align: center;
+        }
+        
+        .price-label {
+            font-size: 10px;
+            color: var(--olympus-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        
+        .price-value {
+            font-size: 18px;
+            font-weight: 900;
+            font-family: var(--font-primary);
+            color: var(--olympus-text-primary);
+        }
+        
+        .countdown-display {
+            font-size: 14px;
+            color: var(--divine-warning);
+            margin-top: 5px;
+        }
+        
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 250px 1fr 350px;
+            gap: 10px;
+            margin: 0 10px 10px 10px;
+            height: calc(100vh - 280px);
+            overflow: hidden;
+        }
+        
+        .panel {
+            background: var(--olympus-bg-secondary);
+            border: 2px solid var(--olympus-border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .panel-title {
+            font-family: var(--font-divine);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--divine-holy);
+            padding: 12px;
+            border-bottom: 1px solid var(--olympus-border);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: var(--olympus-bg-tertiary);
+        }
+        
+        .panel-content {
+            padding: 15px;
+            overflow-y: auto;
+            height: calc(100% - 50px);
+        }
+        
+        /* Strategies Panel */
+        .strategies-tabs {
+            display: flex;
+            gap: 5px;
+            padding: 10px;
+            border-bottom: 1px solid var(--olympus-border);
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 8px;
+            background: var(--olympus-bg-tertiary);
+            border: 1px solid var(--olympus-border);
+            border-radius: 6px;
+            color: var(--olympus-text-secondary);
+            font-size: 11px;
+            cursor: pointer;
+            transition: var(--transition-divine);
+        }
+        
+        .tab-btn.active {
+            background: var(--divine-holy);
+            color: #000;
+            border-color: var(--divine-holy);
+        }
+        
+        .strategies-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+        }
+        
+        .strategy-item {
+            padding: 10px;
+            background: var(--olympus-bg-tertiary);
+            border: 1px solid var(--olympus-border);
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition-divine);
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
+        .strategy-item:hover {
+            border-color: var(--divine-info);
+            transform: translateX(5px);
+        }
+        
+        .strategy-item.active {
+            border-color: var(--divine-success);
+            background: linear-gradient(135deg, rgba(0,255,136,0.1), transparent);
+        }
+        
+        .strategy-item.imprisoned {
+            opacity: 0.5;
+            border-color: var(--divine-danger);
+            background: linear-gradient(135deg, rgba(255,51,102,0.1), transparent);
+        }
+        
+        .strategy-name {
+            font-weight: 600;
+            color: var(--olympus-text-primary);
+        }
+        
+        .strategy-stats {
+            display: flex;
+            gap: 10px;
+            font-size: 10px;
+            color: var(--olympus-text-secondary);
+        }
+        
+        /* Chart Panel */
+        .chart-container {
+            position: relative;
+            height: 100%;
+        }
+        
+        #live-chart {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .chart-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            z-index: 100;
+        }
+        
+        .chart-btn {
+            width: 32px;
+            height: 32px;
+            background: var(--olympus-bg-secondary);
+            border: 1px solid var(--olympus-border);
+            border-radius: 6px;
+            color: var(--olympus-text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-divine);
+        }
+        
+        .chart-btn:hover {
+            background: var(--divine-holy);
+            color: #000;
+            border-color: var(--divine-holy);
+        }
+        
+        /* Signals Panel */
+        .signals-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .signal-card {
+            padding: 12px;
+            background: var(--olympus-bg-tertiary);
+            border: 1px solid var(--olympus-border);
+            border-radius: 8px;
+            transition: var(--transition-divine);
+        }
+        
+        .signal-card.buy {
+            border-left: 4px solid var(--divine-success);
+            background: linear-gradient(90deg, rgba(0,255,136,0.1), transparent);
+        }
+        
+        .signal-card.sell {
+            border-left: 4px solid var(--divine-danger);
+            background: linear-gradient(90deg, rgba(255,51,102,0.1), transparent);
+        }
+        
+        .signal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .signal-direction {
+            font-family: var(--font-primary);
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .signal-score {
+            padding: 4px 8px;
+            background: var(--olympus-bg-secondary);
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--divine-holy);
+        }
+        
+        .signal-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--olympus-text-secondary);
+        }
+        
+        .signal-contributors {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--olympus-border);
+            font-size: 10px;
+            color: var(--olympus-text-secondary);
+        }
+        
+        /* Settings Modal */
+        #settings-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2500;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        #settings-modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .settings-modal-content {
+            background: var(--olympus-bg-secondary);
+            border: 2px solid var(--divine-holy);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--glow-divine);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        
+        #settings-modal-overlay.visible .settings-modal-content {
+            transform: translateY(0);
+        }
+        
+        .settings-modal-header {
+            padding: 20px;
+            border-bottom: 2px solid var(--olympus-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--olympus-bg-tertiary);
+            border-radius: 16px 16px 0 0;
+        }
+        
+        .settings-modal-title {
+            font-family: var(--font-divine);
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--divine-holy);
+            text-shadow: var(--glow-divine);
+            letter-spacing: 2px;
+        }
+        
+        .settings-modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        
+        .settings-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--olympus-border);
+            padding-bottom: 10px;
+        }
+        
+        .settings-tab {
+            padding: 10px 20px;
+            background: var(--olympus-bg-tertiary);
+            border: 1px solid var(--olympus-border);
+            border-radius: 8px;
+            color: var(--olympus-text-secondary);
+            cursor: pointer;
+            transition: var(--transition-divine);
+            font-family: var(--font-primary);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .settings-tab.active {
+            background: var(--divine-holy);
+            color: #000;
+            border-color: var(--divine-holy);
+        }
+        
+        .settings-content {
+            display: none;
+        }
+        
+        .settings-content.active {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .setting-group {
+            padding: 15px;
+            background: var(--olympus-bg-tertiary);
+            border: 1px solid var(--olympus-border);
+            border-radius: 8px;
+        }
+        
+        .setting-group-title {
+            font-family: var(--font-divine);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--divine-holy);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 11px;
+            color: var(--olympus-text-secondary);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 8px;
+            background: var(--olympus-bg-secondary);
+            border: 1px solid var(--olympus-border);
+            border-radius: 4px;
+            color: var(--olympus-text-primary);
+            font-family: var(--font-secondary);
+            font-size: 12px;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--divine-info);
+            box-shadow: 0 0 0 2px rgba(0, 170, 255, 0.1);
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px 0;
+        }
+        
+        .settings-modal-footer {
+            padding: 20px;
+            border-top: 2px solid var(--olympus-border);
+            display: flex;
+            justify-content: space-between;
+            background: var(--olympus-bg-tertiary);
+            border-radius: 0 0 16px 16px;
+        }
+        
+        /* Notifications */
+        .notifications {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 2000;
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .notification {
+            background: var(--olympus-bg-secondary);
+            border: 2px solid var(--olympus-border);
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: slideInLeft 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .notification.success {
+            border-color: var(--divine-success);
+            box-shadow: var(--glow-success);
+        }
+        
+        .notification.danger {
+            border-color: var(--divine-danger);
+            box-shadow: var(--glow-danger);
+        }
+        
+        .notification.warning {
+            border-color: var(--divine-warning);
+            box-shadow: var(--glow-warning);
+        }
+        
+        .notification.divine {
+            border-color: var(--divine-holy);
+            box-shadow: var(--glow-divine);
+        }
+        
+        .notification-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .notification-icon {
+            font-size: 20px;
+        }
+        
+        .notification-title {
+            font-family: var(--font-primary);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .notification-message {
+            font-size: 11px;
+            color: var(--olympus-text-secondary);
+            line-height: 1.4;
+        }
+        
+        /* Mobile Responsive */
+        @media screen and (max-width: 768px) {
+            .panteon-panel,
+            .kehanet-panel {
+                display: none;
+            }
+            
+            .main-grid {
+                grid-template-columns: 1fr;
+                height: calc(100vh - 200px);
+            }
+            
+            .price-display {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .main-controls {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .form-control,
+            .btn {
+                width: 100%;
+            }
+        }
+        
+        /* Loading Animation */
+        .divine-loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+        }
+        
+        .divine-loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--olympus-border);
+            border-top: 4px solid var(--divine-holy);
+            border-radius: 50%;
+            animation: divine-spin 1s linear infinite;
+        }
+        
+        @keyframes divine-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle Effects Container -->
+    <div id="particles-container"></div>
+    
+    <!-- Panteon Panel -->
+    <div class="panteon-panel" id="panteon-panel">
+        <div class="panteon-header">PANTEON'UN ELÇİLERİ</div>
+        <div class="elci-container">
+            <!-- Metatron -->
+            <div class="elci-card" id="elci-metatron">
+                <div class="elci-header">
+                    <span class="elci-name">METATRON</span>
+                    <span class="elci-mode inancli" id="metatron-mode">İNANÇLI</span>
+                </div>
+                <div class="elci-stats">
+                    <div class="elci-stat">
+                        <span>İtibar:</span>
+                        <span class="elci-itibar" id="metatron-itibar">100</span>
+                    </div>
+                    <div class="elci-stat">
+                        <span>Gardiyan:</span>
+                        <span id="metatron-gardiyan-count">0</span>
+                    </div>
+                    <div class="elci-stat">
+                        <span>Başarı:</span>
+                        <span id="metatron-success-rate">0%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Uriel -->
+            <div class="elci-card" id="elci-uriel">
+                <div class="elci-header">
+                    <span class="elci-name">URIEL</span>
+                    <span class="elci-mode inancli" id="uriel-mode">İNANÇLI</span>
+                </div>
+                <div class="elci-stats">
+                    <div class="elci-stat">
+                        <span>İtibar:</span>
+                        <span class="elci-itibar" id="uriel-itibar">100</span>
+                    </div>
+                    <div class="elci-stat">
+                        <span>Gardiyan:</span>
+                        <span id="uriel-gardiyan-count">0</span>
+                    </div>
+                    <div class="elci-stat">
+                        <span>Başarı:</span>
+                        <span id="uriel-success-rate">0%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Raphael -->
+            <div class="elci-card" id="elci-raphael">
+                <div class="elci-header">
+                    <span class="elci-name">RAPHAEL</span>
+                    <span class="elci-mode inancli" id="raphael-mode">İNANÇLI</span>
+                </div>
+                <div class="elci-stats">
+                    <div class="elci-stat">
+                        <span>İtibar:</span>
+                        <span class="elci-itibar" id="raphael-itibar">100</span>
+                    </div>
+                    <div class="elci-stat">
+                        <span>İyileşen:</span>
+                        <span id="raphael-healed-count">0</span>
+                    </div>
+                    <div class="elci-stat">
+                        <span>Başarı:</span>
+                        <span id="raphael-success-rate">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Kehanet Panel -->
+    <div class="kehanet-panel" id="kehanet-panel">
+        <div class="kehanet-header">ZEUS'UN FISILTİLARI</div>
+        <div class="kehanet-buttons">
+            <button class="kehanet-btn" id="kehanet-shield" title="Koruma">🛡️</button>
+            <button class="kehanet-btn" id="kehanet-balance" title="Denge">⚖️</button>
+            <button class="kehanet-btn" id="kehanet-sword" title="Saldırı">⚔️</button>
+        </div>
+    </div>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Super Top Ticker -->
+        <div id="super-top-ticker">
+            <div class="super-top-left">
+                <span id="ticker-bar-symbol">BTC/USDT</span>
+                <span id="ticker-bar-price">-</span>
+                <span id="ticker-bar-change" style="margin-left: 10px;">-</span>
+            </div>
+            <div class="super-top-right-buttons">
+                <button class="btn btn-holy" id="kutsal-su-btn">KUTSAL SU</button>
+                <button class="btn btn-danger" id="kurban-et-btn">KURBAN ET</button>
+                <button class="btn btn-warning" id="open-settings-btn">KUTSAL KİTAP</button>
+            </div>
+        </div>
+        
+        <!-- Header -->
+        <header class="header">
+            <div class="header-top-bar" id="header-main-bar">
+                ⚡ PANTEON'UN KADERİ ⚡
+            </div>
+            <div class="header-collapsible-content">
+                <div class="main-controls">
+                    <input type="text" id="symbol-input" class="form-control" placeholder="Sembol (BTC, ETH, SOL)">
+                    <select id="timeframe-select" class="form-control">
+                        <option value="1m">1m</option>
+                        <option value="5m">5m</option>
+                        <option value="15m" selected>15m</option>
+                        <option value="1h">1h</option>
+                        <option value="4h">4h</option>
+                    </select>
+                    <div class="status">
+                        <div id="connection-status" class="status-dot"></div>
+                        <span id="connection-text">BAĞLANTI YOK</span>
+                    </div>
+                    <button id="start-btn" class="btn btn-success">KADERİ BAŞLAT</button>
+                    <button id="stop-btn" class="btn btn-danger" disabled>KADERİ DURDUR</button>
+                </div>
+                <div class="price-display">
+                    <div class="price-item">
+                        <div class="price-label">FİYAT</div>
+                        <div class="price-value" id="current-price">-</div>
+                        <div class="countdown-display" id="candle-countdown">⏱️ --:--</div>
+                    </div>
+                    <div class="price-item">
+                        <div class="price-label">24s DEĞİŞİM</div>
+                        <div class="price-value" id="price-change-24h">-</div>
+                    </div>
+                    <div class="price-item">
+                        <div class="price-label">24s HACİM</div>
+                        <div class="price-value" id="volume-24h">-</div>
+                    </div>
+                    <div class="price-item">
+                        <div class="price-label">VOLATİLİTE</div>
+                        <div class="price-value" id="atr-value">-</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Grid -->
+        <main class="main-grid">
+            <!-- Left Panel - Strategies -->
+            <aside class="panel">
+                <div class="panel-title">GARDİYANLAR</div>
+                <div class="strategies-tabs">
+                    <button class="tab-btn active" data-tab="seref">ŞEREF</button>
+                    <button class="tab-btn" data-tab="ameliyat">AMELİYAT</button>
+                    <button class="tab-btn" data-tab="zindan">ZİNDAN</button>
+                </div>
+                <div class="panel-content">
+                    <div class="strategies-list" id="strategies-seref"></div>
+                    <div class="strategies-list" id="strategies-ameliyat" style="display:none;"></div>
+                    <div class="strategies-list" id="strategies-zindan" style="display:none;"></div>
+                </div>
+            </aside>
+            
+            <!-- Center - Chart -->
+            <section class="panel">
+                <div class="panel-title">KADER HARİTASI</div>
+                <div class="chart-container">
+                    <div id="live-chart"></div>
+                    <div class="chart-controls">
+                        <button class="chart-btn" id="chart-zoom-in">+</button>
+                        <button class="chart-btn" id="chart-zoom-out">-</button>
+                        <button class="chart-btn" id="chart-reset">⟲</button>
+                        <button class="chart-btn" id="chart-fullscreen">⛶</button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Right Panel - Signals -->
+            <aside class="panel">
+                <div class="panel-title">İLAHİ MÜDAHALELER</div>
+                <div class="panel-content">
+                    <div class="signals-container" id="signals-container"></div>
+                </div>
+            </aside>
+        </main>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal-overlay">
+        <div class="settings-modal-content">
+            <div class="settings-modal-header">
+                <h2 class="settings-modal-title">📜 KUTSAL KİTAP 📜</h2>
+                <button class="btn" id="close-settings-btn">✕</button>
+            </div>
+            <div class="settings-modal-body">
+                <div class="settings-tabs">
+                    <button class="settings-tab active" data-tab="divine">İLAHİ AYARLAR</button>
+                    <button class="settings-tab" data-tab="guardian">GARDİYAN YÖNETİMİ</button>
+                    <button class="settings-tab" data-tab="risk">RİSK PROTOKOLÜ</button>
+                    <button class="settings-tab" data-tab="visual">GÖRSEL EFEKTLER</button>
+                </div>
+                
+                <!-- Divine Settings -->
+                <div class="settings-content active" id="settings-divine">
+                    <div class="setting-group">
+                        <div class="setting-group-title">PANTEON PARAMETRELERİ</div>
+                        <div class="form-group">
+                            <label class="form-label">Minimum Uyum Skoru</label>
+                            <input type="range" id="confluence-threshold" class="form-input" min="1" max="10" value="3">
+                            <span id="confluence-value">3</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Minimum Gardiyan Sayısı</label>
+                            <input type="number" id="min-contributors" class="form-input" value="2" min="1" max="5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Risk/Ödül Oranı</label>
+                            <input type="number" id="rr-ratio" class="form-input" value="1.5" step="0.1">
+                        </div>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <div class="setting-group-title">İTİBAR SİSTEMİ</div>
+                        <div class="form-group">
+                            <label class="form-label">TP İtibar Ödülü</label>
+                            <input type="number" id="tp-reputation" class="form-input" value="1" step="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">SL İtibar Cezası</label>
+                            <input type="number" id="sl-reputation" class="form-input" value="-2" step="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Durgunluk Cezası (saat)</label>
+                            <input type="number" id="idle-hours" class="form-input" value="4" min="1">
+                        </div>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <div class="setting-group-title">ELÇİ MODLARI</div>
+                        <div class="form-group">
+                            <label class="form-label">İnançlı Mod Eşiği</label>
+                            <input type="number" id="faithful-threshold" class="form-input" value="80" min="0" max="200">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Şüpheci Mod Eşiği</label>
+                            <input type="number" id="skeptic-threshold" class="form-input" value="40" min="0" max="200">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Kıyamet Mod Eşiği</label>
+                            <input type="number" id="apocalypse-threshold" class="form-input" value="10" min="0" max="200">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Guardian Settings -->
+                <div class="settings-content" id="settings-guardian">
+                    <div class="setting-group">
+                        <div class="setting-group-title">GARDİYAN AKTİVASYONU</div>
+                        <div id="guardian-toggles"></div>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <div class="setting-group-title">SÜVARI YÖNETİMİ</div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enable-cavalry">
+                                Süvarileri Aktif Et
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Süvari Uyanma Eşiği</label>
+                            <input type="number" id="cavalry-threshold" class="form-input" value="8" min="1" max="10">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Risk Settings -->
+                <div class="settings-content" id="settings-risk">
+                    <div class="setting-group">
+                        <div class="setting-group-title">RİSK YÖNETİMİ</div>
+                        <div class="form-group">
+                            <label class="form-label">Maksimum Açık Pozisyon</label>
+                            <input type="number" id="max-positions" class="form-input" value="3" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Günlük Maksimum İşlem</label>
+                            <input type="number" id="max-daily-trades" class="form-input" value="20" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enable-trailing" checked>
+                                Trailing Stop Aktif
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enable-breakeven" checked>
+                                Breakeven Koruması
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <div class="setting-group-title">MAHŞERİN DÖRT ATLISI</div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enable-horsemen" checked>
+                                Atlı Tespiti Aktif
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Savaş Atlısı Eşiği (%)</label>
+                            <input type="number" id="war-threshold" class="form-input" value="5" step="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Kıtlık Atlısı Eşiği</label>
+                            <input type="number" id="famine-threshold" class="form-input" value="70" step="5">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Visual Settings -->
+                <div class="settings-content" id="settings-visual">
+                    <div class="setting-group">
+                        <div class="setting-group-title">GÖRSEL EFEKTLER</div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enable-particles" checked>
+                                Parçacık Efektleri
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enable-sounds" checked>
+                                Ses Efektleri
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Efekt Yoğunluğu</label>
+                            <select id="effect-intensity" class="form-input">
+                                <option value="low">Düşük</option>
+                                <option value="medium" selected>Orta</option>
+                                <option value="high">Yüksek</option>
+                                <option value="insane">ÇILGIN</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <div class="setting-group-title">TEMA</div>
+                        <div class="form-group">
+                            <label class="form-label">Ana Tema</label>
+                            <select id="theme-select" class="form-input">
+                                <option value="olympus" selected>Olimpos</option>
+                                <option value="valhalla">Valhalla</option>
+                                <option value="underworld">Yeraltı Dünyası</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-modal-footer">
+                <button class="btn btn-danger" id="reset-universe-btn">EVRENİ SIFIRLA</button>
+                <button class="btn btn-holy" id="save-settings-btn">KADERİ MÜHÜRLE</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notifications Container -->
+    <div class="notifications" id="notifications"></div>
+    
+    <script>
+    // ================================================
+    // PANTEON'UN KADERİ - ANA UYGULAMA
+    // ================================================
+    
+    /**
+     * DBManager - IndexedDB Yönetimi
+     * Tüm kalıcı veriler burada saklanır
+     */
+    class DBManager {
+        constructor() {
+            this.dbName = 'PanteonDB';
+            this.version = 1;
+            this.db = null;
+        }
+        
+        async init() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(this.dbName, this.version);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    this.db = request.result;
+                    resolve();
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    
+                    // Settings Store
+                    if (!db.objectStoreNames.contains('settings')) {
+                        db.createObjectStore('settings', { keyPath: 'id' });
+                    }
+                    
+                    // Panteon State Store
+                    if (!db.objectStoreNames.contains('panteonState')) {
+                        db.createObjectStore('panteonState', { keyPath: 'id' });
+                    }
+                    
+                    // Strategy Stats Store
+                    if (!db.objectStoreNames.contains('strategyStats')) {
+                        db.createObjectStore('strategyStats', { keyPath: 'name' });
+                    }
+                    
+                    // Signal History Store
+                    if (!db.objectStoreNames.contains('signalHistory')) {
+                        const signalStore = db.createObjectStore('signalHistory', { 
+                            keyPath: 'id', 
+                            autoIncrement: true 
+                        });
+                        signalStore.createIndex('timestamp', 'timestamp', { unique: false });
+                        signalStore.createIndex('symbol', 'symbol', { unique: false });
+                    }
+                    
+                    // Notification History Store
+                    if (!db.objectStoreNames.contains('notificationHistory')) {
+                        const notifStore = db.createObjectStore('notificationHistory', { 
+                            keyPath: 'id', 
+                            autoIncrement: true 
+                        });
+                        notifStore.createIndex('timestamp', 'timestamp', { unique: false });
+                    }
+                };
+            });
+        }
+        
+        async save(storeName, data) {
+            const transaction = this.db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.put(data);
+            
+            return new Promise((resolve, reject) => {
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+        
+        async get(storeName, key) {
+            const transaction = this.db.transaction([storeName], 'readonly');
+            const store = transaction.objectStore(storeName);
+            const request = store.get(key);
+            
+            return new Promise((resolve, reject) => {
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+        
+        async getAll(storeName) {
+            const transaction = this.db.transaction([storeName], 'readonly');
+            const store = transaction.objectStore(storeName);
+            const request = store.getAll();
+            
+            return new Promise((resolve, reject) => {
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+        
+        async delete(storeName, key) {
+            const transaction = this.db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.delete(key);
+            
+            return new Promise((resolve, reject) => {
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+        
+        async clear(storeName) {
+            const transaction = this.db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.clear();
+            
+            return new Promise((resolve, reject) => {
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+    }
+    
+    /**
+     * EffectsManager - Görsel Efekt Yönetimi
+     * tsparticles.js kullanarak özel efektler oluşturur
+     */
+    class EffectsManager {
+        constructor() {
+            this.particles = null;
+            this.effectIntensity = 'medium';
+            this.soundEnabled = true;
+        }
+        
+        async init() {
+            // tsparticles container'ını başlat
+            this.particles = await tsparticles.load('particles-container', {
+                particles: {
+                    number: { value: 0 },
+                    color: { value: '#ffffff' },
+                    shape: { type: 'circle' },
+                    opacity: { value: 1 },
+                    size: { value: 3 },
+                    move: {
+                        enable: true,
+                        speed: 2,
+                        direction: 'none',
+                        random: true,
+                        straight: false,
+                        outModes: { default: 'destroy' }
+                    }
+                },
+                interactivity: {
+                    detectsOn: 'canvas',
+                    events: { resize: true }
+                },
+                detectRetina: true
+            });
+        }
+        
+        /**
+         * Buy sinyali efekti - Yeşil yükseliş
+         */
+        async triggerBuyEffect(price) {
+            if (!this.particles) return;
+            
+            const intensity = this.getIntensityMultiplier();
+            
+            // Yeşil parçacıklar ekle
+            for (let i = 0; i < 30 * intensity; i++) {
+                setTimeout(() => {
+                    this.particles.addParticle({
+                        x: Math.random() * window.innerWidth,
+                        y: window.innerHeight,
+                        color: { value: '#00ff88' },
+                        size: { value: Math.random() * 5 + 2 },
+                        move: {
+                            speed: Math.random() * 5 + 2,
+                            angle: { value: 270, offset: Math.random() * 30 - 15 }
+                        },
+                        opacity: { value: 1, animation: { enable: true, speed: 1, minimumValue: 0 } }
+                    });
+                }, i * 20);
+            }
+            
+            // Ses efekti
+            if (this.soundEnabled) {
+                this.playSound('buy');
+            }
+            
+            // Ekran flash efekti
+            this.flashScreen('#00ff88', 0.3);
+        }
+        
+        /**
+         * Sell sinyali efekti - Kırmızı düşüş
+         */
+        async triggerSellEffect(price) {
+            if (!this.particles) return;
+            
+            const intensity = this.getIntensityMultiplier();
+            
+            // Kırmızı parçacıklar ekle
+            for (let i = 0; i < 30 * intensity; i++) {
+                setTimeout(() => {
+                    this.particles.addParticle({
+                        x: Math.random() * window.innerWidth,
+                        y: 0,
+                        color: { value: '#ff3366' },
+                        size: { value: Math.random() * 5 + 2 },
+                        move: {
+                            speed: Math.random() * 5 + 2,
+                            angle: { value: 90, offset: Math.random() * 30 - 15 }
+                        },
+                        opacity: { value: 1, animation: { enable: true, speed: 1, minimumValue: 0 } }
+                    });
+                }, i * 20);
+            }
+            
+            // Ses efekti
+            if (this.soundEnabled) {
+                this.playSound('sell');
+            }
+            
+            // Ekran flash efekti
+            this.flashScreen('#ff3366', 0.3);
+        }
+        
+        /**
+         * TP (Take Profit) efekti - Altın patlama
+         */
+        async triggerTPEffect() {
+            if (!this.particles) return;
+            
+            const intensity = this.getIntensityMultiplier();
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            
+            // Altın patlama efekti
+            for (let i = 0; i < 50 * intensity; i++) {
+                const angle = (Math.PI * 2 * i) / (50 * intensity);
+                const speed = Math.random() * 10 + 5;
+                
+                this.particles.addParticle({
+                    x: centerX,
+                    y: centerY,
+                    color: { value: '#ffd700' },
+                    size: { value: Math.random() * 8 + 3 },
+                    move: {
+                        speed: speed,
+                        angle: { value: angle * 180 / Math.PI }
+                    },
+                    opacity: { 
+                        value: 1, 
+                        animation: { enable: true, speed: 0.5, minimumValue: 0 }
+                    }
+                });
+            }
+            
+            // Ses efekti
+            if (this.soundEnabled) {
+                this.playSound('victory');
+            }
+            
+            // Ekran flash efekti
+            this.flashScreen('#ffd700', 0.5);
+        }
+        
+        /**
+         * SL (Stop Loss) efekti - Kırmızı parçalanma
+         */
+        async triggerSLEffect() {
+            if (!this.particles) return;
+            
+            const intensity = this.getIntensityMultiplier();
+            
+            // Kırmızı parçalanma efekti
+            for (let i = 0; i < 40 * intensity; i++) {
+                setTimeout(() => {
+                    this.particles.addParticle({
+                        x: Math.random() * window.innerWidth,
+                        y: Math.random() * window.innerHeight,
+                        color: { value: '#ff0000' },
+                        size: { value: Math.random() * 6 + 2 },
+                        move: {
+                            speed: Math.random() * 8 + 2,
+                            direction: 'outside',
+                            straight: true
+                        },
+                        opacity: { 
+                            value: 1, 
+                            animation: { enable: true, speed: 1, minimumValue: 0 }
+                        }
+                    });
+                }, i * 10);
+            }
+            
+            // Ses efekti
+            if (this.soundEnabled) {
+                this.playSound('defeat');
+            }
+            
+            // Ekran sarsıntı efekti
+            this.shakeScreen();
+        }
+        
+        /**
+         * İlahi Müdahale efekti - Zeus'un fısıltısı
+         */
+        async triggerDivineIntervention(type) {
+            if (!this.particles) return;
+            
+            const colors = {
+                shield: '#00aaff',
+                balance: '#ffaa00',
+                sword: '#ff3366'
+            };
+            
+            const color = colors[type] || '#ffd700';
+            const intensity = this.getIntensityMultiplier();
+            
+            // Spiral efekt
+            for (let i = 0; i < 100 * intensity; i++) {
+                const angle = (i / 10) * Math.PI;
+                const radius = i * 2;
+                const x = window.innerWidth / 2 + Math.cos(angle) * radius;
+                const y = window.innerHeight / 2 + Math.sin(angle) * radius;
+                
+                setTimeout(() => {
+                    this.particles.addParticle({
+                        x: x,
+                        y: y,
+                        color: { value: color },
+                        size: { value: Math.random() * 10 + 5 },
+                        move: {
+                            enable: false
+                        },
+                        opacity: { 
+                            value: 1, 
+                            animation: { 
+                                enable: true, 
+                                speed: 0.5, 
+                                minimumValue: 0,
+                                startValue: 'random'
+                            }
+                        }
+                    });
+                }, i * 10);
+            }
+            
+            // Ses efekti
+            if (this.soundEnabled) {
+                this.playSound('divine');
+            }
+            
+            // Ekran flash efekti
+            this.flashScreen(color, 0.7);
+        }
+        
+        /**
+         * Mahşerin Atlısı gelişi efekti
+         */
+        async triggerHorsemanArrival(horseman) {
+            if (!this.particles) return;
+            
+            const configs = {
+                war: { color: '#ff0000', sound: 'war' },
+                famine: { color: '#8b4513', sound: 'famine' },
+                pestilence: { color: '#228b22', sound: 'pestilence' },
+                death: { color: '#000000', sound: 'death' }
+            };
+            
+            const config = configs[horseman] || configs.death;
+            const intensity = this.getIntensityMultiplier();
+            
+            // Karanlık bulutlar
+            for (let i = 0; i < 200 * intensity; i++) {
+                this.particles.addParticle({
+                    x: Math.random() * window.innerWidth,
+                    y: -50,
+                    color: { value: config.color },
+                    size: { value: Math.random() * 20 + 10 },
+                    move: {
+                        speed: Math.random() * 3 + 1,
+                        angle: { value: 90 }
+                    },
+                    opacity: { 
+                        value: 0.8,
+                        animation: { 
+                            enable: true, 
+                            speed: 0.2,
+                            minimumValue: 0.3
+                        }
+                    }
+                });
+            }
+            
+            // Ses efekti
+            if (this.soundEnabled) {
+                this.playSound(config.sound);
+            }
+            
+            // Ekran karartma efekti
+            this.darkScreen(0.7, 3000);
+        }
+        
+        /**
+         * Yardımcı fonksiyonlar
+         */
+        getIntensityMultiplier() {
+            const intensities = {
+                low: 0.5,
+                medium: 1,
+                high: 1.5,
+                insane: 3
+            };
+            return intensities[this.effectIntensity] || 1;
+        }
+        
+        flashScreen(color, opacity) {
+            const flash = document.createElement('div');
+            flash.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: ${color};
+                opacity: ${opacity};
+                pointer-events: none;
+                z-index: 10000;
+                animation: flashFade 0.5s ease-out forwards;
+            `;
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes flashFade {
+                    from { opacity: ${opacity}; }
+                    to { opacity: 0; }
+                }
+            `;
+            
+            document.head.appendChild(style);
+            document.body.appendChild(flash);
+            
+            setTimeout(() => {
+                flash.remove();
+                style.remove();
+            }, 500);
+        }
+        
+        shakeScreen() {
+            document.body.style.animation = 'screenShake 0.5s';
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes screenShake {
+                    0%, 100% { transform: translate(0, 0); }
+                    25% { transform: translate(-10px, -10px); }
+                    50% { transform: translate(10px, 10px); }
+                    75% { transform: translate(-10px, 10px); }
+                }
+            `;
+            
+            document.head.appendChild(style);
+            
+            setTimeout(() => {
+                document.body.style.animation = '';
+                style.remove();
+            }, 500);
+        }
+        
+        darkScreen(opacity, duration) {
+            const dark = document.createElement('div');
+            dark.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: black;
+                opacity: 0;
+                pointer-events: none;
+                z-index: 9998;
+                transition: opacity 1s;
+            `;
+            
+            document.body.appendChild(dark);
+            
+            setTimeout(() => {
+                dark.style.opacity = opacity;
+            }, 10);
+            
+            setTimeout(() => {
+                dark.style.opacity = '0';
+                setTimeout(() => dark.remove(), 1000);
+            }, duration);
+        }
+        
+        playSound(type) {
+            if (!this.soundEnabled) return;
+            
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            const sounds = {
+                buy: { frequency: 800, type: 'sine', duration: 0.3 },
+                sell: { frequency: 400, type: 'square', duration: 0.3 },
+                victory: { frequency: 1200, type: 'triangle', duration: 0.5 },
+                defeat: { frequency: 200, type: 'sawtooth', duration: 0.5 },
+                divine: { frequency: 600, type: 'sine', duration: 1 },
+                war: { frequency: 150, type: 'sawtooth', duration: 2 },
+                famine: { frequency: 100, type: 'square', duration: 2 },
+                pestilence: { frequency: 300, type: 'triangle', duration: 2 },
+                death: { frequency: 50, type: 'sawtooth', duration: 3 }
+            };
+            
+            const sound = sounds[type] || sounds.divine;
+            
+            oscillator.frequency.value = sound.frequency;
+            oscillator.type = sound.type;
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + sound.duration);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + sound.duration);
+        }
+    }
+    
+    /**
+     * PanteonManager - Elçilerin ve Gardiyanların yönetimi
+     */
+    class PanteonManager {
+        constructor(app) {
+            this.app = app;
+            
+            // Elçiler
+            this.elciler = {
+                metatron: {
+                    name: 'METATRON',
+                    itibar: 100,
+                    mode: 'inancli',
+                    gardiyanlar: [],
+                    stats: { tp: 0, sl: 0, total: 0 }
+                },
+                uriel: {
+                    name: 'URIEL',
+                    itibar: 100,
+                    mode: 'inancli',
+                    gardiyanlar: [],
+                    stats: { tp: 0, sl: 0, total: 0 }
+                },
+                raphael: {
+                    name: 'RAPHAEL',
+                    itibar: 100,
+                    mode: 'inancli',
+                    healedCount: 0,
+                    stats: { healed: 0, failed: 0 }
+                }
+            };
+            
+            // Gardiyanların Elçilere dağılımı
+            this.gardiyanAssignments = {
+                metatron: [
+                    'wallBounce', 'velocityScalping', 'orderFlowMomentum',
+                    'breakoutPattern', 'marketStructure', 'smartMoneyConcepts',
+                    'superTrend', 'institutionalOrderFlow'
+                ],
+                uriel: [
+                    'rsiDivergence', 'liquidityGaps', 'fibonacciRetracement',
+                    'supportResistance', 'volumeProfile', 'divergenceDetection',
+                    'microSpreadArbitrage', 'vwapReversion', 'bollingerReversion'
+                ]
+            };
+            
+            // Durgunluk takibi
+            this.lastActivityTime = Date.now();
+            this.idleCheckInterval = null;
+        }
+        
+        init() {
+            // Gardiyanları Elçilere ata
+            for (const [elci, gardiyanList] of Object.entries(this.gardiyanAssignments)) {
+                this.elciler[elci].gardiyanlar = gardiyanList;
+            }
+            
+            // Durgunluk kontrolünü başlat
+            this.startIdleCheck();
+            
+            // UI'yi güncelle
+            this.updateUI();
+        }
+        
+        /**
+         * İtibar güncelleme
+         */
+        updateReputation(signalResult, contributors) {
+            const isTP = signalResult === 'tp';
+            
+            if (isTP) {
+                // TP durumu - katkıda bulunanlar ödüllendirilir
+                const contributingElciler = new Set();
+                
+                for (const contributor of contributors) {
+                    const elci = this.findElciByGardiyan(contributor.strategy);
+                    if (elci) {
+                        contributingElciler.add(elci);
+                    }
+                }
+                
+                // Katkıda bulunan Elçiler +1 itibar
+                for (const elciName of contributingElciler) {
+                    this.elciler[elciName].itibar += 1;
+                    this.elciler[elciName].stats.tp++;
+                }
+                
+                // Raphael her TP'de +0.5 itibar (iyileştirici bonus)
+                this.elciler.raphael.itibar += 0.5;
+                
+            } else {
+                // SL durumu - tüm Elçiler cezalandırılır
+                for (const elciName of Object.keys(this.elciler)) {
+                    const elci = this.elciler[elciName];
+                    elci.itibar -= 2;
+                    
+                    if (elciName !== 'raphael') {
+                        elci.stats.sl++;
+                    }
+                }
+                
+                // Sorumlu Elçi ek ceza
+                const responsibleElciler = new Set();
+                for (const contributor of contributors) {
+                    const elci = this.findElciByGardiyan(contributor.strategy);
+                    if (elci) {
+                        responsibleElciler.add(elci);
+                    }
+                }
+                
+                for (const elciName of responsibleElciler) {
+                    this.elciler[elciName].itibar -= 3;
+                }
+            }
+            
+            // Modları güncelle
+            this.updateModes();
+            
+            // UI'yi güncelle
+            this.updateUI();
+            
+            // Aktiviteyi kaydet
+            this.lastActivityTime = Date.now();
+        }
+        
+        /**
+         * Elçi modlarını güncelle
+         */
+        updateModes() {
+            for (const elci of Object.values(this.elciler)) {
+                const oldMode = elci.mode;
+                
+                if (elci.itibar >= 80) {
+                    elci.mode = 'inancli';
+                } else if (elci.itibar >= 40) {
+                    elci.mode = 'supheci';
+                } else {
+                    elci.mode = 'kiyamet';
+                }
+                
+                // Mod değişimi bildirimi
+                if (oldMode !== elci.mode) {
+                    this.app.showNotification(
+                        'MOD DEĞİŞİMİ',
+                        `${elci.name} artık ${elci.mode.toUpperCase()} modunda!`,
+                        elci.mode === 'kiyamet' ? 'danger' : 
+                        elci.mode === 'supheci' ? 'warning' : 'success'
+                    );
+                }
+            }
+        }
+        
+        /**
+         * Durgunluk kontrolü
+         */
+        startIdleCheck() {
+            this.idleCheckInterval = setInterval(() => {
+                const now = Date.now();
+                const idleHours = (now - this.lastActivityTime) / (1000 * 60 * 60);
+                
+                if (idleHours >= 4) {
+                    // 4 saat durgunluk - tüm Elçiler -1 itibar
+                    for (const elci of Object.values(this.elciler)) {
+                        elci.itibar = Math.max(0, elci.itibar - 1);
+                    }
+                    
+                    this.updateModes();
+                    this.updateUI();
+                    
+                    this.app.showNotification(
+                        'DURGUNLUK CEZASI',
+                        'Panteon 4 saattir hareketsiz! Tüm Elçiler -1 itibar kaybetti.',
+                        'warning'
+                    );
+                    
+                    // Zamanı sıfırla
+                    this.lastActivityTime = now;
+                }
+            }, 60000); // Dakikada bir kontrol
+        }
+        
+        /**
+         * Gardiyanın hangi Elçiye ait olduğunu bul
+         */
+        findElciByGardiyan(gardiyanName) {
+            for (const [elciName, gardiyanList] of Object.entries(this.gardiyanAssignments)) {
+                if (gardiyanList.includes(gardiyanName)) {
+                    return elciName;
+                }
+            }
+            return null;
+        }
+        
+        /**
+         * Elçi bazlı strateji ağırlığı çarpanı
+         */
+        getElciMultiplier(elciName) {
+            const elci = this.elciler[elciName];
+            if (!elci) return 1;
+            
+            switch (elci.mode) {
+                case 'inancli':
+                    return 1.2; // %20 boost
+                case 'supheci':
+                    return 0.9; // %10 penalty
+                case 'kiyamet':
+                    return 0.7; // %30 penalty
+                default:
+                    return 1;
+            }
+        }
+        
+        /**
+         * Raphael'in iyileştirme fonksiyonu
+         */
+        healGardiyan(gardiyanName) {
+            const strategy = this.app.strategies[gardiyanName];
+            if (!strategy) return;
+            
+            // Strateji istatistiklerini sıfırla
+            const stats = this.app.strategyStats[gardiyanName];
+            if (stats) {
+                stats.alpha = 3;
+                stats.beta = 2;
+                stats.proposals = Math.floor(stats.proposals * 0.5);
+                stats.contrib = Math.floor(stats.contrib * 0.5);
+                stats.wins = Math.floor(stats.wins * 0.5);
+                stats.losses = Math.floor(stats.losses * 0.5);
+            }
+            
+            this.elciler.raphael.healedCount++;
+            this.elciler.raphael.stats.healed++;
+            
+            this.app.showNotification(
+                'İYİLEŞTİRME',
+                `RAPHAEL ${gardiyanName} stratejisini iyileştirdi!`,
+                'success'
+            );
+        }
+        
+        /**
+         * UI Güncelleme
+         */
+        updateUI() {
+            for (const [elciName, elci] of Object.entries(this.elciler)) {
+                // İtibar
+                const itibarEl = document.getElementById(`${elciName}-itibar`);
+                if (itibarEl) {
+                    itibarEl.textContent = Math.round(elci.itibar);
+                }
+                
+                // Mod
+                const modeEl = document.getElementById(`${elciName}-mode`);
+                if (modeEl) {
+                    modeEl.textContent = elci.mode.toUpperCase();
+                    modeEl.className = `elci-mode ${elci.mode}`;
+                }
+                
+                // İstatistikler
+                if (elciName === 'raphael') {
+                    const healedEl = document.getElementById('raphael-healed-count');
+                    if (healedEl) {
+                        healedEl.textContent = elci.healedCount;
+                    }
+                } else {
+                    const gardiyanCountEl = document.getElementById(`${elciName}-gardiyan-count`);
+                    if (gardiyanCountEl) {
+                        gardiyanCountEl.textContent = elci.gardiyanlar.length;
+                    }
+                }
+                
+                // Başarı oranı
+                const successRateEl = document.getElementById(`${elciName}-success-rate`);
+                if (successRateEl) {
+                    if (elciName === 'raphael') {
+                        const total = elci.stats.healed + elci.stats.failed;
+                        const rate = total > 0 ? (elci.stats.healed / total * 100) : 0;
+                        successRateEl.textContent = `${rate.toFixed(0)}%`;
+                    } else {
+                        const total = elci.stats.tp + elci.stats.sl;
+                        const rate = total > 0 ? (elci.stats.tp / total * 100) : 0;
+                        successRateEl.textContent = `${rate.toFixed(0)}%`;
+                    }
+                }
+            }
+        }
+        
+        /**
+         * Panteon durumunu kaydet
+         */
+        async saveState() {
+            await this.app.dbManager.save('panteonState', {
+                id: 'main',
+                elciler: this.elciler,
+                lastActivityTime: this.lastActivityTime
+            });
+        }
+        
+        /**
+         * Panteon durumunu yükle
+         */
+        async loadState() {
+            const state = await this.app.dbManager.get('panteonState', 'main');
+            if (state) {
+                this.elciler = state.elciler;
+                this.lastActivityTime = state.lastActivityTime;
+                this.updateModes();
+                this.updateUI();
+            }
+        }
+    }
+    
+    /**
+     * TheOracle - Mahşerin Dört Atlısı tespiti
+     */
+    class TheOracle {
+        constructor(app) {
+            this.app = app;
+            
+            this.horsemen = {
+                war: { active: false, threshold: 5 },      // Volatilite %5+
+                famine: { active: false, threshold: 70 },  // RSI 70+
+                pestilence: { active: false, threshold: 0.5 }, // Spread %0.5+
+                death: { active: false, threshold: -10 }   // Drawdown %10+
+            };
+            
+            this.checkInterval = null;
+        }
+        
+        start() {
+            this.checkInterval = setInterval(() => this.detectHorsemen(), 10000);
+        }
+        
+        stop() {
+            if (this.checkInterval) {
+                clearInterval(this.checkInterval);
+                this.checkInterval = null;
+            }
+        }
+        
+        detectHorsemen() {
+            const indicators = this.app.indicators;
+            const marketData = this.app.marketData;
+            
+            // Savaş Atlısı - Yüksek volatilite
+            if (indicators.atr && marketData.price) {
+                const volatility = (indicators.atr / marketData.price) * 100;
+                const wasActive = this.horsemen.war.active;
+                this.horsemen.war.active = volatility > this.horsemen.war.threshold;
+                
+                if (!wasActive && this.horsemen.war.active) {
+                    this.announceHorseman('war');
+                }
+            }
+            
+            // Kıtlık Atlısı - Aşırı alım
+            if (indicators.rsi) {
+                const wasActive = this.horsemen.famine.active;
+                this.horsemen.famine.active = indicators.rsi > this.horsemen.famine.threshold;
+                
+                if (!wasActive && this.horsemen.famine.active) {
+                    this.announceHorseman('famine');
+                }
+            }
+            
+            // Salgın Atlısı - Yüksek spread
+            const orderBook = this.app.orderBook;
+            if (orderBook.bids.length && orderBook.asks.length) {
+                const spread = ((orderBook.asks[0][0] - orderBook.bids[0][0]) / orderBook.bids[0][0]) * 100;
+                const wasActive = this.horsemen.pestilence.active;
+                this.horsemen.pestilence.active = spread > this.horsemen.pestilence.threshold;
+                
+                if (!wasActive && this.horsemen.pestilence.active) {
+                    this.announceHorseman('pestilence');
+                }
+            }
+            
+            // Ölüm Atlısı - Derin drawdown
+            const stats = this.app.stats;
+            if (stats.total > 0) {
+                const winRate = (stats.tp / stats.total) * 100;
+                const wasActive = this.horsemen.death.active;
+                this.horsemen.death.active = winRate < 40; // %40'ın altı
+                
+                if (!wasActive && this.horsemen.death.active) {
+                    this.announceHorseman('death');
+                }
+            }
+        }
+        
+        announceHorseman(horseman) {
+            const messages = {
+                war: 'SAVAŞ ATLISI GELDİ! Yüksek volatilite tespit edildi.',
+                famine: 'KITLIK ATLISI GELDİ! Aşırı alım bölgesi.',
+                pestilence: 'SALGIN ATLISI GELDİ! Likidite problemi tespit edildi.',
+                death: 'ÖLÜM ATLISI GELDİ! Kritik kayıp durumu.'
+            };
+            
+            this.app.showNotification(
+                'MAHŞERİN ATLISI',
+                messages[horseman],
+                'danger'
+            );
+            
+            // Görsel efekt
+            this.app.effectsManager.triggerHorsemanArrival(horseman);
+            
+            // Süvarileri uyandır
+            this.awakenCavalry(horseman);
+        }
+        
+        awakenCavalry(horseman) {
+            // İlgili süvari stratejisini aktive et
+            const cavalryMap = {
+                war: 'BlackSwanCatcher',
+                famine: 'MeanReversionExtreme',
+                pestilence: 'LiquidityVacuum',
+                death: 'PhoenixAscension'
+            };
+            
+            const cavalryName = cavalryMap[horseman];
+            if (cavalryName && this.app.cavalryStrategies[cavalryName]) {
+                this.app.cavalryStrategies[cavalryName].awaken();
+                
+                this.app.showNotification(
+                    'SÜVARI UYANDI',
+                    `${cavalryName} stratejisi aktive edildi!`,
+                    'warning'
+                );
+            }
+        }
+    }
+
+       // ================================================
+    // PANTEON'UN KADERİ - ANA UYGULAMA (DEVAM)
+    // ================================================
+    
+    /**
+     * Gardiyan Stratejileri - Orijinal 19 strateji
+     */
+    class BaseStrategy {
+        constructor(app, name) {
+            this.app = app;
+            this.name = name;
+            this.weight = 1;
+            this.status = 'active'; // active, surgery, imprisoned
+            this.lastProposalTime = {};
+            this.cooldownMs = 10000;
+            this.stats = {
+                proposals: 0,
+                contributions: 0,
+                wins: 0,
+                losses: 0
+            };
+        }
+        
+        propose(direction, reason, score) {
+            const now = Date.now();
+            const key = `${this.app.currentSymbol}-${direction}`;
+            
+            if (now - (this.lastProposalTime[key] || 0) < this.cooldownMs) {
+                return;
+            }
+            
+            if (this.status !== 'active') {
+                return; // Zindandaki veya ameliyattaki stratejiler teklif veremez
+            }
+            
+            // Elçi çarpanını uygula
+            const elci = this.app.panteonManager.findElciByGardiyan(this.name);
+            const elciMultiplier = this.app.panteonManager.getElciMultiplier(elci);
+            const adjustedScore = score * elciMultiplier;
+            
+            this.app.confluenceEngine.propose(this.name, direction, reason, adjustedScore);
+            this.lastProposalTime[key] = now;
+            this.stats.proposals++;
+        }
+        
+        analyzeOrderBook(orderBook) {}
+        processTrade(trade) {}
+        analyze() {}
+    }
+    
+    class WallBounceStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'WallBounce');
+            this.DISTANCE_THRESHOLD_PERCENT = 0.05 / 100;
+        }
+        
+        analyzeOrderBook(orderBook) {
+            const currentPrice = this.app.marketData.price;
+            if (!currentPrice) return;
+            
+            const btcPrice = this.app.marketData.btcPrice || 70000;
+            const wallQuantityThreshold = (this.app.settings.params.wallBtc * btcPrice) / currentPrice;
+            
+            for (const [price, qty] of orderBook.asks) {
+                if (qty > wallQuantityThreshold) {
+                    const distance = (price - currentPrice) / currentPrice;
+                    if (distance > 0 && distance < this.DISTANCE_THRESHOLD_PERCENT) {
+                        this.propose('sell', `Satış Duvarı ${price.toFixed(this.app.getDecimalPlaces(price))}`, 3);
+                        return;
+                    }
+                }
+            }
+            
+            for (const [price, qty] of orderBook.bids) {
+                if (qty > wallQuantityThreshold) {
+                    const distance = (currentPrice - price) / currentPrice;
+                    if (distance > 0 && distance < this.DISTANCE_THRESHOLD_PERCENT) {
+                        this.propose('buy', `Alış Duvarı ${price.toFixed(this.app.getDecimalPlaces(price))}`, 3);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+    
+    class VelocityScalpingStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'VelocityScalping');
+            this.pricePoints = [];
+            this.VELOCITY_WINDOW_MS = 2000;
+            this.MIN_POINTS = 20;
+            this.VELOCITY_THRESHOLD_PERCENT = 0.10 / 100;
+        }
+        
+        processTrade(trade) {
+            const now = Date.now();
+            this.pricePoints.push({ time: now, price: trade.price });
+            this.pricePoints = this.pricePoints.filter(p => now - p.time < this.VELOCITY_WINDOW_MS);
+            
+            if (this.pricePoints.length < this.MIN_POINTS) return;
+            
+            const firstPoint = this.pricePoints[0];
+            const lastPoint = this.pricePoints[this.pricePoints.length - 1];
+            const priceChange = (lastPoint.price - firstPoint.price) / firstPoint.price;
+            
+            if (priceChange > this.VELOCITY_THRESHOLD_PERCENT) {
+                this.propose('buy', `Fiyat Hızı: +${(priceChange * 100).toFixed(2)}%`, 4);
+                this.pricePoints = [];
+            } else if (priceChange < -this.VELOCITY_THRESHOLD_PERCENT) {
+                this.propose('sell', `Fiyat Hızı: ${(priceChange * 100).toFixed(2)}%`, 4);
+                this.pricePoints = [];
+            }
+        }
+    }
+    
+    class RsiDivergenceStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'RsiDivergence');
+            this.lookback = 14;
+        }
+        
+        analyze() {
+            const candles = this.app.candles;
+            const rsiValues = this.app.indicators.rsi;
+            
+            if (!rsiValues || rsiValues.length < this.lookback || !candles || candles.length < this.lookback) return;
+            
+            const lastCandle = candles[candles.length - 1];
+            const prevCandle = candles[candles.length - this.lookback];
+            const lastRsi = rsiValues[rsiValues.length - 1];
+            const prevRsi = rsiValues[rsiValues.length - this.lookback];
+            
+            if (!lastCandle || !prevCandle || !isFinite(lastRsi) || !isFinite(prevRsi)) return;
+            
+            if (lastCandle.high > prevCandle.high && lastRsi < prevRsi) {
+                this.propose('sell', 'RSI Ayı Uyuşmazlığı', 5);
+            }
+            
+            if (lastCandle.low < prevCandle.low && lastRsi > prevRsi) {
+                this.propose('buy', 'RSI Boğa Uyuşmazlığı', 5);
+            }
+        }
+    }
+    
+    class OrderFlowMomentumStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'OrderFlowMomentum');
+            this.trades = [];
+            this.WINDOW_MS = 5000;
+        }
+        
+        processTrade(trade) {
+            const now = Date.now();
+            this.trades.push({ ...trade, timestamp: now });
+            this.trades = this.trades.filter(t => now - t.timestamp < this.WINDOW_MS);
+            
+            if (this.trades.length < 50) return;
+            
+            const buys = this.trades.filter(t => !t.isBuyerMaker).reduce((sum, t) => sum + t.quantity, 0);
+            const sells = this.trades.filter(t => t.isBuyerMaker).reduce((sum, t) => sum + t.quantity, 0);
+            const total = buys + sells;
+            
+            if (total === 0) return;
+            
+            if (buys / total > 0.7) {
+                this.propose('buy', `Alıcı Akışı: %${(buys / total * 100).toFixed(0)}`, 4);
+                this.trades = [];
+            } else if (sells / total > 0.7) {
+                this.propose('sell', `Satıcı Akışı: %${(sells / total * 100).toFixed(0)}`, 4);
+                this.trades = [];
+            }
+        }
+    }
+    
+    class LiquidityGapsStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'LiquidityGaps');
+            this.GAP_THRESHOLD_PERCENT = 0.1 / 100;
+        }
+        
+        analyzeOrderBook(orderBook) {
+            for (let i = 0; i < orderBook.asks.length - 1; i++) {
+                const gap = orderBook.asks[i + 1][0] - orderBook.asks[i][0];
+                if ((gap / orderBook.asks[i][0]) > this.GAP_THRESHOLD_PERCENT) {
+                    this.propose('buy', `Likidite Boşluğu ${orderBook.asks[i][0].toFixed(this.app.getDecimalPlaces(orderBook.asks[i][0]))}`, 3);
+                    return;
+                }
+            }
+            
+            for (let i = 0; i < orderBook.bids.length - 1; i++) {
+                const gap = orderBook.bids[i][0] - orderBook.bids[i + 1][0];
+                if ((gap / orderBook.bids[i][0]) > this.GAP_THRESHOLD_PERCENT) {
+                    this.propose('sell', `Likidite Boşluğu ${orderBook.bids[i][0].toFixed(this.app.getDecimalPlaces(orderBook.bids[i][0]))}`, 3);
+                    return;
+                }
+            }
+        }
+    }
+    
+    class BreakoutPatternStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'BreakoutPattern');
+            this.LOOKBACK = 30;
+            this.VOL_SPIKE = 1.4;
+            this.BREAK_PCT = 0.03 / 100;
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            if (c.length < this.LOOKBACK + 1) return;
+            
+            const recent = c.slice(-this.LOOKBACK - 1);
+            const highs = recent.map(x => x.high);
+            const lows = recent.map(x => x.low);
+            const vols = recent.map(x => x.volume);
+            
+            const last = recent[recent.length - 1];
+            const maxH = Math.max(...highs.slice(0, -1));
+            const minL = Math.min(...lows.slice(0, -1));
+            const volSma = vols.slice(0, -1).reduce((a, b) => a + b, 0) / (vols.length - 1);
+            
+            if (last.close > maxH * (1 + this.BREAK_PCT) && last.volume > volSma * this.VOL_SPIKE) {
+                this.propose('buy', 'Aralık Üstü Hacimli Kırılım', 4);
+            } else if (last.close < minL * (1 - this.BREAK_PCT) && last.volume > volSma * this.VOL_SPIKE) {
+                this.propose('sell', 'Aralık Altı Hacimli Kırılım', 4);
+            }
+        }
+    }
+    
+    class SupportResistanceStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'SupportResistance');
+            this.LOOKBACK = 60;
+            this.THRESH = 0.15 / 100;
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            if (c.length < this.LOOKBACK) return;
+            
+            const slice = c.slice(-this.LOOKBACK);
+            const last = slice[slice.length - 1];
+            const maxH = Math.max(...slice.map(x => x.high));
+            const minL = Math.min(...slice.map(x => x.low));
+            
+            const distTop = (maxH - last.close) / last.close;
+            const distBot = (last.close - minL) / last.close;
+            
+            if (distTop >= 0 && distTop < this.THRESH && last.close < last.open) {
+                this.propose('sell', 'Direnç Bölgesi Reddi', 3);
+            }
+            
+            if (distBot >= 0 && distBot < this.THRESH && last.close > last.open) {
+                this.propose('buy', 'Destek Bölgesi Tepkisi', 3);
+            }
+        }
+    }
+    
+    class FibonacciRetracementStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'FibonacciRetracement');
+            this.LOOKBACK = 120;
+            this.TOL = 0.2 / 100;
+            this.levels = [0.382, 0.5, 0.618];
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            if (c.length < this.LOOKBACK) return;
+            
+            const slice = c.slice(-this.LOOKBACK);
+            let high = -Infinity, low = Infinity, hT = 0, lT = 0;
+            
+            slice.forEach(k => {
+                if (k.high > high) { high = k.high; hT = k.time; }
+                if (k.low < low) { low = k.low; lT = k.time; }
+            });
+            
+            if (!isFinite(high) || !isFinite(low) || high === low) return;
+            
+            const last = slice[slice.length - 1];
+            
+            if (hT > lT) {
+                const retr = (high - last.close) / (high - low);
+                for (const L of this.levels) {
+                    if (Math.abs(retr - L) < this.TOL) {
+                        this.propose('buy', `Fibo ${Math.round(L * 100)}% Bölgesi`, 3);
+                        break;
+                    }
+                }
+            } else {
+                const retr = (last.close - low) / (high - low);
+                for (const L of this.levels) {
+                    if (Math.abs(retr - L) < this.TOL) {
+                        this.propose('sell', `Fibo ${Math.round(L * 100)}% Bölgesi`, 3);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    class VolumeProfileStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'VolumeProfile');
+            this.PERIOD = 20;
+            this.SPIKE = 2.0;
+            this.CLOSE_POS = 0.7;
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            if (c.length < this.PERIOD + 1) return;
+            
+            const last = c[c.length - 1];
+            const vols = c.slice(-this.PERIOD - 1, -1).map(x => x.volume);
+            const volSma = vols.reduce((a, b) => a + b, 0) / vols.length;
+            
+            if (last.volume > volSma * this.SPIKE && (last.close - last.low) / Math.max(1e-8, (last.high - last.low)) > this.CLOSE_POS) {
+                this.propose('buy', 'Hacim Spike - Üst Kapanış', 3);
+            } else if (last.volume > volSma * this.SPIKE && (last.high - last.close) / Math.max(1e-8, (last.high - last.low)) > this.CLOSE_POS) {
+                this.propose('sell', 'Hacim Spike - Alt Kapanış', 3);
+            }
+        }
+    }
+    
+    class SmartMoneyConceptsStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'SmartMoneyConcepts');
+            this.GAP_MIN_PCT = 0.05 / 100;
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            if (c.length < 3) return;
+            
+            const a = c[c.length - 3];
+            const b = c[c.length - 2];
+            const d = c[c.length - 1];
+            
+            if ((d.low - a.high) / Math.max(1e-8, d.low) > this.GAP_MIN_PCT) {
+                this.propose('buy', 'Bullish FVG', 4);
+            }
+            
+            if ((a.low - d.high) / Math.max(1e-8, d.high) > this.GAP_MIN_PCT) {
+                this.propose('sell', 'Bearish FVG', 4);
+            }
+        }
+    }
+    
+    class DivergenceDetectionStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'DivergenceDetection');
+            this.LOOKBACK = 40;
+            this.SWING = 3;
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            const rsi = this.app.indicators.rsi;
+            
+            if (!rsi || c.length < this.LOOKBACK || rsi.length < this.LOOKBACK) return;
+            
+            const slice = c.slice(-this.LOOKBACK);
+            const r = rsi.slice(-this.LOOKBACK);
+            const pivLows = [];
+            const pivHighs = [];
+            
+            for (let i = this.SWING; i < slice.length - this.SWING; i++) {
+                if (slice[i].low < Math.min(...slice.slice(i - this.SWING, i).map(x => x.low)) &&
+                    slice[i].low < Math.min(...slice.slice(i + 1, i + 1 + this.SWING).map(x => x.low))) {
+                    pivLows.push(i);
+                }
+                if (slice[i].high > Math.max(...slice.slice(i - this.SWING, i).map(x => x.high)) &&
+                    slice[i].high > Math.max(...slice.slice(i + 1, i + 1 + this.SWING).map(x => x.high))) {
+                    pivHighs.push(i);
+                }
+            }
+            
+            if (pivLows.length >= 2) {
+                const i1 = pivLows[pivLows.length - 2], i2 = pivLows[pivLows.length - 1];
+                if (slice[i2].low < slice[i1].low && r[i2] > r[i1]) {
+                    this.propose('buy', 'Bullish RSI Divergence (Pivot)', 5);
+                }
+            }
+            
+            if (pivHighs.length >= 2) {
+                const i1 = pivHighs[pivHighs.length - 2], i2 = pivHighs[pivHighs.length - 1];
+                if (slice[i2].high > slice[i1].high && r[i2] < r[i1]) {
+                    this.propose('sell', 'Bearish RSI Divergence (Pivot)', 5);
+                }
+            }
+        }
+    }
+    
+    class MarketStructureStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'MarketStructure');
+            this.SWING = 3;
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            if (c.length < 2 * this.SWING + 5) return;
+            
+            const pivotHighs = [], pivotLows = [];
+            
+            for (let i = this.SWING; i < c.length - this.SWING; i++) {
+                if (c[i].high > Math.max(...c.slice(i - this.SWING, i).map(x => x.high)) &&
+                    c[i].high > Math.max(...c.slice(i + 1, i + 1 + this.SWING).map(x => x.high))) {
+                    pivotHighs.push(i);
+                }
+                if (c[i].low < Math.min(...c.slice(i - this.SWING, i).map(x => x.low)) &&
+                    c[i].low < Math.min(...c.slice(i + 1, i + 1 + this.SWING).map(x => x.low))) {
+                    pivotLows.push(i);
+                }
+            }
+            
+            const last = c[c.length - 1];
+            
+            if (pivotHighs.length) {
+                const ph = c[pivotHighs[pivotHighs.length - 1]].high;
+                if (last.close > ph) {
+                    this.propose('buy', 'Yapı Kırılımı (BOS Up)', 4);
+                }
+            }
+            
+            if (pivotLows.length) {
+                const pl = c[pivotLows[pivotLows.length - 1]].low;
+                if (last.close < pl) {
+                    this.propose('sell', 'Yapı Kırılımı (BOS Down)', 4);
+                }
+            }
+        }
+    }
+    
+    class InstitutionalOrderFlowStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'InstitutionalOrderFlow');
+            this.TOP_N = 5;
+            this.IMB_THRESHOLD = 2.0;
+        }
+        
+        analyzeOrderBook(orderBook) {
+            if (!orderBook.bids.length || !orderBook.asks.length) return;
+            
+            const topB = orderBook.bids.slice(0, this.TOP_N).reduce((s, [, q]) => s + q, 0);
+            const topA = orderBook.asks.slice(0, this.TOP_N).reduce((s, [, q]) => s + q, 0);
+            
+            if (topB / Math.max(1e-8, topA) > this.IMB_THRESHOLD) {
+                this.propose('buy', 'Orderbook İmbalansı (Bid Ağırlık)', 3);
+            } else if (topA / Math.max(1e-8, topB) > this.IMB_THRESHOLD) {
+                this.propose('sell', 'Orderbook İmbalansı (Ask Ağırlık)', 3);
+            }
+        }
+    }
+    
+    class MicroSpreadArbitrageStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'MicroSpreadArbitrage');
+            this.SPREAD_PCT = 0.08 / 100;
+        }
+        
+        analyzeOrderBook(orderBook) {
+            if (!orderBook.bids.length || !orderBook.asks.length) return;
+            
+            const bestBid = orderBook.bids[0][0];
+            const bestAsk = orderBook.asks[0][0];
+            const mid = (bestAsk + bestBid) / 2;
+            const spreadPct = (bestAsk - bestBid) / mid;
+            
+            if (spreadPct > this.SPREAD_PCT) {
+                const current = this.app.marketData.price || mid;
+                if (current < mid) {
+                    this.propose('buy', 'Geniş Spread - Mean Reversion', 2);
+                } else {
+                    this.propose('sell', 'Geniş Spread - Mean Reversion', 2);
+                }
+            }
+        }
+    }
+    
+    class VWAPReversionStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'VWAPReversion');
+            this.MULT = 1.0;
+        }
+        
+        analyze() {
+            const price = this.app.marketData.price;
+            const vwap = this.app.indicators.vwap;
+            const atr = this.app.indicators.atr;
+            
+            if (!price || !vwap || !atr) return;
+            
+            const dev = atr / price;
+            const diffPct = (price - vwap) / vwap;
+            
+            if (diffPct > this.MULT * dev) {
+                this.propose('sell', 'VWAP Üstü Aşırı Sapma', 3);
+            }
+            if (diffPct < -this.MULT * dev) {
+                this.propose('buy', 'VWAP Altı Aşırı Sapma', 3);
+            }
+        }
+    }
+    
+    class SuperTrendStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'SuperTrend');
+            this.MULT = 3.0;
+            this.PERIOD = 14;
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            const atr = this.app.indicators.atr;
+            
+            if (!atr || c.length < 2) return;
+            
+            const last = c[c.length - 1];
+            const m = (last.high + last.low) / 2;
+            const upper = m + this.MULT * atr;
+            const lower = m - this.MULT * atr;
+            
+            if (last.close > upper) {
+                this.propose('buy', 'ATR Kanal Üstü Kırılım (SuperTrend)', 4);
+            } else if (last.close < lower) {
+                this.propose('sell', 'ATR Kanal Altı Kırılım (SuperTrend)', 4);
+            }
+        }
+    }
+    
+    class BollingerReversionStrategy extends BaseStrategy {
+        constructor(app) {
+            super(app, 'BollingerReversion');
+            this.PERIOD = 20;
+            this.MULT = 2;
+        }
+        
+        analyze() {
+            const c = this.app.candles;
+            if (c.length < this.PERIOD) return;
+            
+            const closes = c.slice(-this.PERIOD).map(x => x.close);
+            const sma = closes.reduce((a, b) => a + b, 0) / closes.length;
+            const variance = closes.reduce((sum, close) => sum + Math.pow(close - sma, 2), 0) / closes.length;
+            const stdDev = Math.sqrt(variance);
+            
+            const upper = sma + (stdDev * this.MULT);
+            const lower = sma - (stdDev * this.MULT);
+            
+            const last = c[c.length - 1];
+            
+            if (last.close > upper) {
+                this.propose('sell', 'Bollinger Üst Bant Dokunuşu', 3);
+            } else if (last.close < lower) {
+                this.propose('buy', 'Bollinger Alt Bant Dokunuşu', 3);
+            }
+            
+            // Bollinger bantlarını grafiğe ekle
+            if (this.app.chart && this.app.bollingerSeries) {
+                this.app.bollingerSeries.update({
+                    time: last.time / 1000,
+                    upper: upper,
+                    middle: sma,
+                    lower: lower
+                });
+            }
+        }
+    }
+    
+    /**
+     * Süvari Stratejileri - Gizli Silahlar
+     */
+    class CavalryStrategy extends BaseStrategy {
+        constructor(app, name) {
+            super(app, name);
+            this.isAwake = false;
+            this.awakenTime = 0;
+            this.sleepDuration = 3600000; // 1 saat uyku
+        }
+        
+        awaken() {
+            this.isAwake = true;
+            this.awakenTime = Date.now();
+            
+            setTimeout(() => {
+                this.sleep();
+            }, this.sleepDuration);
+        }
+        
+        sleep() {
+            this.isAwake = false;
+            this.app.showNotification(
+                'SÜVARI UYUDU',
+                `${this.name} tekrar uykuya daldı.`,
+                'info'
+            );
+        }
+        
+        propose(direction, reason, score) {
+            if (!this.isAwake) return;
+            super.propose(direction, reason, score * 2); // Süvariler 2x güçlü
+        }
+    }
+    
+    class BlackSwanCatcher extends CavalryStrategy {
+        constructor(app) {
+            super(app, 'BlackSwanCatcher');
+        }
+        
+        analyze() {
+            if (!this.isAwake) return;
+            
+            const volatility = this.app.indicators.atr / this.app.marketData.price;
+            if (volatility > 0.1) { // %10+ volatilite
+                this.propose('buy', 'Kara Kuğu Fırsatı', 10);
+            }
+        }
+    }
+    
+    class PhoenixAscension extends CavalryStrategy {
+        constructor(app) {
+            super(app, 'PhoenixAscension');
+        }
+        
+        analyze() {
+            if (!this.isAwake) return;
+            
+            const stats = this.app.stats;
+            if (stats.total > 0) {
+                const winRate = (stats.tp / stats.total) * 100;
+                if (winRate < 30) { // %30'un altında win rate
+                    this.propose('buy', 'Anka Kuşu Yükselişi', 10);
+                }
+            }
+        }
+    }
+    
+    /**
+     * EnhancedConfluenceEngine - Gelişmiş Uyum Motoru
+     */
+    class EnhancedConfluenceEngine {
+        constructor(app) {
+            this.app = app;
+            this.proposals = [];
+            this.lastSignalTime = 0;
+            this.lastSignalTimeByDirection = { buy: 0, sell: 0 };
+            this.lastDirection = null;
+        }
+        
+        propose(strategy, direction, reason, score) {
+            const now = Date.now();
+            
+            // Eski teklifleri temizle
+            this.proposals = this.proposals.filter(p => 
+                p.strategy !== strategy && (now - p.timestamp) < 3000
+            );
+            
+            // Yeni teklifi ekle
+            this.proposals.push({
+                strategy,
+                direction,
+                reason,
+                score,
+                timestamp: now
+            });
+            
+            // Uyumu kontrol et
+            this.checkConfluence();
+        }
+        
+        checkConfluence() {
+            const now = Date.now();
+            
+            // Cooldown kontrolü
+            if (now - this.lastSignalTime < 15000) return;
+            
+            // Yönlere göre skorları hesapla
+            const buyProposals = this.proposals.filter(p => p.direction === 'buy');
+            const sellProposals = this.proposals.filter(p => p.direction === 'sell');
+            
+            // Minimum katkıda bulunan sayısı kontrolü
+            const minContributors = this.app.settings.minContributors || 2;
+            
+            if (buyProposals.length < minContributors && sellProposals.length < minContributors) {
+                return;
+            }
+            
+            const buyScore = buyProposals.reduce((sum, p) => sum + p.score, 0);
+            const sellScore = sellProposals.reduce((sum, p) => sum + p.score, 0);
+            
+            const threshold = this.app.settings.confluenceThreshold || 3;
+            
+            if (buyScore >= threshold && buyScore > sellScore && buyProposals.length >= minContributors) {
+                this.generateSignal('buy', buyProposals);
+            } else if (sellScore >= threshold && sellScore > buyScore && sellProposals.length >= minContributors) {
+                this.generateSignal('sell', sellProposals);
+            }
+        }
+        
+        generateSignal(direction, contributors) {
+            const signal = {
+                id: `sig_${Date.now()}`,
+                timestamp: Date.now(),
+                symbol: this.app.currentSymbol,
+                direction,
+                price: this.app.marketData.price || 0,
+                score: contributors.reduce((sum, c) => sum + c.score, 0),
+                contributors: contributors.map(c => ({
+                    strategy: c.strategy,
+                    reason: c.reason,
+                    score: c.score
+                })),
+                status: 'active'
+            };
+            
+            // TP/SL hesapla
+            this.calculateTpSl(signal);
+            
+            // Sinyali ekle
+            this.app.addSignal(signal);
+            
+            // Elçilere bildir
+            this.app.panteonManager.updateReputation('pending', contributors);
+            
+            // Teklifleri temizle
+            this.proposals = [];
+            this.lastSignalTime = Date.now();
+            this.lastSignalTimeByDirection[direction] = Date.now();
+            this.lastDirection = direction;
+        }
+        
+        calculateTpSl(signal) {
+            const atr = this.app.indicators.atr || signal.price * 0.01;
+            const rrRatio = this.app.settings.rrRatio || 1.5;
+            
+            if (signal.direction === 'buy') {
+                signal.sl = signal.price - atr;
+                signal.tp = signal.price + (atr * rrRatio);
+            } else {
+                signal.sl = signal.price + atr;
+                signal.tp = signal.price - (atr * rrRatio);
+            }
+        }
+    }
+    
+    /**
+     * UltimateTradingCommandCenter - Ana Uygulama
+     */
+    class UltimateTradingCommandCenter {
+        constructor() {
+            // Core
+            this.version = '3.2.0';
+            this.isRunning = false;
+            this.currentSymbol = 'BTCUSDT';
+            this.currentTimeframe = '15m';
+            
+            // Market Data
+            this.marketData = {
+                price: 0,
+                change24h: 0,
+                volume24h: 0,
+                symbol: this.currentSymbol,
+                btcPrice: 70000
+            };
+            
+            this.orderBook = {
+                bids: [],
+                asks: [],
+                lastUpdateId: null
+            };
+            
+            this.candles = [];
+            this.trades = [];
+            
+            // Indicators
+            this.indicators = {
+                rsi: [],
+                atr: null,
+                sma20: null,
+                sma50: null,
+                vwap: null,
+                bbands: null
+            };
+            
+            // Signals & Stats
+            this.signals = [];
+            this.stats = { total: 0, tp: 0, sl: 0 };
+            this.strategyStats = {};
+            
+            // WebSockets
+            this.sockets = {};
+            this.reconnectAttempts = 0;
+            this.maxReconnectAttempts = 10;
+            
+            // Chart
+            this.chart = null;
+            this.candleSeries = null;
+            this.volumeSeries = null;
+            this.bollingerSeries = null;
+            
+            // Settings
+            this.settings = {
+                confluenceThreshold: 3,
+                minContributors: 2,
+                rrRatio: 1.5,
+                params: {
+                    rsiPeriod: 14,
+                    atrPeriod: 14,
+                    wallBtc: 20
+                },
+                enableParticles: true,
+                enableSounds: true,
+                effectIntensity: 'medium'
+            };
+            
+            // Managers
+            this.dbManager = null;
+            this.effectsManager = null;
+            this.panteonManager = null;
+            this.oracle = null;
+            this.confluenceEngine = null;
+            
+            // Strategies
+            this.strategies = {};
+            this.activeStrategies = {};
+            this.cavalryStrategies = {};
+            
+            // Intervals
+            this.intervals = {
+                render: null,
+                analysis: null,
+                countdown: null
+            };
+            
+            // Initialize
+            this.init();
+        }
+        
+        async init() {
+            console.log('🏛️ PANTEON\'UN KADERİ v3.2 BAŞLATILIYOR...');
+            
+            try {
+                // Database Manager
+                this.dbManager = new DBManager();
+                await this.dbManager.init();
+                console.log('✅ IndexedDB başlatıldı');
+                
+                // Effects Manager
+                this.effectsManager = new EffectsManager();
+                await this.effectsManager.init();
+                console.log('✅ Görsel efektler yüklendi');
+                
+                // Panteon Manager
+                this.panteonManager = new PanteonManager(this);
+                this.panteonManager.init();
+                await this.panteonManager.loadState();
+                console.log('✅ Panteon yüklendi');
+                
+                // Oracle
+                this.oracle = new TheOracle(this);
+                console.log('✅ Oracle hazır');
+                
+                // Confluence Engine
+                this.confluenceEngine = new EnhancedConfluenceEngine(this);
+                console.log('✅ Confluence Engine hazır');
+                
+                // Strategies
+                this.initStrategies();
+                console.log('✅ Stratejiler yüklendi');
+                
+                // Chart
+                this.initChart();
+                console.log('✅ Grafik hazır');
+                
+                // UI
+                this.initUI();
+                console.log('✅ Arayüz hazır');
+                
+                // Event Listeners
+                this.setupEventListeners();
+                console.log('✅ Event listener\'lar bağlandı');
+                
+                // Load Settings
+                await this.loadSettings();
+                console.log('✅ Ayarlar yüklendi');
+                
+                // Countdown Timer
+                this.startCountdown();
+                
+                this.showNotification(
+                    'PANTEON UYANDI',
+                    'Sistem başarıyla başlatıldı. Tanrılar sizi selamlıyor!',
+                    'divine'
+                );
+                
+                // İlahi müdahale efekti
+                this.effectsManager.triggerDivineIntervention('shield');
+                
+            } catch (error) {
+                console.error('❌ Başlatma hatası:', error);
+                this.showNotification(
+                    'HATA',
+                    'Sistem başlatılamadı: ' + error.message,
+                    'danger'
+                );
+            }
+        }
+        
+        initStrategies() {
+            // Ana stratejiler
+            this.strategies = {
+                wallBounce: new WallBounceStrategy(this),
+                velocityScalping: new VelocityScalpingStrategy(this),
+                rsiDivergence: new RsiDivergenceStrategy(this),
+                orderFlowMomentum: new OrderFlowMomentumStrategy(this),
+                liquidityGaps: new LiquidityGapsStrategy(this),
+                breakoutPattern: new BreakoutPatternStrategy(this),
+                supportResistance: new SupportResistanceStrategy(this),
+                fibonacciRetracement: new FibonacciRetracementStrategy(this),
+                volumeProfile: new VolumeProfileStrategy(this),
+                smartMoneyConcepts: new SmartMoneyConceptsStrategy(this),
+                divergenceDetection: new DivergenceDetectionStrategy(this),
+                marketStructure: new MarketStructureStrategy(this),
+                institutionalOrderFlow: new InstitutionalOrderFlowStrategy(this),
+                microSpreadArbitrage: new MicroSpreadArbitrageStrategy(this),
+                vwapReversion: new VWAPReversionStrategy(this),
+                superTrend: new SuperTrendStrategy(this),
+                bollingerReversion: new BollingerReversionStrategy(this)
+            };
+            
+            // Süvari stratejileri
+            this.cavalryStrategies = {
+                blackSwanCatcher: new BlackSwanCatcher(this),
+                phoenixAscension: new PhoenixAscension(this)
+            };
+            
+            // Aktif stratejileri güncelle
+            this.updateActiveStrategies();
+        }
+        
+        updateActiveStrategies() {
+            this.activeStrategies = {};
+            
+            for (const [key, strategy] of Object.entries(this.strategies)) {
+                if (strategy.status === 'active') {
+                    this.activeStrategies[key] = strategy;
+                }
+            }
+        }
+        
+        initChart() {
+            const chartContainer = document.getElementById('live-chart');
+            
+            this.chart = LightweightCharts.createChart(chartContainer, {
+                width: chartContainer.clientWidth,
+                height: chartContainer.clientHeight,
+                layout: {
+                    backgroundColor: 'transparent',
+                    textColor: getComputedStyle(document.body).getPropertyValue('--olympus-text-primary')
+                },
+                grid: {
+                    vertLines: {
+                        color: getComputedStyle(document.body).getPropertyValue('--olympus-border')
+                    },
+                    horzLines: {
+                        color: getComputedStyle(document.body).getPropertyValue('--olympus-border')
+                    }
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal
+                },
+                rightPriceScale: {
+                    borderColor: getComputedStyle(document.body).getPropertyValue('--olympus-border')
+                },
+                timeScale: {
+                    borderColor: getComputedStyle(document.body).getPropertyValue('--olympus-border'),
+                    timeVisible: true,
+                    secondsVisible: false
+                }
+            });
+            
+            // Candlestick series
+            this.candleSeries = this.chart.addCandlestickSeries({
+                upColor: getComputedStyle(document.body).getPropertyValue('--divine-success'),
+                downColor: getComputedStyle(document.body).getPropertyValue('--divine-danger'),
+                borderVisible: false,
+                wickUpColor: getComputedStyle(document.body).getPropertyValue('--divine-success'),
+                wickDownColor: getComputedStyle(document.body).getPropertyValue('--divine-danger')
+            });
+            
+            // Volume series
+            this.volumeSeries = this.chart.addHistogramSeries({
+                color: getComputedStyle(document.body).getPropertyValue('--divine-info'),
+                priceFormat: {
+                    type: 'volume'
+                },
+                priceScaleId: '',
+                scaleMargins: {
+                    top: 0.8,
+                    bottom: 0
+                }
+            });
+            
+            // Bollinger Bands (placeholder for now)
+            // Will be implemented with custom rendering
+            
+            // Handle resize
+            window.addEventListener('resize', () => {
+                this.chart.resize(chartContainer.clientWidth, chartContainer.clientHeight);
+            });
+        }
+        
+        initUI() {
+            // Update symbol
+            document.getElementById('symbol-input').value = this.currentSymbol.replace('USDT', '');
+            document.getElementById('ticker-bar-symbol').textContent = this.currentSymbol.replace('USDT', '/USDT');
+            
+            // Update timeframe
+            document.getElementById('timeframe-select').value = this.currentTimeframe;
+            
+            // Render strategies
+            this.renderStrategies();
+            
+            // Setup tabs
+            this.setupTabs();
+        }
+        
+        setupEventListeners() {
+            // Main controls
+            document.getElementById('start-btn').addEventListener('click', () => this.start());
+            document.getElementById('stop-btn').addEventListener('click', () => this.stop());
+            
+            // Symbol & Timeframe
+            document.getElementById('symbol-input').addEventListener('change', (e) => {
+                let symbol = e.target.value.toUpperCase();
+                if (!symbol.endsWith('USDT')) symbol += 'USDT';
+                this.changeSymbol(symbol);
+            });
+            
+            document.getElementById('timeframe-select').addEventListener('change', (e) => {
+                this.changeTimeframe(e.target.value);
+            });
+            
+            // Zeus whispers (Kehanet)
+            document.getElementById('kehanet-shield').addEventListener('click', () => {
+                this.divineIntervention('shield');
+            });
+            
+            document.getElementById('kehanet-balance').addEventListener('click', () => {
+                this.divineIntervention('balance');
+            });
+            
+            document.getElementById('kehanet-sword').addEventListener('click', () => {
+                this.divineIntervention('sword');
+            });
+            
+            // Holy actions
+            document.getElementById('kutsal-su-btn').addEventListener('click', () => {
+                this.holyWater();
+            });
+            
+            document.getElementById('kurban-et-btn').addEventListener('click', () => {
+                this.sacrifice();
+            });
+            
+            // Settings
+            document.getElementById('open-settings-btn').addEventListener('click', () => {
+                this.openSettings();
+            });
+            
+            document.getElementById('close-settings-btn').addEventListener('click', () => {
+                this.closeSettings();
+            });
+            
+            document.getElementById('save-settings-btn').addEventListener('click', () => {
+                this.saveSettings();
+            });
+            
+            document.getElementById('reset-universe-btn').addEventListener('click', () => {
+                this.resetUniverse();
+            });
+            
+            // Chart controls
+            document.getElementById('chart-zoom-in').addEventListener('click', () => {
+                this.zoomChart(0.9);
+            });
+            
+            document.getElementById('chart-zoom-out').addEventListener('click', () => {
+                this.zoomChart(1.1);
+            });
+            
+            document.getElementById('chart-reset').addEventListener('click', () => {
+                this.resetChart();
+            });
+            
+            document.getElementById('chart-fullscreen').addEventListener('click', () => {
+                this.toggleFullscreen();
+            });
+            
+            // Settings tabs
+            document.querySelectorAll('.settings-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    this.switchSettingsTab(e.target.dataset.tab);
+                });
+            });
+        }
+        
+        setupTabs() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const tab = e.target.dataset.tab;
+                    
+                    // Update active button
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    
+                    // Show corresponding list
+                    document.querySelectorAll('.strategies-list').forEach(list => {
+                        list.style.display = 'none';
+                    });
+                    document.getElementById(`strategies-${tab}`).style.display = 'block';
+                });
+            });
+        }
+        
+        async start() {
+            if (this.isRunning) return;
+            
+            this.isRunning = true;
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('stop-btn').disabled = false;
+            
+            // Update status
+            this.updateConnectionStatus(true);
+            
+            // Fetch initial data
+            await this.fetchInitialData();
+            
+            // Connect WebSockets
+            this.connectWebSockets();
+            
+            // Start intervals
+            this.intervals.analysis = setInterval(() => this.runAnalysis(), 5000);
+            this.intervals.render = setInterval(() => this.render(), 1000);
+            
+            // Start Oracle
+            this.oracle.start();
+            
+            this.showNotification(
+                'KADER BAŞLADI',
+                'Tanrılar piyasaları izlemeye başladı.',
+                'success'
+            );
+        }
+        
+        async stop() {
+            if (!this.isRunning) return;
+            
+            this.isRunning = false;
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('stop-btn').disabled = true;
+            
+            // Update status
+            this.updateConnectionStatus(false);
+            
+            // Disconnect WebSockets
+            this.disconnectWebSockets();
+            
+            // Clear intervals
+            Object.values(this.intervals).forEach(interval => {
+                if (interval) clearInterval(interval);
+            });
+            
+            // Stop Oracle
+            this.oracle.stop();
+            
+            // Save state
+            await this.panteonManager.saveState();
+            
+            this.showNotification(
+                'KADER DURDU',
+                'Tanrılar dinlenmeye çekildi.',
+                'warning'
+            );
+        }
+        
+        async fetchInitialData() {
+            try {
+                const url = `https://fapi.binance.com/fapi/v1/klines?symbol=${this.currentSymbol}&interval=${this.currentTimeframe}&limit=500`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                this.candles = data.map(d => ({
+                    time: d[0],
+                    open: parseFloat(d[1]),
+                    high: parseFloat(d[2]),
+                    low: parseFloat(d[3]),
+                    close: parseFloat(d[4]),
+                    volume: parseFloat(d[5])
+                }));
+                
+                // Update chart
+                this.candleSeries.setData(this.candles.map(c => ({
+                    time: c.time / 1000,
+                    open: c.open,
+                    high: c.high,
+                    low: c.low,
+                    close: c.close
+                })));
+                
+                const volumeData = this.candles.map(c => ({
+                    time: c.time / 1000,
+                    value: c.volume,
+                    color: c.close >= c.open ? 
+                        getComputedStyle(document.body).getPropertyValue('--divine-success') :
+                        getComputedStyle(document.body).getPropertyValue('--divine-danger')
+                }));
+                
+                this.volumeSeries.setData(volumeData);
+                
+                // Calculate indicators
+                this.calculateIndicators();
+                
+            } catch (error) {
+                console.error('Data fetch error:', error);
+                this.showNotification('HATA', 'Veri alınamadı: ' + error.message, 'danger');
+            }
+        }
+        
+        connectWebSockets() {
+            const symbolLower = this.currentSymbol.toLowerCase();
+            const streams = [
+                `${symbolLower}@ticker`,
+                `${symbolLower}@depth20@100ms`,
+                `${symbolLower}@aggTrade`,
+                `${symbolLower}@kline_${this.currentTimeframe}`
+            ];
+            
+            const ws = new WebSocket(`wss://fstream.binance.com/stream?streams=${streams.join('/')}`);
+            
+            ws.onopen = () => {
+                console.log('✅ WebSocket bağlandı');
+                this.reconnectAttempts = 0;
+            };
+            
+            ws.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                this.handleMarketData(message.stream, message.data);
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket hatası:', error);
+            };
+            
+            ws.onclose = () => {
+                if (this.isRunning) {
+                    this.handleReconnect();
+                }
+            };
+            
+            this.sockets.main = ws;
+        }
+        
+        handleMarketData(stream, data) {
+            const streamType = stream.split('@')[1];
+            
+            if (streamType === 'ticker') {
+                this.marketData = {
+                    ...this.marketData,
+                    price: parseFloat(data.c),
+                    change24h: parseFloat(data.P),
+                    volume24h: parseFloat(data.q)
+                };
+                
+                // Check positions
+                this.checkPositions();
+                
+            } else if (streamType.startsWith('depth')) {
+                this.orderBook = {
+                    bids: data.b.map(([p, q]) => [parseFloat(p), parseFloat(q)]),
+                    asks: data.a.map(([p, q]) => [parseFloat(p), parseFloat(q)]),
+                    lastUpdateId: data.u
+                };
+                
+                // Strategy analysis
+                for (const strategy of Object.values(this.activeStrategies)) {
+                    if (strategy.analyzeOrderBook) {
+                        strategy.analyzeOrderBook(this.orderBook);
+                    }
+                }
+                
+            } else if (streamType === 'aggTrade') {
+                const trade = {
+                    price: parseFloat(data.p),
+                    quantity: parseFloat(data.q),
+                    isBuyerMaker: data.m,
+                    timestamp: data.T
+                };
+                
+                this.trades.push(trade);
+                if (this.trades.length > 1000) {
+                    this.trades.shift();
+                }
+                
+                // Strategy processing
+                for (const strategy of Object.values(this.activeStrategies)) {
+                    if (strategy.processTrade) {
+                        strategy.processTrade(trade);
+                    }
+                }
+                
+            } else if (streamType.startsWith('kline')) {
+                const kline = data.k;
+                
+                // Update chart
+                const candle = {
+                    time: kline.t / 1000,
+                    open: parseFloat(kline.o),
+                    high: parseFloat(kline.h),
+                    low: parseFloat(kline.l),
+                    close: parseFloat(kline.c)
+                };
+                
+                this.candleSeries.update(candle);
+                
+                const volume = {
+                    time: kline.t / 1000,
+                    value: parseFloat(kline.v),
+                    color: candle.close >= candle.open ?
+                        getComputedStyle(document.body).getPropertyValue('--divine-success') :
+                        getComputedStyle(document.body).getPropertyValue('--divine-danger')
+                };
+                
+                this.volumeSeries.update(volume);
+                
+                // Update candles array on close
+                if (kline.x) {
+                    const newCandle = {
+                        time: kline.t,
+                        open: parseFloat(kline.o),
+                        high: parseFloat(kline.h),
+                        low: parseFloat(kline.l),
+                        close: parseFloat(kline.c),
+                        volume: parseFloat(kline.v)
+                    };
+                    
+                    const lastCandle = this.candles[this.candles.length - 1];
+                    if (lastCandle && lastCandle.time === newCandle.time) {
+                        this.candles[this.candles.length - 1] = newCandle;
+                    } else {
+                        this.candles.push(newCandle);
+                        if (this.candles.length > 500) {
+                            this.candles.shift();
+                        }
+                    }
+                    
+                    // Recalculate indicators
+                    this.calculateIndicators();
+                }
+            }
+        }
+        
+        calculateIndicators() {
+            // RSI
+            const period = this.settings.params.rsiPeriod;
+            const closes = this.candles.map(c => c.close);
+            
+            if (closes.length >= period) {
+                // [RSI calculation - simplified for brevity]
+                const lastRsi = 50; // Placeholder
+                this.indicators.rsi = Array(closes.length).fill(lastRsi);
+            }
+            
+            // ATR
+            if (this.candles.length >= period) {
+                const trs = [];
+                for (let i = 1; i < this.candles.length; i++) {
+                    const high = this.candles[i].high;
+                    const low = this.candles[i].low;
+                    const prevClose = this.candles[i - 1].close;
+                    
+                    trs.push(Math.max(
+                        high - low,
+                        Math.abs(high - prevClose),
+                        Math.abs(low - prevClose)
+                    ));
+                }
+                
+                this.indicators.atr = trs.slice(-period).reduce((a, b) => a + b, 0) / period;
+            }
+            
+            // VWAP
+            let cumPV = 0;
+            let cumVolume = 0;
+            
+            for (const candle of this.candles) {
+                const typicalPrice = (candle.high + candle.low + candle.close) / 3;
+                cumPV += typicalPrice * candle.volume;
+                cumVolume += candle.volume;
+            }
+            
+            this.indicators.vwap = cumVolume > 0 ? cumPV / cumVolume : null;
+        }
+        
+        runAnalysis() {
+            // Run strategy analysis
+            for (const strategy of Object.values(this.activeStrategies)) {
+                if (strategy.analyze) {
+                    strategy.analyze();
+                }
+            }
+            
+            // Run cavalry analysis
+            for (const cavalry of Object.values(this.cavalryStrategies)) {
+                if (cavalry.analyze) {
+                    cavalry.analyze();
+                }
+            }
+        }
+        
+        render() {
+            // Update price display
+            const priceEl = document.getElementById('current-price');
+            const tickerPriceEl = document.getElementById('ticker-bar-price');
+            
+            if (this.marketData.price) {
+                const formattedPrice = this.formatPrice(this.marketData.price);
+                if (priceEl) priceEl.textContent = formattedPrice;
+                if (tickerPriceEl) tickerPriceEl.textContent = formattedPrice;
+            }
+            
+            // Update change
+            const changeEl = document.getElementById('price-change-24h');
+            const tickerChangeEl = document.getElementById('ticker-bar-change');
+            if (this.marketData.change24h !== undefined) {
+                const changeText = `${this.marketData.change24h >= 0 ? '+' : ''}${this.marketData.change24h.toFixed(2)}%`;
+                if (changeEl) changeEl.textContent = changeText;
+                if (tickerChangeEl) {
+                    tickerChangeEl.textContent = changeText;
+                    tickerChangeEl.style.color = this.marketData.change24h >= 0 ? 
+                        'var(--divine-success)' : 'var(--divine-danger)';
+                }
+            }
+            
+            // Update volume
+            const volumeEl = document.getElementById('volume-24h');
+            if (volumeEl && this.marketData.volume24h) {
+                volumeEl.textContent = this.formatVolume(this.marketData.volume24h);
+            }
+            
+            // Update ATR
+            const atrEl = document.getElementById('atr-value');
+            if (atrEl && this.indicators.atr) {
+                atrEl.textContent = this.indicators.atr.toFixed(2);
+            }
+        }
+        
+        startCountdown() {
+            this.intervals.countdown = setInterval(() => {
+                const now = Date.now();
+                const currentCandle = this.candles[this.candles.length - 1];
+                
+                if (!currentCandle) return;
+                
+                const timeframeMs = this.getTimeframeMs();
+                const nextCandleTime = currentCandle.time + timeframeMs;
+                const remaining = nextCandleTime - now;
+                
+                if (remaining > 0) {
+                    const minutes = Math.floor(remaining / 60000);
+                    const seconds = Math.floor((remaining % 60000) / 1000);
+                    
+                    const countdownEl = document.getElementById('candle-countdown');
+                    if (countdownEl) {
+                        countdownEl.textContent = `⏱️ ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                }
+            }, 1000);
+        }
+        
+        getTimeframeMs() {
+            const map = {
+                '1m': 60000,
+                '5m': 300000,
+                '15m': 900000,
+                '1h': 3600000,
+                '4h': 14400000
+            };
+            return map[this.currentTimeframe] || 900000;
+        }
+                // ================================================
+        // PANTEON'UN KADERİ - ANA UYGULAMA (SON BÖLÜM)
+        // ================================================
+        
+        addSignal(signal) {
+            // Add to signals array
+            this.signals.unshift(signal);
+            if (this.signals.length > 100) {
+                this.signals.pop();
+            }
+            
+            // Update stats
+            this.stats.total++;
+            
+            // Save to database
+            this.dbManager.save('signalHistory', {
+                ...signal,
+                id: undefined // Let IndexedDB auto-generate ID
+            });
+            
+            // Update UI
+            this.renderSignals();
+            
+            // Show notification
+            const direction = signal.direction.toUpperCase();
+            const contributors = signal.contributors.map(c => c.strategy).join(', ');
+            
+            this.showNotification(
+                `${direction} SİNYALİ`,
+                `Skor: ${signal.score.toFixed(1)} | Gardiyanlar: ${contributors}`,
+                signal.direction === 'buy' ? 'success' : 'danger'
+            );
+            
+            // Trigger effect
+            if (signal.direction === 'buy') {
+                this.effectsManager.triggerBuyEffect(signal.price);
+            } else {
+                this.effectsManager.triggerSellEffect(signal.price);
+            }
+            
+            // Add chart marker
+            this.addChartMarker(signal);
+        }
+        
+        checkPositions() {
+            const price = this.marketData.price;
+            if (!price) return;
+            
+            const activeSignals = this.signals.filter(s => s.status === 'active');
+            
+            for (const signal of activeSignals) {
+                let triggered = false;
+                let result = '';
+                
+                if (signal.direction === 'buy') {
+                    if (price >= signal.tp) {
+                        triggered = true;
+                        result = 'tp';
+                    } else if (price <= signal.sl) {
+                        triggered = true;
+                        result = 'sl';
+                    }
+                } else {
+                    if (price <= signal.tp) {
+                        triggered = true;
+                        result = 'tp';
+                    } else if (price >= signal.sl) {
+                        triggered = true;
+                        result = 'sl';
+                    }
+                }
+                
+                if (triggered) {
+                    this.closeSignal(signal, result);
+                }
+            }
+        }
+        
+        closeSignal(signal, result) {
+            // Update signal status
+            signal.status = result;
+            signal.closeTime = Date.now();
+            signal.closePrice = this.marketData.price;
+            
+            // Update stats
+            this.stats[result]++;
+            
+            // Update Panteon reputation
+            this.panteonManager.updateReputation(result, signal.contributors);
+            
+            // Update strategy stats
+            for (const contributor of signal.contributors) {
+                const strategy = this.strategies[contributor.strategy];
+                if (strategy) {
+                    strategy.stats.contributions++;
+                    if (result === 'tp') {
+                        strategy.stats.wins++;
+                    } else {
+                        strategy.stats.losses++;
+                    }
+                    
+                    // Check if strategy needs surgery or imprisonment
+                    this.evaluateStrategyPerformance(contributor.strategy);
+                }
+            }
+            
+            // Save to database
+            this.dbManager.save('signalHistory', {
+                ...signal,
+                id: undefined
+            });
+            
+            // Trigger effect
+            if (result === 'tp') {
+                this.effectsManager.triggerTPEffect();
+                this.showNotification(
+                    'ZAFER!',
+                    `Sinyal başarıyla kapandı! Kar: ${((signal.closePrice - signal.price) / signal.price * 100).toFixed(2)}%`,
+                    'success'
+                );
+            } else {
+                this.effectsManager.triggerSLEffect();
+                this.showNotification(
+                    'KAYIP',
+                    `Sinyal zarar ile kapandı. Kayıp: ${((signal.price - signal.closePrice) / signal.price * 100).toFixed(2)}%`,
+                    'danger'
+                );
+            }
+            
+            // Update UI
+            this.renderSignals();
+        }
+        
+        evaluateStrategyPerformance(strategyName) {
+            const strategy = this.strategies[strategyName];
+            if (!strategy) return;
+            
+            const stats = strategy.stats;
+            const totalTrades = stats.wins + stats.losses;
+            
+            if (totalTrades < 10) return; // Not enough data
+            
+            const winRate = stats.wins / totalTrades;
+            
+            // Check for imprisonment (< 30% win rate)
+            if (winRate < 0.3 && strategy.status === 'active') {
+                strategy.status = 'imprisoned';
+                this.showNotification(
+                    'ZİNDANA ATILDI',
+                    `${strategyName} stratejisi başarısızlık nedeniyle zindana atıldı!`,
+                    'danger'
+                );
+                this.updateActiveStrategies();
+                this.renderStrategies();
+            }
+            
+            // Check for surgery (30-40% win rate)
+            else if (winRate < 0.4 && winRate >= 0.3 && strategy.status === 'active') {
+                strategy.status = 'surgery';
+                this.panteonManager.healGardiyan(strategyName);
+                this.showNotification(
+                    'AMELİYATHANEYE ALINDI',
+                    `${strategyName} stratejisi Raphael tarafından iyileştiriliyor.`,
+                    'warning'
+                );
+                this.updateActiveStrategies();
+                this.renderStrategies();
+            }
+            
+            // Check for recovery (> 50% win rate after surgery)
+            else if (winRate > 0.5 && strategy.status === 'surgery') {
+                strategy.status = 'active';
+                this.showNotification(
+                    'İYİLEŞTİ',
+                    `${strategyName} stratejisi başarıyla iyileşti ve göreve döndü!`,
+                    'success'
+                );
+                this.updateActiveStrategies();
+                this.renderStrategies();
+            }
+        }
+        
+        renderSignals() {
+            const container = document.getElementById('signals-container');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            const recentSignals = this.signals.slice(0, 10);
+            
+            for (const signal of recentSignals) {
+                const card = document.createElement('div');
+                card.className = `signal-card ${signal.direction}`;
+                
+                const time = new Date(signal.timestamp).toLocaleTimeString('tr-TR');
+                const status = signal.status === 'active' ? 
+                    '<span style="color: var(--divine-warning)">AKTİF</span>' :
+                    signal.status === 'tp' ?
+                        '<span style="color: var(--divine-success)">ZAFER</span>' :
+                        '<span style="color: var(--divine-danger)">KAYIP</span>';
+                
+                const contributorsText = signal.contributors
+                    .map(c => `${c.strategy} (${c.score.toFixed(1)})`)
+                    .join(', ');
+                
+                card.innerHTML = `
+                    <div class="signal-header">
+                        <span class="signal-direction">${signal.direction.toUpperCase()}</span>
+                        <span class="signal-score">SKOR: ${signal.score.toFixed(1)}</span>
+                    </div>
+                    <div class="signal-details">
+                        <div>Giriş: ${this.formatPrice(signal.price)}</div>
+                        <div>Zaman: ${time}</div>
+                        <div>TP: ${this.formatPrice(signal.tp)}</div>
+                        <div>SL: ${this.formatPrice(signal.sl)}</div>
+                        <div>Durum: ${status}</div>
+                        <div>Sembol: ${signal.symbol}</div>
+                    </div>
+                    <div class="signal-contributors">
+                        <strong>Gardiyanlar:</strong> ${contributorsText}
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            }
+        }
+        
+        renderStrategies() {
+            // Şeref Tablosu (Active strategies)
+            const serefContainer = document.getElementById('strategies-seref');
+            serefContainer.innerHTML = '';
+            
+            // Ameliyathane (Surgery strategies)
+            const ameliyatContainer = document.getElementById('strategies-ameliyat');
+            ameliyatContainer.innerHTML = '';
+            
+            // Zindan (Imprisoned strategies)
+            const zindanContainer = document.getElementById('strategies-zindan');
+            zindanContainer.innerHTML = '';
+            
+            for (const [key, strategy] of Object.entries(this.strategies)) {
+                const item = document.createElement('div');
+                item.className = `strategy-item ${strategy.status === 'active' ? 'active' : strategy.status === 'imprisoned' ? 'imprisoned' : ''}`;
+                
+                const stats = strategy.stats;
+                const totalTrades = stats.wins + stats.losses;
+                const winRate = totalTrades > 0 ? (stats.wins / totalTrades * 100).toFixed(0) : '0';
+                
+                // Find which Elci owns this strategy
+                const elci = this.panteonManager.findElciByGardiyan(key);
+                const elciName = elci ? elci.toUpperCase() : '-';
+                
+                item.innerHTML = `
+                    <div class="strategy-name">${strategy.name}</div>
+                    <div class="strategy-stats">
+                        <span>Elçi: ${elciName}</span>
+                        <span>WR: ${winRate}%</span>
+                        <span>T: ${totalTrades}</span>
+                    </div>
+                `;
+                
+                item.addEventListener('click', () => {
+                    this.toggleStrategy(key);
+                });
+                
+                // Add to appropriate container
+                if (strategy.status === 'active') {
+                    serefContainer.appendChild(item);
+                } else if (strategy.status === 'surgery') {
+                    ameliyatContainer.appendChild(item);
+                } else if (strategy.status === 'imprisoned') {
+                    zindanContainer.appendChild(item);
+                }
+            }
+        }
+        
+        toggleStrategy(strategyName) {
+            const strategy = this.strategies[strategyName];
+            if (!strategy) return;
+            
+            if (strategy.status === 'active') {
+                // Can't deactivate manually, only through performance
+                this.showNotification(
+                    'UYARI',
+                    'Aktif gardiyanlar sadece performans değerlendirmesiyle devre dışı bırakılabilir.',
+                    'warning'
+                );
+            } else if (strategy.status === 'imprisoned') {
+                // Check if can be released
+                const stats = strategy.stats;
+                const totalTrades = stats.wins + stats.losses;
+                
+                if (totalTrades >= 100) {
+                    // Kıyamet Günü Protokolü - Give second chance
+                    strategy.status = 'active';
+                    strategy.stats = { proposals: 0, contributions: 0, wins: 0, losses: 0 };
+                    
+                    this.showNotification(
+                        'KIYAMET GÜNÜ PROTOKOLÜ',
+                        `${strategyName} stratejisi ikinci bir şans aldı ve Çaylak Misyoner olarak döndü!`,
+                        'divine'
+                    );
+                    
+                    this.updateActiveStrategies();
+                    this.renderStrategies();
+                } else {
+                    this.showNotification(
+                        'UYARI',
+                        `${strategyName} henüz affedilemez. ${100 - totalTrades} işlem daha beklemeli.`,
+                        'warning'
+                    );
+                }
+            }
+        }
+        
+        divineIntervention(type) {
+            // Zeus'un fısıltıları
+            const interventions = {
+                shield: {
+                    message: 'Zeus koruma kalkanı gönderdi! Risk azaltıldı.',
+                    effect: () => {
+                        this.settings.rrRatio = Math.max(1, this.settings.rrRatio - 0.5);
+                        this.settings.confluenceThreshold = Math.min(10, this.settings.confluenceThreshold + 1);
+                    }
+                },
+                balance: {
+                    message: 'Zeus dengeyi sağladı! Parametreler optimize edildi.',
+                    effect: () => {
+                        this.settings.rrRatio = 1.5;
+                        this.settings.confluenceThreshold = 3;
+                        
+                        // Reset all Elci reputations to 100
+                        for (const elci of Object.values(this.panteonManager.elciler)) {
+                            elci.itibar = 100;
+                        }
+                        this.panteonManager.updateModes();
+                        this.panteonManager.updateUI();
+                    }
+                },
+                sword: {
+                    message: 'Zeus saldırı emri verdi! Agresif mod aktif.',
+                    effect: () => {
+                        this.settings.rrRatio = Math.min(3, this.settings.rrRatio + 0.5);
+                        this.settings.confluenceThreshold = Math.max(1, this.settings.confluenceThreshold - 1);
+                    }
+                }
+            };
+            
+            const intervention = interventions[type];
+            if (!intervention) return;
+            
+            // Apply effect
+            intervention.effect();
+            
+            // Show notification
+            this.showNotification('İLAHİ MÜDAHALE', intervention.message, 'divine');
+            
+            // Trigger visual effect
+            this.effectsManager.triggerDivineIntervention(type);
+            
+            // Save settings
+            this.saveSettings();
+        }
+        
+        holyWater() {
+            // Kutsal Su - Panteon'u iyileştir
+            const totalReputation = Object.values(this.panteonManager.elciler)
+                .reduce((sum, elci) => sum + elci.itibar, 0);
+            
+            if (totalReputation >= 240) { // 80+ average
+                // Kutsal Pınar Protokolü
+                for (const [key, strategy] of Object.entries(this.strategies)) {
+                    if (strategy.status === 'surgery') {
+                        strategy.status = 'active';
+                        strategy.stats = { 
+                            proposals: Math.floor(strategy.stats.proposals * 0.5),
+                            contributions: Math.floor(strategy.stats.contributions * 0.5),
+                            wins: Math.floor(strategy.stats.wins * 0.5),
+                            losses: Math.floor(strategy.stats.losses * 0.5)
+                        };
+                    }
+                }
+                
+                this.showNotification(
+                    'KUTSAL PINAR PROTOKOLÜ',
+                    'Panteon zirveye ulaştı! Tüm ameliyattaki gardiyanlar iyileştirildi.',
+                    'divine'
+                );
+                
+                this.effectsManager.triggerDivineIntervention('shield');
+                this.updateActiveStrategies();
+                this.renderStrategies();
+                
+            } else {
+                this.showNotification(
+                    'YETERSİZ İTİBAR',
+                    `Kutsal Su için Panteon'un toplam itibarı 240+ olmalı. Mevcut: ${totalReputation.toFixed(0)}`,
+                    'warning'
+                );
+            }
+        }
+        
+        sacrifice() {
+            // Kurban Et - En kötü performanslı stratejiyi feda et
+            let worstStrategy = null;
+            let worstWinRate = 1;
+            
+            for (const [key, strategy] of Object.entries(this.strategies)) {
+                if (strategy.status !== 'active') continue;
+                
+                const stats = strategy.stats;
+                const totalTrades = stats.wins + stats.losses;
+                
+                if (totalTrades >= 5) {
+                    const winRate = stats.wins / totalTrades;
+                    if (winRate < worstWinRate) {
+                        worstWinRate = winRate;
+                        worstStrategy = { key, strategy };
+                    }
+                }
+            }
+            
+            if (worstStrategy) {
+                // Sacrifice the strategy
+                worstStrategy.strategy.status = 'imprisoned';
+                
+                // Boost all Elci reputations
+                for (const elci of Object.values(this.panteonManager.elciler)) {
+                    elci.itibar += 10;
+                }
+                
+                this.panteonManager.updateModes();
+                this.panteonManager.updateUI();
+                
+                this.showNotification(
+                    'KURBAN EDİLDİ',
+                    `${worstStrategy.strategy.name} tanrılara kurban edildi! Tüm Elçiler +10 itibar kazandı.`,
+                    'danger'
+                );
+                
+                this.effectsManager.triggerSLEffect();
+                this.updateActiveStrategies();
+                this.renderStrategies();
+                
+            } else {
+                this.showNotification(
+                    'KURBAN YOK',
+                    'Kurban edilecek uygun bir gardiyan bulunamadı.',
+                    'warning'
+                );
+            }
+        }
+        
+        openSettings() {
+            const modal = document.getElementById('settings-modal-overlay');
+            modal.classList.add('visible');
+            
+            // Load current settings into form
+            document.getElementById('confluence-threshold').value = this.settings.confluenceThreshold;
+            document.getElementById('confluence-value').textContent = this.settings.confluenceThreshold;
+            document.getElementById('min-contributors').value = this.settings.minContributors;
+            document.getElementById('rr-ratio').value = this.settings.rrRatio;
+            
+            // RSI & ATR periods
+            document.getElementById('rsi-period').value = this.settings.params.rsiPeriod;
+            document.getElementById('atr-period').value = this.settings.params.atrPeriod;
+            document.getElementById('wall-btc').value = this.settings.params.wallBtc;
+            
+            // Effects
+            document.getElementById('enable-particles').checked = this.settings.enableParticles;
+            document.getElementById('enable-sounds').checked = this.settings.enableSounds;
+            document.getElementById('effect-intensity').value = this.settings.effectIntensity;
+            
+            // Update range slider display
+            document.getElementById('confluence-threshold').addEventListener('input', (e) => {
+                document.getElementById('confluence-value').textContent = e.target.value;
+            });
+            
+            // Populate guardian toggles
+            const togglesContainer = document.getElementById('guardian-toggles');
+            togglesContainer.innerHTML = '';
+            
+            for (const [key, strategy] of Object.entries(this.strategies)) {
+                const label = document.createElement('label');
+                label.className = 'checkbox-label';
+                label.innerHTML = `
+                    <input type="checkbox" id="toggle-${key}" ${strategy.status === 'active' ? 'checked' : ''} ${strategy.status === 'imprisoned' ? 'disabled' : ''}>
+                    ${strategy.name} ${strategy.status === 'imprisoned' ? '(ZİNDANDA)' : strategy.status === 'surgery' ? '(AMELİYATTA)' : ''}
+                `;
+                togglesContainer.appendChild(label);
+            }
+        }
+        
+        closeSettings() {
+            const modal = document.getElementById('settings-modal-overlay');
+            modal.classList.remove('visible');
+        }
+        
+        async saveSettings() {
+            // Get values from form
+            this.settings.confluenceThreshold = parseInt(document.getElementById('confluence-threshold').value);
+            this.settings.minContributors = parseInt(document.getElementById('min-contributors').value);
+            this.settings.rrRatio = parseFloat(document.getElementById('rr-ratio').value);
+            
+            this.settings.params.rsiPeriod = parseInt(document.getElementById('rsi-period').value);
+            this.settings.params.atrPeriod = parseInt(document.getElementById('atr-period').value);
+            this.settings.params.wallBtc = parseInt(document.getElementById('wall-btc').value);
+            
+            this.settings.enableParticles = document.getElementById('enable-particles').checked;
+            this.settings.enableSounds = document.getElementById('enable-sounds').checked;
+            this.settings.effectIntensity = document.getElementById('effect-intensity').value;
+            
+            // Update effects manager
+            this.effectsManager.soundEnabled = this.settings.enableSounds;
+            this.effectsManager.effectIntensity = this.settings.effectIntensity;
+            
+            // Save to database
+            await this.dbManager.save('settings', {
+                id: 'main',
+                ...this.settings
+            });
+            
+            // Recalculate indicators with new periods
+            this.calculateIndicators();
+            
+            this.showNotification(
+                'KADER MÜHÜRLENDİ',
+                'Ayarlar başarıyla kaydedildi.',
+                'success'
+            );
+            
+            this.closeSettings();
+        }
+        
+        async loadSettings() {
+            const saved = await this.dbManager.get('settings', 'main');
+            if (saved) {
+                this.settings = { ...this.settings, ...saved };
+                
+                // Apply to effects manager
+                this.effectsManager.soundEnabled = this.settings.enableSounds;
+                this.effectsManager.effectIntensity = this.settings.effectIntensity;
+            }
+        }
+        
+        async resetUniverse() {
+            if (!confirm('EVRENİ SIFIRLAMAK İSTEDİĞİNİZDEN EMİN MİSİNİZ?\n\nBu işlem tüm verileri silecek ve sistemi sıfırlayacaktır!')) {
+                return;
+            }
+            
+            // Clear all databases
+            await this.dbManager.clear('settings');
+            await this.dbManager.clear('panteonState');
+            await this.dbManager.clear('strategyStats');
+            await this.dbManager.clear('signalHistory');
+            await this.dbManager.clear('notificationHistory');
+            
+            // Reset all data
+            this.signals = [];
+            this.stats = { total: 0, tp: 0, sl: 0 };
+            this.strategyStats = {};
+            
+            // Reset Panteon
+            for (const elci of Object.values(this.panteonManager.elciler)) {
+                elci.itibar = 100;
+                elci.mode = 'inancli';
+                elci.stats = elci.name === 'RAPHAEL' ? 
+                    { healed: 0, failed: 0 } : 
+                    { tp: 0, sl: 0, total: 0 };
+            }
+            
+            this.panteonManager.updateModes();
+            this.panteonManager.updateUI();
+            
+            // Reset strategies
+            for (const strategy of Object.values(this.strategies)) {
+                strategy.status = 'active';
+                strategy.stats = { proposals: 0, contributions: 0, wins: 0, losses: 0 };
+            }
+            
+            this.updateActiveStrategies();
+            this.renderStrategies();
+            this.renderSignals();
+            
+            this.showNotification(
+                'EVREN SIFIRLANDI',
+                'Yeni bir kader başlıyor! Tanrılar sizi selamlıyor.',
+                'divine'
+            );
+            
+            // Epic reset effect
+            this.effectsManager.triggerDivineIntervention('balance');
+            
+            this.closeSettings();
+        }
+        
+        switchSettingsTab(tabName) {
+            // Update active tab
+            document.querySelectorAll('.settings-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.settings-tab[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Show corresponding content
+            document.querySelectorAll('.settings-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`settings-${tabName}`).classList.add('active');
+        }
+        
+        addChartMarker(signal) {
+            if (!this.candleSeries) return;
+            
+            const marker = {
+                time: signal.timestamp / 1000,
+                position: signal.direction === 'buy' ? 'belowBar' : 'aboveBar',
+                color: signal.direction === 'buy' ? 
+                    getComputedStyle(document.body).getPropertyValue('--divine-success') :
+                    getComputedStyle(document.body).getPropertyValue('--divine-danger'),
+                shape: signal.direction === 'buy' ? 'arrowUp' : 'arrowDown',
+                text: `${signal.score.toFixed(1)}`
+            };
+            
+            const currentMarkers = this.candleSeries.markers() || [];
+            currentMarkers.push(marker);
+            
+            // Keep only last 50 markers
+            if (currentMarkers.length > 50) {
+                currentMarkers.shift();
+            }
+            
+            this.candleSeries.setMarkers(currentMarkers);
+        }
+        
+        zoomChart(factor) {
+            if (!this.chart) return;
+            
+            const timeScale = this.chart.timeScale();
+            const currentRange = timeScale.getVisibleLogicalRange();
+            
+            if (currentRange) {
+                timeScale.setVisibleLogicalRange({
+                    from: currentRange.from * factor,
+                    to: currentRange.to * factor
+                });
+            }
+        }
+        
+        resetChart() {
+            if (!this.chart) return;
+            this.chart.timeScale().fitContent();
+        }
+        
+        toggleFullscreen() {
+            const chartContainer = document.querySelector('.chart-container');
+            
+            if (!document.fullscreenElement) {
+                chartContainer.requestFullscreen().catch(err => {
+                    console.error('Fullscreen error:', err);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        changeSymbol(newSymbol) {
+            if (newSymbol === this.currentSymbol) return;
+            
+            this.currentSymbol = newSymbol;
+            document.getElementById('ticker-bar-symbol').textContent = newSymbol.replace('USDT', '/USDT');
+            
+            // Clear current data
+            this.candles = [];
+            this.trades = [];
+            this.orderBook = { bids: [], asks: [] };
+            
+            // Restart if running
+            if (this.isRunning) {
+                this.stop();
+                setTimeout(() => this.start(), 1000);
+            }
+        }
+        
+        changeTimeframe(newTimeframe) {
+            if (newTimeframe === this.currentTimeframe) return;
+            
+            this.currentTimeframe = newTimeframe;
+            
+            // Clear current data
+            this.candles = [];
+            
+            // Restart if running
+            if (this.isRunning) {
+                this.stop();
+                setTimeout(() => this.start(), 1000);
+            }
+        }
+        
+        handleReconnect() {
+            this.reconnectAttempts++;
+            
+            if (this.reconnectAttempts > this.maxReconnectAttempts) {
+                this.showNotification(
+                    'BAĞLANTI HATASI',
+                    'Maksimum yeniden bağlanma denemesi aşıldı.',
+                    'danger'
+                );
+                this.stop();
+                return;
+            }
+            
+            const delay = Math.min(30000, 1000 * Math.pow(2, this.reconnectAttempts));
+            
+            this.showNotification(
+                'YENİDEN BAĞLANIYOR',
+                `Deneme ${this.reconnectAttempts}/${this.maxReconnectAttempts} - ${delay/1000}s`,
+                'warning'
+            );
+            
+            setTimeout(() => {
+                if (this.isRunning) {
+                    this.connectWebSockets();
+                }
+            }, delay);
+        }
+        
+        disconnectWebSockets() {
+            for (const ws of Object.values(this.sockets)) {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.close();
+                }
+            }
+            this.sockets = {};
+        }
+        
+        updateConnectionStatus(connected) {
+            const statusEl = document.getElementById('connection-status');
+            const textEl = document.getElementById('connection-text');
+            
+            if (connected) {
+                statusEl.classList.add('online');
+                textEl.textContent = 'BAĞLI';
+            } else {
+                statusEl.classList.remove('online');
+                textEl.textContent = 'BAĞLANTI YOK';
+            }
+        }
+        
+        showNotification(title, message, type = 'info') {
+            const container = document.getElementById('notifications');
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            const icons = {
+                success: '✨',
+                danger: '⚡',
+                warning: '⚠️',
+                info: 'ℹ️',
+                divine: '🏛️'
+            };
+            
+            notification.innerHTML = `
+                <div class="notification-header">
+                    <span class="notification-icon">${icons[type] || icons.info}</span>
+                    <span class="notification-title">${title}</span>
+                </div>
+                <div class="notification-message">${message}</div>
+            `;
+            
+            container.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                notification.style.animation = 'fadeOut 0.5s ease';
+                setTimeout(() => notification.remove(), 500);
+            }, 5000);
+            
+            // Save to notification history
+            this.dbManager.save('notificationHistory', {
+                timestamp: Date.now(),
+                title,
+                message,
+                type
+            });
+        }
+        
+        formatPrice(price) {
+            if (!price && price !== 0) return '-';
+            return price.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: price < 1 ? 6 : 2
+            });
+        }
+        
+        formatVolume(volume) {
+            if (!volume) return '-';
+            
+            if (volume >= 1e9) {
+                return (volume / 1e9).toFixed(2) + 'B';
+            } else if (volume >= 1e6) {
+                return (volume / 1e6).toFixed(2) + 'M';
+            } else {
+                return (volume / 1e3).toFixed(2) + 'K';
+            }
+        }
+        
+        getDecimalPlaces(price) {
+            if (price === undefined || price === null) return 2;
+            if (price > 1000) return 2;
+            if (price > 1) return 3;
+            if (price > 0.01) return 4;
+            return 6;
+        }
+    }
+    
+    // ================================================
+    // UYGULAMA BAŞLATMA
+    // ================================================
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('🏛️ PANTEON\'UN KADERİ YÜKLENİYOR...');
+        
+        // Add fadeOut animation style
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeOut {
+                from { opacity: 1; transform: translateX(0); }
+                to { opacity: 0; transform: translateX(-20px); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Initialize application
+        try {
+            window.app = new UltimateTradingCommandCenter();
+            console.log('✅ PANTEON HAZIR!');
+        } catch (error) {
+            console.error('❌ KRITIK HATA:', error);
+            document.body.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    color: var(--divine-danger);
+                    font-family: var(--font-divine);
+                    font-size: 24px;
+                    text-align: center;
+                    padding: 40px;
+                    background: var(--olympus-bg-secondary);
+                    border: 2px solid var(--divine-danger);
+                    border-radius: 12px;
+                    box-shadow: var(--glow-danger);
+                ">
+                    <h1>⚡ PANTEON ÇÖKTÜ ⚡</h1>
+                    <p style="font-size: 16px; margin-top: 20px;">
+                        Tanrılar öfkeli! Sistem başlatılamadı.
+                    </p>
+                    <p style="font-size: 14px; margin-top: 10px; color: var(--olympus-text-secondary);">
+                        Hata: ${error.message}
+                    </p>
+                    <p style="font-size: 12px; margin-top: 20px; color: var(--olympus-text-secondary);">
+                        Konsolu kontrol edin ve sayfayı yenileyin.
+                    </p>
+                </div>
+            `;
+        }
+    });
+    
+    // Global error handler
+    window.addEventListener('error', (event) => {
+        console.error('Global error:', event.error);
+        
+        if (window.app) {
+            window.app.showNotification(
+                'SİSTEM HATASI',
+                event.error.message,
+                'danger'
+            );
+        }
+    });
+    
+    // Unhandled promise rejection handler
+    window.addEventListener('unhandledrejection', (event) => {
+        console.error('Unhandled promise rejection:', event.reason);
+        
+        if (window.app) {
+            window.app.showNotification(
+                'ASYNC HATA',
+                event.reason.message || event.reason,
+                'danger'
+            );
+        }
+    });
+    </script>
+</body>
+</html>
+    

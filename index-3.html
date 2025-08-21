@@ -1,0 +1,298 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GrokSignals Pro Terminal</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans">
+  <div class="container mx-auto p-4 max-w-7xl">
+    <h1 class="text-3xl font-bold text-center mb-6">GrokSignals Pro Terminal</h1>
+
+    <!-- Connection Controls -->
+    <div class="flex justify-center space-x-4 mb-6">
+      <button id="connectBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded">Connect & Start Signals</button>
+      <button id="stopBtn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded" disabled>Stop</button>
+    </div>
+
+    <!-- Market Data -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="bg-gray-800 p-4 rounded-lg">
+        <h2 class="text-lg font-semibold">Current Price</h2>
+        <p id="price" class="text-2xl">-</p>
+      </div>
+      <div class="bg-gray-800 p-4 rounded-lg">
+        <h2 class="text-lg font-semibold">24h Change</h2>
+        <p id="change" class="text-2xl">-</p>
+      </div>
+      <div class="bg-gray-800 p-4 rounded-lg">
+        <h2 class="text-lg font-semibold">24h Volume</h2>
+        <p id="volume" class="text-2xl">-</p>
+      </div>
+      <div class="bg-gray-800 p-4 rounded-lg">
+        <h2 class="text-lg font-semibold">RSI (14)</h2>
+        <p id="rsi" class="text-2xl">-</p>
+      </div>
+    </div>
+
+    <!-- Chart and Market Depth -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+      <!-- Price Chart -->
+      <div class="bg-gray-800 p-4 rounded-lg">
+        <h2 class="text-lg font-semibold mb-2">Price Chart</h2>
+        <div class="flex space-x-2 mb-4">
+          <button class="timeframe-btn bg-gray-700 hover:bg-gray-600 py-1 px-3 rounded" data-timeframe="1m">1m</button>
+          <button class="timeframe-btn bg-gray-700 hover:bg-gray-600 py-1 px-3 rounded" data-timeframe="5m">5m</button>
+          <button class="timeframe-btn bg-gray-700 hover:bg-gray-600 py-1 px-3 rounded" data-timeframe="15m">15m</button>
+          <button class="timeframe-btn bg-gray-700 hover:bg-gray-600 py-1 px-3 rounded" data-timeframe="1h">1h</button>
+          <button class="timeframe-btn bg-gray-700 hover:bg-gray-600 py-1 px-3 rounded" data-timeframe="4h">4h</button>
+          <button class="timeframe-btn bg-gray-700 hover:bg-gray-600 py-1 px-3 rounded" data-timeframe="1d">1d</button>
+        </div>
+        <canvas id="priceChart"></canvas>
+      </div>
+
+      <!-- Market Depth -->
+      <div class="bg-gray-800 p-4 rounded-lg">
+        <h2 class="text-lg font-semibold mb-2">Market Depth</h2>
+        <div class="flex space-x-2 mb-4">
+          <button class="depth-tab bg-gray-700 hover:bg-gray-600 py-1 px-3 rounded" data-tab="chart">Chart</button>
+          <button class="depth-tab bg-gray-700 hover:bg-gray-600 py-1 px-3 rounded" data-tab="book">Order Book</button>
+        </div>
+        <div id="depthChartContainer" class="hidden">
+          <canvas id="depthChart"></canvas>
+        </div>
+        <div id="orderBookContainer">
+          <div class="grid grid-cols-3 gap-2 text-sm font-semibold mb-2">
+            <span>Price (USDT)</span>
+            <span>Amount</span>
+            <span>Total</span>
+          </div>
+          <div id="bids" class="text-green-400"></div>
+          <div id="asks" class="text-red-400"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Signal Stream -->
+    <div class="bg-gray-800 p-4 rounded-lg">
+      <h2 class="text-lg font-semibold mb-2">Signal Stream</h2>
+      <p id="signalStats" class="mb-2">Signals: 0 | Long: 0 | Short: 0</p>
+      <div id="signals" class="h-40 overflow-y-auto">
+        <p>Waiting for connection and data...</p>
+      </div>
+    </div>
+
+    <!-- Connection Status -->
+    <div class="text-center mt-6">
+      <p id="status" class="text-red-400">Disconnected</p>
+    </div>
+  </div>
+
+  <script>
+    // WebSocket and Data Handling
+    let ws = null;
+    let priceData = [];
+    let rsiData = [];
+    let signals = { total: 0, long: 0, short: 0 };
+    let currentTimeframe = '1m';
+    let chart = null;
+    let depthChart = null;
+
+    // Initialize Charts
+    function initCharts() {
+      const priceCtx = document.getElementById('priceChart').getContext('2d');
+      chart = new Chart(priceCtx, {
+        type: 'candlestick',
+        data: { datasets: [{ label: 'BTC/USDT', data: [] }] },
+        options: {
+          responsive: true,
+          scales: { x: { type: 'time' }, y: { beginAtZero: false } }
+        }
+      });
+
+      const depthCtx = document.getElementById('depthChart').getContext('2d');
+      depthChart = new Chart(depthCtx, {
+        type: 'line',
+        data: {
+          datasets: [
+            { label: 'Bids', data: [], borderColor: 'green', fill: true },
+            { label: 'Asks', data: [], borderColor: 'red', fill: true }
+          ]
+        },
+        options: { responsive: true, scales: { x: { type: 'linear' }, y: { beginAtZero: true } } }
+      });
+    }
+
+    // Connect to Binance WebSocket
+    function connectWebSocket() {
+      ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@aggTrade/btcusdt@depth10/btcusdt@kline_' + currentTimeframe);
+      document.getElementById('status').textContent = 'Connecting...';
+      document.getElementById('status').className = 'text-yellow-400';
+
+      ws.onopen = () => {
+        document.getElementById('status').textContent = 'Connected';
+        document.getElementById('status').className = 'text-green-400';
+        document.getElementById('connectBtn').disabled = true;
+        document.getElementById('stopBtn').disabled = false;
+      };
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        handleWebSocketData(data);
+      };
+
+      ws.onclose = () => {
+        document.getElementById('status').textContent = 'Disconnected';
+        document.getElementById('status').className = 'text-red-400';
+        document.getElementById('connectBtn').disabled = false;
+        document.getElementById('stopBtn').disabled = true;
+      };
+    }
+
+    // Handle WebSocket Data
+    function handleWebSocketData(data) {
+      if (data.e === 'aggTrade') {
+        const price = parseFloat(data.p);
+        document.getElementById('price').textContent = `$${price.toFixed(2)}`;
+        priceData.push({ time: new Date(data.T), price });
+        if (priceData.length > 100) priceData.shift();
+        updateRSI(price);
+      } else if (data.e === 'depthUpdate') {
+        updateOrderBook(data.bids, data.asks);
+        updateDepthChart(data.bids, data.asks);
+      } else if (data.e === 'kline') {
+        const kline = data.k;
+        const candle = {
+          x: new Date(kline.t),
+          open: parseFloat(kline.o),
+          high: parseFloat(kline.h),
+          low: parseFloat(kline.l),
+          close: parseFloat(kline.c)
+        };
+        chart.data.datasets[0].data.push(candle);
+        if (chart.data.datasets[0].data.length > 100) chart.data.datasets[0].data.shift();
+        chart.update();
+        document.getElementById('volume').textContent = kline.v;
+        document.getElementById('change').textContent = ((kline.c - kline.o) / kline.o * 100).toFixed(2) + '%';
+      }
+    }
+
+    // Update RSI
+    function updateRSI(price) {
+      rsiData.push(price);
+      if (rsiData.length > 14) {
+        const gains = [];
+        const losses = [];
+        for (let i = 1; i < rsiData.length; i++) {
+          const diff = rsiData[i] - rsiData[i - 1];
+          if (diff >= 0) gains.push(diff);
+          else losses.push(-diff);
+        }
+        const avgGain = gains.reduce((a, b) => a + b, 0) / 14;
+        const avgLoss = losses.reduce((a, b) => a + b, 0) / 14;
+        const rs = avgGain / avgLoss;
+        const rsi = 100 - (100 / (1 + rs));
+        document.getElementById('rsi').textContent = rsi.toFixed(2);
+        generateSignal(rsi);
+      }
+    }
+
+    // Generate Trading Signals
+    function generateSignal(rsi) {
+      const signalsDiv = document.getElementById('signals');
+      let signal = null;
+      if (rsi < 30) signal = 'Long';
+      else if (rsi > 70) signal = 'Short';
+      if (signal) {
+        signals.total++;
+        signals[signal.toLowerCase()]++;
+        const signalText = `${new Date().toLocaleTimeString()} - ${signal} Signal (RSI: ${rsi.toFixed(2)})`;
+        signalsDiv.innerHTML = `<p>${signalText}</p>` + signalsDiv.innerHTML;
+        document.getElementById('signalStats').textContent = `Signals: ${signals.total} | Long: ${signals.long} | Short: ${signals.short}`;
+      }
+    }
+
+    // Update Order Book
+    function updateOrderBook(bids, asks) {
+      const bidsDiv = document.getElementById('bids');
+      const asksDiv = document.getElementById('asks');
+      bidsDiv.innerHTML = bids.map(b => `<div class="grid grid-cols-3 gap-2"><span>${b[0]}</span><span>${b[1]}</span><span>${(b[0] * b[1]).toFixed(2)}</span></div>`).join('');
+      asksDiv.innerHTML = asks.map(a => `<div class="grid grid-cols-3 gap-2"><span>${a[0]}</span><span>${a[1]}</span><span>${(a[0] * a[1]).toFixed(2)}</span></div>`).join('');
+    }
+
+    // Update Depth Chart
+    function updateDepthChart(bids, asks) {
+      depthChart.data.datasets[0].data = bids.map(b => ({ x: parseFloat(b[0]), y: parseFloat(b[1]) }));
+      depthChart.data.datasets[1].data = asks.map(a => ({ x: parseFloat(a[0]), y: parseFloat(a[1]) }));
+      depthChart.update();
+    }
+
+    // Event Listeners
+    document.getElementById('connectBtn').addEventListener('click', connectWebSocket);
+    document.getElementById('stopBtn').addEventListener('click', () => ws && ws.close());
+    document.querySelectorAll('.timeframe-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentTimeframe = btn.dataset.timeframe;
+        document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('bg-gray-600'));
+        btn.classList.add('bg-gray-600');
+        if (ws) {
+          ws.close();
+          connectWebSocket();
+        }
+      });
+    });
+    document.querySelectorAll('.depth-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.depth-tab').forEach(b => b.classList.remove('bg-gray-600'));
+        btn.classList.add('bg-gray-600');
+        document.getElementById('depthChartContainer').classList.toggle('hidden', btn.dataset.tab !== 'chart');
+        document.getElementById('orderBookContainer').classList.toggle('hidden', btn.dataset.tab !== 'book');
+      });
+    });
+
+    // Initialize
+    initCharts();
+  </script>
+</body>
+</html>
