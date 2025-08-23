@@ -1,0 +1,647 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Trading Command Center</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        :root {
+            --panel-bg: #0d1117;
+            --input-bg: #010409;
+            --hover-bg: #161b22;
+            --border-color: #30363d;
+            --text-main: #c9d1d9;
+            --text-secondary: #8b949e;
+            --primary: #58a6ff;
+            --positive: #238636;
+            --negative: #da3633;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--input-bg);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Üst Menü Çubuğu */
+        .top-menu {
+            display: flex;
+            height: 40px;
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            padding: 0 10px;
+            gap: 15px;
+            flex-shrink: 0;
+        }
+
+        .menu-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .menu-item:hover {
+            background: var(--hover-bg);
+            color: var(--text-main);
+        }
+
+        .menu-item.active {
+            color: var(--primary);
+            background: var(--hover-bg);
+        }
+
+        .menu-divider {
+            width: 1px;
+            height: 20px;
+            background: var(--border-color);
+            margin: 0 5px;
+        }
+
+        .symbol-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .symbol-input {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-main);
+            padding: 6px 10px;
+            width: 100px;
+            font-size: 13px;
+        }
+
+        .timeframe-select {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-main);
+            padding: 6px;
+            font-size: 13px;
+        }
+
+        /* Ana İçerik Alanı */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sol Panel (Gizlenebilir) */
+        .side-panel {
+            width: 280px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: width 0.3s ease;
+        }
+
+        .side-panel.collapsed {
+            width: 40px;
+        }
+
+        .panel-header {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .toggle-panel {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        /* Grafik Alanı */
+        .chart-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--input-bg);
+        }
+
+        .chart-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #live-chart {
+            width: 100%;
+            height: 100%;
+        }
+
+        .chart-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            z-index: 100;
+        }
+
+        .chart-btn {
+            background: rgba(1, 4, 9, 0.7);
+            backdrop-filter: blur(2px);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* Alt Bilgi */
+        .status-bar {
+            height: 28px;
+            background: var(--panel-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            gap: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--negative);
+        }
+
+        .status-dot.connected {
+            background: var(--positive);
+        }
+
+        /* Modal Pencereler */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80%;
+            overflow: auto;
+        }
+
+        .modal-header {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 15px;
+        }
+
+        /* Piyasa Verileri */
+        .market-data {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .data-item {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px;
+        }
+
+        .data-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .data-value {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Sinyal Göstergeleri */
+        .signal-bars {
+            display: flex;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .signal-bar {
+            flex: 1;
+        }
+
+        .signal-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .signal-progress {
+            height: 6px;
+            background: var(--input-bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .signal-progress-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .signal-progress-fill.buy {
+            background: linear-gradient(90deg, var(--positive), #3fb950);
+        }
+
+        .signal-progress-fill.sell {
+            background: linear-gradient(90deg, var(--negative), #da3633);
+        }
+
+        .signal-value {
+            font-size: 12px;
+            text-align: right;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive Tasarım */
+        @media (max-width: 768px) {
+            .top-menu {
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+            
+            .menu-item span {
+                display: none;
+            }
+            
+            .side-panel {
+                position: absolute;
+                left: -280px;
+                height: calc(100% - 68px);
+                z-index: 500;
+            }
+            
+            .side-panel.open {
+                left: 0;
+            }
+            
+            .symbol-selector {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Üst Menü Çubuğu -->
+    <div class="top-menu">
+        <div class="menu-item active">
+            <i class="fas fa-chart-line"></i>
+            <span>Grafik</span>
+        </div>
+        <div class="menu-item">
+            <i class="fas fa-book"></i>
+            <span>Emir Defteri</span>
+        </div>
+        <div class="menu-item">
+            <i class="fas fa-exchange-alt"></i>
+            <span>İşlemler</span>
+        </div>
+        <div class="menu-item">
+            <i class="fas fa-bolt"></i>
+            <span>Sinyaller</span>
+        </div>
+        <div class="menu-item">
+            <i class="fas fa-history"></i>
+            <span>Geçmiş</span>
+        </div>
+        <div class="menu-item">
+            <i class="fas fa-cog"></i>
+            <span>Ayarlar</span>
+        </div>
+        
+        <div class="menu-divider"></div>
+        
+        <div class="menu-item">
+            <i class="fas fa-play-circle"></i>
+            <span>Başlat</span>
+        </div>
+        <div class="menu-item">
+            <i class="fas fa-stop-circle"></i>
+            <span>Durdur</span>
+        </div>
+        
+        <div class="symbol-selector">
+            <input type="text" class="symbol-input" value="BTCUSDT">
+            <select class="timeframe-select">
+                <option>1m</option>
+                <option>5m</option>
+                <option selected>15m</option>
+                <option>1h</option>
+                <option>4h</option>
+                <option>1d</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Ana İçerik -->
+    <div class="main-content">
+        <!-- Sol Panel -->
+        <div class="side-panel">
+            <div class="panel-header">
+                <span>Piyasa Verileri</span>
+                <button class="toggle-panel">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            <div class="panel-content">
+                <div class="market-data">
+                    <div class="data-item">
+                        <div class="data-label">Fiyat</div>
+                        <div class="data-value">$67,432.10</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">24s Değişim</div>
+                        <div class="data-value" style="color: var(--positive)">+2.34%</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">24s Hacim</div>
+                        <div class="data-value">$28.5B</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">ATR</div>
+                        <div class="data-value">$412.50</div>
+                    </div>
+                </div>
+
+                <div class="signal-bars">
+                    <div class="signal-bar">
+                        <div class="signal-label">Alış Sinyali</div>
+                        <div class="signal-progress">
+                            <div class="signal-progress-fill buy" style="width: 65%"></div>
+                        </div>
+                        <div class="signal-value">65%</div>
+                    </div>
+                    <div class="signal-bar">
+                        <div class="signal-label">Satış Sinyali</div>
+                        <div class="signal-progress">
+                            <div class="signal-progress-fill sell" style="width: 35%"></div>
+                        </div>
+                        <div class="signal-value">35%</div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h4>Aktif Emirler</h4>
+                    <div class="orders-list">
+                        <div class="order-item">
+                            <div class="order-type buy">BUY</div>
+                            <div class="order-details">
+                                <div>0.05 BTC</div>
+                                <div>$67,400.00</div>
+                            </div>
+                        </div>
+                        <div class="order-item">
+                            <div class="order-type sell">SELL</div>
+                            <div class="order-details">
+                                <div>0.02 BTC</div>
+                                <div>$68,200.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grafik Alanı -->
+        <div class="chart-area">
+            <div class="chart-container">
+                <div id="live-chart"></div>
+                <div class="chart-controls">
+                    <button class="chart-btn"><i class="fas fa-search-plus"></i></button>
+                    <button class="chart-btn"><i class="fas fa-search-minus"></i></button>
+                    <button class="chart-btn"><i class="fas fa-expand"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alt Durum Çubuğu -->
+    <div class="status-bar">
+        <div class="status-item">
+            <div class="status-dot connected"></div>
+            <span>Bağlı</span>
+        </div>
+        <div class="status-item">
+            <i class="fas fa-clock"></i>
+            <span>Son Güncelleme: 12:45:23</span>
+        </div>
+        <div class="status-item">
+            <i class="fas fa-bolt"></i>
+            <span>Gecikme: 42ms</span>
+        </div>
+        <div class="status-item">
+            <i class="fas fa-chart-line"></i>
+            <span>BTC/USDT | 15m</span>
+        </div>
+    </div>
+
+    <!-- Modal Pencereler (Gizli) -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Ayarlar</div>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Ayarlar içeriği buraya gelecek...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Grafik oluşturma
+            const chart = LightweightCharts.createChart(document.getElementById('live-chart'), {
+                layout: {
+                    background: { color: '#010409' },
+                    textColor: '#c9d1d9',
+                },
+                grid: {
+                    vertLines: { color: '#30363d' },
+                    horzLines: { color: '#30363d' },
+                },
+                timeScale: {
+                    timeVisible: true,
+                    secondsVisible: false,
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                },
+            });
+
+            const candleSeries = chart.addCandlestickSeries({
+                upColor: '#26a69a',
+                downColor: '#ef5350',
+                borderVisible: false,
+                wickUpColor: '#26a69a',
+                wickDownColor: '#ef5350',
+            });
+
+            // Örnek veri
+            const data = [
+                { time: '2023-06-01', open: 65000, high: 67000, low: 64500, close: 66500 },
+                { time: '2023-06-02', open: 66500, high: 67500, low: 65500, close: 67000 },
+                { time: '2023-06-03', open: 67000, high: 68500, low: 66800, close: 68000 },
+                { time: '2023-06-04', open: 68000, high: 69000, low: 67500, close: 68500 },
+                { time: '2023-06-05', open: 68500, high: 69500, low: 68000, close: 69000 },
+                { time: '2023-06-06', open: 69000, high: 70000, low: 68500, close: 69500 },
+                { time: '2023-06-07', open: 69500, high: 71000, low: 69200, close: 70500 },
+                { time: '2023-06-08', open: 70500, high: 71500, low: 70000, close: 71000 },
+                { time: '2023-06-09', open: 71000, high: 72500, low: 70800, close: 72000 },
+                { time: '2023-06-10', open: 72000, high: 73500, low: 71800, close: 73000 },
+            ];
+
+            candleSeries.setData(data);
+
+            // Panel açma/kapama
+            const togglePanelBtn = document.querySelector('.toggle-panel');
+            const sidePanel = document.querySelector('.side-panel');
+            
+            togglePanelBtn.addEventListener('click', function() {
+                sidePanel.classList.toggle('collapsed');
+                const icon = togglePanelBtn.querySelector('i');
+                
+                if (sidePanel.classList.contains('collapsed')) {
+                    icon.classList.remove('fa-chevron-left');
+                    icon.classList.add('fa-chevron-right');
+                } else {
+                    icon.classList.remove('fa-chevron-right');
+                    icon.classList.add('fa-chevron-left');
+                }
+            });
+
+            // Menü öğeleri için tıklama olayları
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Modal pencereleri yönetme
+            const settingsModal = document.getElementById('settings-modal');
+            const closeModalBtn = document.querySelector('.close-modal');
+            
+            document.querySelector('.menu-item:nth-child(6)').addEventListener('click', function() {
+                settingsModal.style.display = 'flex';
+            });
+            
+            closeModalBtn.addEventListener('click', function() {
+                settingsModal.style.display = 'none';
+            });
+            
+            window.addEventListener('click', function(event) {
+                if (event.target === settingsModal) {
+                    settingsModal.style.display = 'none';
+                }
+            });
+
+            // Grafik kontrolleri
+            const zoomInBtn = document.querySelector('.chart-btn:nth-child(1)');
+            const zoomOutBtn = document.querySelector('.chart-btn:nth-child(2)');
+            const fullscreenBtn = document.querySelector('.chart-btn:nth-child(3)');
+            
+            zoomInBtn.addEventListener('click', function() {
+                chart.timeScale().zoomIn();
+            });
+            
+            zoomOutBtn.addEventListener('click', function() {
+                chart.timeScale().zoomOut();
+            });
+            
+            fullscreenBtn.addEventListener('click', function() {
+                const chartContainer = document.querySelector('.chart-area');
+                chartContainer.requestFullscreen?.().catch(err => {
+                    console.error('Fullscreen hatası:', err);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
