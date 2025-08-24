@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ULTIMATE TRADING KOMUTA MERKEZİ - Ana Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
+    
+    <style>
+        :root {
+            --background-dark: #0d1117; 
+            --panel-bg-dark: #161b22; 
+            --text-main-dark: #c9d1d9; 
+            --text-secondary-dark: #8b949e; 
+            --border-color-dark: #30363d; 
+            --input-bg-dark: #010409; 
+            --hover-bg-dark: #21262d; 
+            --primary-dark: #58a6ff;
+            --positive: #28a745; 
+            --negative: #dc3545; 
+            --neutral: #ffc107;
+            --nav-height: 50px;
+        }
+        
+        [data-theme="dark"] { 
+            --background: var(--background-dark); 
+            --panel-bg: var(--panel-bg-dark); 
+            --text-main: var(--text-main-dark); 
+            --text-secondary: var(--text-secondary-dark); 
+            --border-color: var(--border-color-dark); 
+            --input-bg: var(--input-bg-dark); 
+            --hover-bg: var(--hover-bg-dark); 
+            --primary: var(--primary-dark); 
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Roboto Mono', monospace; 
+            font-size: 12px; 
+            background: var(--background); 
+            color: var(--text-main); 
+            overflow: hidden; 
+        }
+
+        /* Ana Navigasyon Menüsü */
+        .main-navigation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--nav-height);
+            background: var(--panel-bg);
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .nav-logo {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--primary);
+            margin-right: 30px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 5px;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            padding: 8px 16px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 11px;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: var(--hover-bg);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: var(--background);
+            border-color: var(--primary);
+        }
+
+        .nav-item.active:hover {
+            background: var(--primary);
+            opacity: 0.9;
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            padding: 6px 12px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 10px;
+        }
+
+        .theme-toggle:hover {
+            background: var(--hover-bg);
+            border-color: var(--primary);
+        }
+
+        /* Ana İçerik Alanı */
+        .main-content {
+            position: fixed;
+            top: var(--nav-height);
+            left: 0;
+            width: 100%;
+            height: calc(100vh - var(--nav-height));
+            overflow: hidden;
+        }
+
+        /* Panel Container */
+        .panel-container {
+            width: 100%;
+            height: 100%;
+            display: none;
+            overflow: hidden;
+        }
+
+        .panel-container.active {
+            display: block;
+        }
+
+        /* Ana Panel (Grafik + Temel Kontroller) */
+        .home-panel {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            height: 100%;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .basic-controls {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .form-control {
+            background: var(--input-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 11px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            background: var(--panel-bg);
+            color: var(--text-main);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 11px;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--primary);
+        }
+
+        .btn-success {
+            background: var(--positive);
+            color: white;
+            border-color: var(--positive);
+        }
+
+        .btn-danger {
+            background: var(--negative);
+            color: white;
+            border-color: var(--negative);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--negative);
+            transition: background-color 0.5s;
+        }
+
+        .status-dot.online {
+            background: var(--positive);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(40, 167, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+
+        .chart-area {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #trading-chart {
+            width: 100%;
+            height: 100%;
+        }
+
+        .chart-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            z-index: 10;
+        }
+
+        .chart-btn {
+            padding: 4px 8px;
+            background: rgba(22, 27, 34, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 10px;
+            transition: all 0.2s;
+        }
+
+        .chart-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--primary);
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-navigation {
+                padding: 0 10px;
+            }
+
+            .nav-logo {
+                font-size: 14px;
+                margin-right: 15px;
+            }
+
+            .nav-item {
+                padding: 6px 10px;
+                font-size: 10px;
+            }
+
+            .basic-controls {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+
+            .control-group {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Ana Navigasyon -->
+    <nav class="main-navigation">
+        <div class="nav-logo">KOMUTA MERKEZİ</div>
+        <div class="nav-menu">
+            <div class="nav-item active" data-panel="home">🏠 Ana Panel</div>
+            <div class="nav-item" data-panel="osiris">⚔️ OSIRIS SENTINEL</div>
+            <div class="nav-item" data-panel="panteon">🔮 Panteon Sistemi</div>
+            <div class="nav-item" data-panel="kehanet">🌟 Kehanet</div>
+            <div class="nav-item" data-panel="analytics">📊 Analiz</div>
+            <div class="nav-item" data-panel="settings">⚙️ Ayarlar</div>
+        </div>
+        <div class="nav-controls">
+            <button class="theme-toggle" id="theme-toggle">🌙 Tema</button>
+        </div>
+    </nav>
+
+    <!-- Ana İçerik Alanı -->
+    <main class="main-content">
+        <!-- Ana Panel (Grafik + Temel Kontroller) -->
+        <div class="panel-container active" id="home-panel">
+            <div class="home-panel">
+                <div class="basic-controls">
+                    <div class="control-group">
+                        <label>Sembol:</label>
+                        <input type="text" id="symbol-input" class="form-control" placeholder="BTC, ETH, SOL" value="BTCUSDT">
+                    </div>
+                    <div class="control-group">
+                        <label>Zaman:</label>
+                        <select id="timeframe-select" class="form-control">
+                            <option value="1m">1m</option>
+                            <option value="5m">5m</option>
+                            <option value="15m" selected>15m</option>
+                            <option value="1h">1h</option>
+                            <option value="4h">4h</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <div class="status-indicator">
+                            <div class="status-dot" id="connection-status"></div>
+                            <span id="connection-text">BAĞLANTI YOK</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <button id="start-btn" class="btn btn-success">SİSTEMİ BAŞLAT</button>
+                        <button id="stop-btn" class="btn btn-danger" disabled>DURDUR</button>
+                    </div>
+                    <div class="control-group">
+                        <button id="clear-chart-btn" class="btn">Grafik Temizle</button>
+                    </div>
+                </div>
+                
+                <div class="chart-area">
+                    <div id="trading-chart"></div>
+                    <div class="chart-controls">
+                        <button class="chart-btn" id="zoom-in">+</button>
+                        <button class="chart-btn" id="zoom-out">-</button>
+                        <button class="chart-btn" id="zoom-reset">Reset</button>
+                        <button class="chart-btn" id="fullscreen-toggle">⛶</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OSIRIS SENTINEL Panel -->
+        <div class="panel-container" id="osiris-panel">
+            <div class="loading">OSIRIS SENTINEL paneli yükleniyor...</div>
+        </div>
+
+        <!-- Panteon Sistemi Panel -->
+        <div class="panel-container" id="panteon-panel">
+            <div class="loading">Panteon Sistemi yükleniyor...</div>
+        </div>
+
+        <!-- Kehanet Panel -->
+        <div class="panel-container" id="kehanet-panel">
+            <div class="loading">Kehanet paneli yükleniyor...</div>
+        </div>
+
+        <!-- Analiz Panel -->
+        <div class="panel-container" id="analytics-panel">
+            <div class="loading">Analiz paneli yükleniyor...</div>
+        </div>
+
+        <!-- Ayarlar Panel -->
+        <div class="panel-container" id="settings-panel">
+            <div class="loading">Ayarlar paneli yükleniyor...</div>
+        </div>
+    </main>
+
+    <script>
+        class MainApplication {
+            constructor() {
+                this.currentPanel = 'home';
+                this.chart = null;
+                this.isConnected = false;
+                this.isRunning = false;
+                
+                this.init();
+            }
+
+            init() {
+                this.setupNavigation();
+                this.setupChart();
+                this.setupControls();
+                this.loadSettings();
+            }
+
+            setupNavigation() {
+                // Panel geçiş navigasyonu
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const panelName = item.dataset.panel;
+                        this.switchPanel(panelName);
+                    });
+                });
+
+                // Tema değiştirici
+                document.getElementById('theme-toggle').addEventListener('click', () => {
+                    this.toggleTheme();
+                });
+            }
+
+            switchPanel(panelName) {
+                // Mevcut aktif paneli kapat
+                document.querySelectorAll('.panel-container').forEach(panel => {
+                    panel.classList.remove('active');
+                });
+                
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // Yeni paneli aç
+                const targetPanel = document.getElementById(`${panelName}-panel`);
+                const targetNavItem = document.querySelector(`[data-panel="${panelName}"]`);
+                
+                if (targetPanel && targetNavItem) {
+                    targetPanel.classList.add('active');
+                    targetNavItem.classList.add('active');
+                    this.currentPanel = panelName;
+                    
+                    // Panel yükleme (lazy loading için)
+                    this.loadPanel(panelName);
+                }
+            }
+
+            async loadPanel(panelName) {
+                const panel = document.getElementById(`${panelName}-panel`);
+                
+                // Eğer panel zaten yüklenmişse, direkt göster
+                if (panel.dataset.loaded === 'true') {
+                    return;
+                }
+
+                try {
+                    switch(panelName) {
+                        case 'osiris':
+                            await this.loadOsirisPanel(panel);
+                            break;
+                        case 'panteon':
+                            await this.loadPanteonPanel(panel);
+                            break;
+                        case 'kehanet':
+                            await this.loadKehanetPanel(panel);
+                            break;
+                        case 'analytics':
+                            await this.loadAnalyticsPanel(panel);
+                            break;
+                        case 'settings':
+                            await this.loadSettingsPanel(panel);
+                            break;
+                    }
+                    panel.dataset.loaded = 'true';
+                } catch (error) {
+                    console.error(`Panel yükleme hatası (${panelName}):`, error);
+                    panel.innerHTML = `<div class="loading" style="color: var(--negative);">Panel yüklenirken hata oluştu: ${error.message}</div>`;
+                }
+            }
+
+            async loadOsirisPanel(panel) {
+                // OSIRIS SENTINEL panelini dinamik olarak yükle
+                panel.innerHTML = `
+                    <iframe src="osiris-sentinel.html" 
+                            style="width: 100%; height: 100%; border: none; background: var(--background);"
+                            sandbox="allow-scripts allow-same-origin">
+                    </iframe>
+                `;
+            }
+
+            async loadPanteonPanel(panel) {
+                // Panteon panelini yükle
+                panel.innerHTML = `
+                    <iframe src="panteon-enhanced.html" 
+                            style="width: 100%; height: 100%; border: none; background: var(--background);"
+                            sandbox="allow-scripts allow-same-origin">
+                    </iframe>
+                `;
+            }
+
+            async loadKehanetPanel(panel) {
+                // Kehanet panelini yükle - gelişmiş arayüz
+                panel.innerHTML = `
+                    <div style="padding: 20px; height: 100%; background: var(--panel-bg); border-radius: 8px;">
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <h2 style="color: var(--primary); font-size: 20px; margin-bottom: 10px;">🌟 Kehanet Sistemi</h2>
+                            <p style="color: var(--text-secondary); font-size: 12px;">Gelecek fiyat hareketlerini öngörme sistemi</p>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <div style="background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">📈</div>
+                                <div style="font-size: 12px; font-weight: 600; color: var(--primary); margin-bottom: 5px;">Trend Kehaneti</div>
+                                <div style="font-size: 10px; color: var(--text-secondary);">Gelecek trend yönü</div>
+                            </div>
+                            <div style="background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">💎</div>
+                                <div style="font-size: 12px; font-weight: 600; color: var(--primary); margin-bottom: 5px;">Fiyat Hedefi</div>
+                                <div style="font-size: 10px; color: var(--text-secondary);">Gelecek fiyat seviyeleri</div>
+                            </div>
+                            <div style="background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">⚡</div>
+                                <div style="font-size: 12px; font-weight: 600; color: var(--primary); margin-bottom: 5px;">Volatilite Tahmini</div>
+                                <div style="font-size: 10px; color: var(--text-secondary);">Gelecek volatilite</div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px;">
+                            <h3 style="color: var(--primary); font-size: 14px; margin-bottom: 10px;">🔮 Aktif Kehanetler</h3>
+                            <div style="font-size: 11px; color: var(--text-secondary); text-align: center; padding: 20px;">
+                                Kehanet sistemi geliştirme aşamasında...<br>
+                                <em>Yakında gelişmiş tahmin algoritmaları eklenecek</em>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            async loadAnalyticsPanel(panel) {
+                panel.innerHTML = `
+                    <div style="padding: 20px; height: 100%; background: var(--panel-bg); border-radius: 8px;">
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <h2 style="color: var(--primary); font-size: 20px; margin-bottom: 10px;">📊 Analiz Merkezi</h2>
+                            <p style="color: var(--text-secondary); font-size: 12px;">Gelişmiş piyasa analiz araçları</p>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <div style="background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px;">
+                                <h4 style="color: var(--primary); font-size: 12px; margin-bottom: 10px;">📈 Teknik Analiz</h4>
+                                <ul style="font-size: 10px; color: var(--text-secondary); list-style: none; padding: 0;">
+                                    <li style="margin-bottom: 5px;">• RSI, MACD, Bollinger Bands</li>
+                                    <li style="margin-bottom: 5px;">• Fibonacci Retracements</li>
+                                    <li style="margin-bottom: 5px;">• Support/Resistance Levels</li>
+                                </ul>
+                            </div>
+                            <div style="background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px;">
+                                <h4 style="color: var(--primary); font-size: 12px; margin-bottom: 10px;">🧠 AI Analiz</h4>
+                                <ul style="font-size: 10px; color: var(--text-secondary); list-style: none; padding: 0;">
+                                    <li style="margin-bottom: 5px;">• Pattern Recognition</li>
+                                    <li style="margin-bottom: 5px;">• Sentiment Analysis</li>
+                                    <li style="margin-bottom: 5px;">• Market Prediction</li>
+                                </ul>
+                            </div>
+                            <div style="background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px;">
+                                <h4 style="color: var(--primary); font-size: 12px; margin-bottom: 10px;">📊 İstatistikler</h4>
+                                <ul style="font-size: 10px; color: var(--text-secondary); list-style: none; padding: 0;">
+                                    <li style="margin-bottom: 5px;">• Win/Loss Ratios</li>
+                                    <li style="margin-bottom: 5px;">• Risk Metrics</li>
+                                    <li style="margin-bottom: 5px;">• Performance Analytics</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div style="background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px;">
+                            <h3 style="color: var(--primary); font-size: 14px; margin-bottom: 10px;">📋 Analiz Sonuçları</h3>
+                            <div style="font-size: 11px; color: var(--text-secondary); text-align: center; padding: 20px;">
+                                Analiz modülleri geliştirme aşamasında...<br>
+                                <em>Gelişmiş analiz araçları yakında eklenecek</em>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            async loadSettingsPanel(panel) {
+                panel.innerHTML = `
+                    <div style="padding: 20px; height: 100%; background: var(--panel-bg); border-radius: 8px; overflow-y: auto;">
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <h2 style="color: var(--primary); font-size: 20px; margin-bottom: 10px;">⚙️ Sistem Ayarları</h2>
+                            <p style="color: var(--text-secondary); font-size: 12px;">Tüm sistem ayarlarını buradan yönetin</p>
+                        </div>
+                        
+                        <div style="display: grid; gap: 20px;">
+                            <div style="background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px;">
+                                <h3 style="color: var(--primary); font-size: 14px; margin-bottom: 15px;">🎨 Görünüm Ayarları</h3>
+                                <div style="margin-bottom: 10px;">
+                                    <label style="display: block; font-size: 11px; color: var(--text-secondary); margin-bottom: 5px;">Tema</label>
+                                    <select style="width: 100%; padding: 6px; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 4px; font-size: 11px;">
+                                        <option>Dark Theme</option>
+                                        <option>Light Theme</option>
+                                        <option>War Mode</option>
+                                    </select>
+                                </div>
+                                <div style="margin-bottom: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; font-size: 11px; cursor: pointer;">
+                                        <input type="checkbox" checked style="accent-color: var(--primary);">
+                                        <span>Animasyonları etkinleştir</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div style="background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px;">
+                                <h3 style="color: var(--primary); font-size: 14px; margin-bottom: 15px;">🔔 Bildirim Ayarları</h3>
+                                <div style="margin-bottom: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; font-size: 11px; cursor: pointer;">
+                                        <input type="checkbox" checked style="accent-color: var(--primary);">
+                                        <span>Sesli bildirimler</span>
+                                    </label>
+                                </div>
+                                <div style="margin-bottom: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; font-size: 11px; cursor: pointer;">
+                                        <input type="checkbox" checked style="accent-color: var(--primary);">
+                                        <span>Sinyal bildirimleri</span>
+                                    </label>
+                                </div>
+                                <div style="margin-bottom: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; font-size: 11px; cursor: pointer;">
+                                        <input type="checkbox" style="accent-color: var(--primary);">
+                                        <span>Email bildirimleri</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div style="background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px;">
+                                <h3 style="color: var(--primary); font-size: 14px; margin-bottom: 15px;">⚡ Performans Ayarları</h3>
+                                <div style="margin-bottom: 10px;">
+                                    <label style="display: block; font-size: 11px; color: var(--text-secondary); margin-bottom: 5px;">Panel Yükleme Modu</label>
+                                    <select style="width: 100%; padding: 6px; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 4px; font-size: 11px;">
+                                        <option>Lazy Loading (Önerilen)</option>
+                                        <option>Eager Loading</option>
+                                        <option>Manuel</option>
+                                    </select>
+                                </div>
+                                <div style="margin-bottom: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; font-size: 11px; cursor: pointer;">
+                                        <input type="checkbox" checked style="accent-color: var(--primary);">
+                                        <span>Bellek optimizasyonu</span>
+                                    </label>
+                                </div>
+                                <div style="margin-bottom: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; font-size: 11px; cursor: pointer;">
+                                        <input type="checkbox" checked style="accent-color: var(--primary);">
+                                        <span>DOM optimizasyonu</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div style="background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px;">
+                                <h3 style="color: var(--primary); font-size: 14px; margin-bottom: 15px;">🔧 Sistem İşlemleri</h3>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
+                                    <button onclick="alert('Ayarlar kaydedildi!')" style="padding: 8px 12px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 10px;">Ayarları Kaydet</button>
+                                    <button onclick="alert('Cache temizlendi!')" style="padding: 8px 12px; background: var(--panel-bg); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; font-size: 10px;">Cache Temizle</button>
+                                    <button onclick="alert('Veriler yedeklendi!')" style="padding: 8px 12px; background: var(--panel-bg); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; font-size: 10px;">Verileri Yedekle</button>
+                                    <button onclick="confirm('Tüm ayarlar sıfırlanacak. Emin misiniz?')" style="padding: 8px 12px; background: var(--negative); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 10px;">Sıfırla</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            setupChart() {
+                const chartContainer = document.getElementById('trading-chart');
+                
+                try {
+                    this.chart = LightweightCharts.createChart(chartContainer, {
+                        width: chartContainer.clientWidth,
+                        height: chartContainer.clientHeight,
+                        layout: {
+                            backgroundColor: '#161b22',
+                            textColor: '#c9d1d9',
+                            fontSize: 12,
+                            fontFamily: 'Roboto Mono, monospace'
+                        },
+                        grid: {
+                            vertLines: { color: '#30363d' },
+                            horzLines: { color: '#30363d' }
+                        },
+                        crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+                        rightPriceScale: { borderColor: '#30363d' },
+                        timeScale: { borderColor: '#30363d' },
+                        handleScroll: { mouseWheel: true, pressedMouseMove: true },
+                        handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true }
+                    });
+
+                    // Candlestick series ekle
+                    this.candlestickSeries = this.chart.addCandlestickSeries({
+                        upColor: '#28a745',
+                        downColor: '#dc3545',
+                        borderDownColor: '#dc3545',
+                        borderUpColor: '#28a745',
+                        wickDownColor: '#dc3545',
+                        wickUpColor: '#28a745',
+                    });
+
+                    // Resize handler
+                    window.addEventListener('resize', () => {
+                        this.chart.applyOptions({
+                            width: chartContainer.clientWidth,
+                            height: chartContainer.clientHeight
+                        });
+                    });
+
+                } catch (error) {
+                    console.error('Chart başlatılamadı:', error);
+                    chartContainer.innerHTML = '<div class="loading" style="color: var(--negative);">Chart yüklenemedi</div>';
+                }
+            }
+
+            setupControls() {
+                // Başlat/Durdur butonları
+                document.getElementById('start-btn').addEventListener('click', () => {
+                    this.startSystem();
+                });
+
+                document.getElementById('stop-btn').addEventListener('click', () => {
+                    this.stopSystem();
+                });
+
+                // Chart kontrolleri
+                document.getElementById('zoom-in').addEventListener('click', () => {
+                    if (this.chart) this.chart.timeScale().zoomIn();
+                });
+
+                document.getElementById('zoom-out').addEventListener('click', () => {
+                    if (this.chart) this.chart.timeScale().zoomOut();
+                });
+
+                document.getElementById('zoom-reset').addEventListener('click', () => {
+                    if (this.chart) this.chart.timeScale().fitContent();
+                });
+
+                document.getElementById('clear-chart-btn').addEventListener('click', () => {
+                    this.clearChart();
+                });
+
+                // Sembol ve timeframe değişiklikleri
+                document.getElementById('symbol-input').addEventListener('change', () => {
+                    this.onSymbolChange();
+                });
+
+                document.getElementById('timeframe-select').addEventListener('change', () => {
+                    this.onTimeframeChange();
+                });
+            }
+
+            startSystem() {
+                if (this.isRunning) return;
+                
+                this.isRunning = true;
+                document.getElementById('start-btn').disabled = true;
+                document.getElementById('stop-btn').disabled = false;
+                
+                // Bağlantı simülasyonu
+                document.getElementById('connection-status').classList.add('online');
+                document.getElementById('connection-text').textContent = 'BAĞLI';
+                this.isConnected = true;
+
+                console.log('Sistem başlatıldı');
+            }
+
+            stopSystem() {
+                if (!this.isRunning) return;
+                
+                this.isRunning = false;
+                document.getElementById('start-btn').disabled = false;
+                document.getElementById('stop-btn').disabled = true;
+                
+                document.getElementById('connection-status').classList.remove('online');
+                document.getElementById('connection-text').textContent = 'BAĞLANTI YOK';
+                this.isConnected = false;
+
+                console.log('Sistem durduruldu');
+            }
+
+            clearChart() {
+                if (this.candlestickSeries) {
+                    this.candlestickSeries.setData([]);
+                }
+            }
+
+            onSymbolChange() {
+                const symbol = document.getElementById('symbol-input').value;
+                console.log('Sembol değiştirildi:', symbol);
+                // Buraya yeni sembol için veri yükleme mantığı eklenecek
+            }
+
+            onTimeframeChange() {
+                const timeframe = document.getElementById('timeframe-select').value;
+                console.log('Timeframe değiştirildi:', timeframe);
+                // Buraya yeni timeframe için veri yükleme mantığı eklenecek
+            }
+
+            toggleTheme() {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('app_theme', newTheme);
+                
+                // Chart temasını güncelle
+                if (this.chart) {
+                    const isDark = newTheme === 'dark';
+                    this.chart.applyOptions({
+                        layout: {
+                            backgroundColor: isDark ? '#161b22' : '#ffffff',
+                            textColor: isDark ? '#c9d1d9' : '#24292f'
+                        },
+                        grid: {
+                            vertLines: { color: isDark ? '#30363d' : '#d0d7de' },
+                            horzLines: { color: isDark ? '#30363d' : '#d0d7de' }
+                        }
+                    });
+                }
+            }
+
+            loadSettings() {
+                // Tema ayarını yükle
+                const savedTheme = localStorage.getItem('app_theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+        }
+
+        // Uygulamayı başlat
+        document.addEventListener('DOMContentLoaded', () => {
+            window.app = new MainApplication();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSIRIS SENTINEL - Advanced Trading Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
+    
+    <style>
+        :root {
+            --background-dark: #0d1117; 
+            --panel-bg-dark: #161b22; 
+            --text-main-dark: #c9d1d9; 
+            --text-secondary-dark: #8b949e; 
+            --border-color-dark: #30363d; 
+            --input-bg-dark: #010409; 
+            --hover-bg-dark: #21262d; 
+            --primary-dark: #58a6ff;
+            --positive: #28a745; 
+            --negative: #dc3545; 
+            --neutral: #ffc107;
+            --osiris-primary: #ff6b35;
+            --osiris-secondary: #f7931e;
+            --osiris-accent: #ffd23f;
+        }
+        
+        [data-theme="dark"] { 
+            --background: var(--background-dark); 
+            --panel-bg: var(--panel-bg-dark); 
+            --text-main: var(--text-main-dark); 
+            --text-secondary: var(--text-secondary-dark); 
+            --border-color: var(--border-color-dark); 
+            --input-bg: var(--input-bg-dark); 
+            --hover-bg: var(--hover-bg-dark); 
+            --primary: var(--primary-dark); 
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Roboto Mono', monospace; 
+            font-size: 12px; 
+            background: var(--background); 
+            color: var(--text-main); 
+            overflow: hidden; 
+            height: 100vh;
+        }
+
+        /* OSIRIS Panel Header */
+        .osiris-header {
+            background: linear-gradient(135deg, var(--osiris-primary), var(--osiris-secondary));
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(255, 107, 53, 0.3);
+        }
+
+        .osiris-title {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .osiris-title::before {
+            content: "⚔️";
+            font-size: 20px;
+            animation: pulse-osiris 2s infinite;
+        }
+
+        @keyframes pulse-osiris {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .osiris-status {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            font-size: 11px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--negative);
+        }
+
+        .status-dot.active {
+            background: var(--positive);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(40, 167, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+
+        /* Main Grid Layout */
+        .osiris-main {
+            display: grid;
+            grid-template-columns: 300px 1fr 250px;
+            grid-template-rows: 1fr;
+            height: calc(100vh - 65px);
+            gap: 1px;
+            background: var(--border-color);
+        }
+
+        /* Control Panel (Left) */
+        .control-panel {
+            background: var(--panel-bg);
+            padding: 15px;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .control-section {
+            margin-bottom: 20px;
+            padding: 12px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        .control-section h3 {
+            color: var(--osiris-primary);
+            font-size: 13px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-group {
+            margin-bottom: 10px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .form-control {
+            width: 100%;
+            background: var(--input-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 6px 8px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 11px;
+        }
+
+        .form-control:focus {
+            border-color: var(--osiris-primary);
+            outline: none;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            background: var(--panel-bg);
+            color: var(--text-main);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 11px;
+            font-family: 'Roboto Mono', monospace;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--osiris-primary);
+        }
+
+        .btn-osiris {
+            background: var(--osiris-primary);
+            color: white;
+            border-color: var(--osiris-primary);
+        }
+
+        .btn-osiris:hover {
+            background: var(--osiris-secondary);
+        }
+
+        .btn-success {
+            background: var(--positive);
+            color: white;
+            border-color: var(--positive);
+        }
+
+        .btn-danger {
+            background: var(--negative);
+            color: white;
+            border-color: var(--negative);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 10px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 3px;
+            transition: background 0.2s;
+        }
+
+        .checkbox-item:hover {
+            background: var(--hover-bg);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            accent-color: var(--osiris-primary);
+        }
+
+        /* Chart Area (Center) */
+        .chart-area {
+            background: var(--panel-bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #osiris-chart {
+            width: 100%;
+            height: 100%;
+        }
+
+        .chart-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .chart-info {
+            background: rgba(22, 27, 34, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 10px;
+            pointer-events: auto;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 5px;
+            pointer-events: auto;
+        }
+
+        .chart-btn {
+            padding: 6px 10px;
+            background: rgba(22, 27, 34, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 10px;
+            transition: all 0.2s;
+        }
+
+        .chart-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--osiris-primary);
+        }
+
+        /* Signal Panel (Right) */
+        .signal-panel {
+            background: var(--panel-bg);
+            padding: 15px;
+            overflow-y: auto;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .signal-section {
+            margin-bottom: 15px;
+        }
+
+        .signal-section h3 {
+            color: var(--osiris-primary);
+            font-size: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .signal-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--input-bg);
+        }
+
+        .signal-item {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .signal-item:last-child {
+            border-bottom: none;
+        }
+
+        .signal-item.buy {
+            border-left: 3px solid var(--positive);
+        }
+
+        .signal-item.sell {
+            border-left: 3px solid var(--negative);
+        }
+
+        .signal-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .signal-time {
+            color: var(--text-secondary);
+            font-size: 9px;
+        }
+
+        .signal-price {
+            font-weight: 600;
+        }
+
+        .signal-score {
+            background: var(--osiris-primary);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: 600;
+        }
+
+        /* Strategy Performance */
+        .strategy-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .strategy-card {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .strategy-name {
+            font-size: 9px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .strategy-value {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--osiris-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .osiris-main {
+                grid-template-columns: 250px 1fr 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .osiris-main {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+            
+            .control-panel,
+            .signal-panel {
+                height: 150px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--osiris-primary);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- OSIRIS Header -->
+    <header class="osiris-header">
+        <div class="osiris-title">
+            OSIRIS SENTINEL
+            <span style="font-size: 12px; opacity: 0.8;">Advanced Trading System</span>
+        </div>
+        <div class="osiris-status">
+            <div class="status-item">
+                <div class="status-dot" id="system-status"></div>
+                <span id="system-text">DEVRE DIŞI</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot" id="connection-status"></div>
+                <span id="connection-text">BAĞLANTI YOK</span>
+            </div>
+            <div class="status-item">
+                <span id="active-strategies">0 Strateji Aktif</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="osiris-main">
+        <!-- Control Panel -->
+        <aside class="control-panel">
+            <div class="control-section">
+                <h3>🎯 Sistem Kontrolü</h3>
+                <div class="control-group">
+                    <label>Sembol</label>
+                    <input type="text" class="form-control" id="symbol-input" value="BTCUSDT">
+                </div>
+                <div class="control-group">
+                    <label>Zaman Dilimi</label>
+                    <select class="form-control" id="timeframe-select">
+                        <option value="1m">1 Dakika</option>
+                        <option value="5m">5 Dakika</option>
+                        <option value="15m" selected>15 Dakika</option>
+                        <option value="1h">1 Saat</option>
+                        <option value="4h">4 Saat</option>
+                    </select>
+                </div>
+                <button class="btn btn-osiris" id="start-osiris">OSIRIS'İ BAŞLAT</button>
+                <button class="btn btn-danger" id="stop-osiris" disabled>SİSTEMİ DURDUR</button>
+            </div>
+
+            <div class="control-section">
+                <h3>⚙️ Parametreler</h3>
+                <div class="control-group">
+                    <label>Sinyal Eşiği</label>
+                    <input type="range" class="form-control" id="signal-threshold" min="1" max="10" value="5" step="1">
+                    <span id="threshold-value">5</span>
+                </div>
+                <div class="control-group">
+                    <label>Risk Oranı (%)</label>
+                    <input type="number" class="form-control" id="risk-percent" value="1" step="0.1" min="0.1" max="5">
+                </div>
+                <div class="control-group">
+                    <label>Maksimum Pozisyon</label>
+                    <input type="number" class="form-control" id="max-positions" value="3" min="1" max="10">
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>🔥 Aktif Stratejiler</h3>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="strategy-momentum" checked>
+                        <label for="strategy-momentum">Momentum Scalp</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="strategy-breakout" checked>
+                        <label for="strategy-breakout">Breakout Pattern</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="strategy-reversal">
+                        <label for="strategy-reversal">Reversal Signal</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="strategy-volume">
+                        <label for="strategy-volume">Volume Spike</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="strategy-liquidation">
+                        <label for="strategy-liquidation">Liquidation Hunt</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>🛡️ Risk Yönetimi</h3>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="auto-sl" checked>
+                    <label for="auto-sl">Otomatik Stop Loss</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="auto-tp" checked>
+                    <label for="auto-tp">Otomatik Take Profit</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="trailing-sl">
+                    <label for="trailing-sl">Trailing Stop</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="emergency-stop">
+                    <label for="emergency-stop">Acil Durum Stopı</label>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Chart Area -->
+        <section class="chart-area">
+            <div id="osiris-chart"></div>
+            <div class="chart-overlay">
+                <div class="chart-info">
+                    <div>Son Fiyat: <span id="current-price">-</span></div>
+                    <div>24s Değişim: <span id="price-change">-</span></div>
+                    <div>Volatilite: <span id="volatility">-</span></div>
+                </div>
+                <div class="chart-controls">
+                    <button class="chart-btn" id="zoom-in">🔍+</button>
+                    <button class="chart-btn" id="zoom-out">🔍-</button>
+                    <button class="chart-btn" id="fit-content">📏</button>
+                    <button class="chart-btn" id="clear-signals">🗑️</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Signal Panel -->
+        <aside class="signal-panel">
+            <div class="signal-section">
+                <h3>📊 Canlı Sinyaller</h3>
+                <div class="signal-list" id="live-signals">
+                    <div style="padding: 20px; text-align: center; color: var(--text-secondary); font-size: 10px;">
+                        Henüz sinyal yok
+                    </div>
+                </div>
+            </div>
+
+            <div class="signal-section">
+                <h3>📈 Performans</h3>
+                <div class="strategy-grid">
+                    <div class="strategy-card">
+                        <div class="strategy-name">Toplam Sinyal</div>
+                        <div class="strategy-value" id="total-signals">0</div>
+                    </div>
+                    <div class="strategy-card">
+                        <div class="strategy-name">Başarı Oranı</div>
+                        <div class="strategy-value" id="success-rate">0%</div>
+                    </div>
+                    <div class="strategy-card">
+                        <div class="strategy-name">Aktif Pozisyon</div>
+                        <div class="strategy-value" id="active-positions">0</div>
+                    </div>
+                    <div class="strategy-card">
+                        <div class="strategy-name">Günlük P&L</div>
+                        <div class="strategy-value" id="daily-pnl">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>🎮 Hızlı Eylemler</h3>
+                <button class="btn" id="close-all">Tüm Pozisyonları Kapat</button>
+                <button class="btn" id="emergency-exit">ACİL ÇIKIŞ</button>
+                <button class="btn" id="export-signals">Sinyalleri Dışa Aktar</button>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        class OSIRISSentinel {
+            constructor() {
+                this.isActive = false;
+                this.isConnected = false;
+                this.chart = null;
+                this.candlestickSeries = null;
+                this.signals = [];
+                this.activeStrategies = [];
+                this.performance = {
+                    totalSignals: 0,
+                    successfulSignals: 0,
+                    activePositions: 0,
+                    dailyPnL: 0
+                };
+                
+                this.init();
+            }
+
+            init() {
+                this.setupChart();
+                this.setupControls();
+                this.setupEventListeners();
+                this.updatePerformanceDisplay();
+                
+                console.log('🗡️ OSIRIS SENTINEL initialized');
+            }
+
+            setupChart() {
+                const chartContainer = document.getElementById('osiris-chart');
+                
+                try {
+                    this.chart = LightweightCharts.createChart(chartContainer, {
+                        width: chartContainer.clientWidth,
+                        height: chartContainer.clientHeight,
+                        layout: {
+                            backgroundColor: '#161b22',
+                            textColor: '#c9d1d9',
+                            fontSize: 12,
+                            fontFamily: 'Roboto Mono, monospace'
+                        },
+                        grid: {
+                            vertLines: { color: '#30363d' },
+                            horzLines: { color: '#30363d' }
+                        },
+                        crosshair: { 
+                            mode: LightweightCharts.CrosshairMode.Normal,
+                            vertLine: { color: '#ff6b35', width: 1, style: LightweightCharts.LineStyle.Dashed },
+                            horzLine: { color: '#ff6b35', width: 1, style: LightweightCharts.LineStyle.Dashed }
+                        },
+                        rightPriceScale: { borderColor: '#30363d' },
+                        timeScale: { borderColor: '#30363d' },
+                        handleScroll: { mouseWheel: true, pressedMouseMove: true },
+                        handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true }
+                    });
+
+                    // Candlestick series
+                    this.candlestickSeries = this.chart.addCandlestickSeries({
+                        upColor: '#28a745',
+                        downColor: '#dc3545',
+                        borderDownColor: '#dc3545',
+                        borderUpColor: '#28a745',
+                        wickDownColor: '#dc3545',
+                        wickUpColor: '#28a745',
+                    });
+
+                    // Volume series (optional)
+                    this.volumeSeries = this.chart.addHistogramSeries({
+                        color: '#26a69a',
+                        priceFormat: { type: 'volume' },
+                        priceScaleId: '', // volume on separate scale
+                        scaleMargins: { top: 0.8, bottom: 0 }
+                    });
+
+                    // Resize handler
+                    window.addEventListener('resize', () => {
+                        this.chart.applyOptions({
+                            width: chartContainer.clientWidth,
+                            height: chartContainer.clientHeight
+                        });
+                    });
+
+                } catch (error) {
+                    console.error('Chart initialization failed:', error);
+                    chartContainer.innerHTML = '<div class="loading">Chart yüklenemedi</div>';
+                }
+            }
+
+            setupControls() {
+                // Threshold slider
+                const thresholdSlider = document.getElementById('signal-threshold');
+                const thresholdValue = document.getElementById('threshold-value');
+                
+                thresholdSlider.addEventListener('input', (e) => {
+                    thresholdValue.textContent = e.target.value;
+                });
+
+                // Strategy checkboxes
+                document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', () => {
+                        this.updateActiveStrategies();
+                    });
+                });
+            }
+
+            setupEventListeners() {
+                // Start/Stop buttons
+                document.getElementById('start-osiris').addEventListener('click', () => {
+                    this.startSystem();
+                });
+
+                document.getElementById('stop-osiris').addEventListener('click', () => {
+                    this.stopSystem();
+                });
+
+                // Chart controls
+                document.getElementById('zoom-in').addEventListener('click', () => {
+                    if (this.chart) this.chart.timeScale().zoomIn();
+                });
+
+                document.getElementById('zoom-out').addEventListener('click', () => {
+                    if (this.chart) this.chart.timeScale().zoomOut();
+                });
+
+                document.getElementById('fit-content').addEventListener('click', () => {
+                    if (this.chart) this.chart.timeScale().fitContent();
+                });
+
+                document.getElementById('clear-signals').addEventListener('click', () => {
+                    this.clearSignals();
+                });
+
+                // Quick actions
+                document.getElementById('close-all').addEventListener('click', () => {
+                    this.closeAllPositions();
+                });
+
+                document.getElementById('emergency-exit').addEventListener('click', () => {
+                    this.emergencyExit();
+                });
+
+                document.getElementById('export-signals').addEventListener('click', () => {
+                    this.exportSignals();
+                });
+
+                // Symbol and timeframe changes
+                document.getElementById('symbol-input').addEventListener('change', () => {
+                    this.onSymbolChange();
+                });
+
+                document.getElementById('timeframe-select').addEventListener('change', () => {
+                    this.onTimeframeChange();
+                });
+            }
+
+            startSystem() {
+                if (this.isActive) return;
+                
+                this.isActive = true;
+                document.getElementById('start-osiris').disabled = true;
+                document.getElementById('stop-osiris').disabled = false;
+                
+                // Update status indicators
+                document.getElementById('system-status').classList.add('active');
+                document.getElementById('system-text').textContent = 'AKTİF';
+                document.getElementById('connection-status').classList.add('active');
+                document.getElementById('connection-text').textContent = 'BAĞLI';
+                
+                this.updateActiveStrategies();
+                console.log('🗡️ OSIRIS SENTINEL activated');
+                
+                // Start simulation (for demo purposes)
+                this.startDataSimulation();
+            }
+
+            stopSystem() {
+                if (!this.isActive) return;
+                
+                this.isActive = false;
+                document.getElementById('start-osiris').disabled = false;
+                document.getElementById('stop-osiris').disabled = true;
+                
+                // Update status indicators
+                document.getElementById('system-status').classList.remove('active');
+                document.getElementById('system-text').textContent = 'DEVRE DIŞI';
+                document.getElementById('connection-status').classList.remove('active');
+                document.getElementById('connection-text').textContent = 'BAĞLANTI YOK';
+                document.getElementById('active-strategies').textContent = '0 Strateji Aktif';
+                
+                console.log('🗡️ OSIRIS SENTINEL deactivated');
+                
+                // Stop simulation
+                if (this.simulationInterval) {
+                    clearInterval(this.simulationInterval);
+                }
+            }
+
+            updateActiveStrategies() {
+                const activeStrategies = Array.from(document.querySelectorAll('.checkbox-item input[type="checkbox"]:checked')).length;
+                document.getElementById('active-strategies').textContent = `${activeStrategies} Strateji Aktif`;
+            }
+
+            startDataSimulation() {
+                // Simple simulation for demo purposes
+                let currentPrice = 50000;
+                let currentTime = Date.now() / 1000;
+                const candleData = [];
+                
+                // Generate some initial data
+                for (let i = 0; i < 100; i++) {
+                    const time = currentTime - (100 - i) * 900; // 15min intervals
+                    const open = currentPrice;
+                    const volatility = 200;
+                    const change = (Math.random() - 0.5) * volatility;
+                    const close = open + change;
+                    const high = Math.max(open, close) + Math.random() * 100;
+                    const low = Math.min(open, close) - Math.random() * 100;
+                    
+                    candleData.push({ time, open, high, low, close });
+                    currentPrice = close;
+                }
+                
+                this.candlestickSeries.setData(candleData);
+                
+                // Update price display
+                document.getElementById('current-price').textContent = `$${currentPrice.toFixed(2)}`;
+                document.getElementById('price-change').textContent = `+2.34%`;
+                document.getElementById('volatility').textContent = `${volatility.toFixed(0)}`;
+                
+                // Simulate random signals
+                this.simulationInterval = setInterval(() => {
+                    if (Math.random() < 0.1) { // 10% chance per interval
+                        this.generateRandomSignal();
+                    }
+                }, 5000);
+            }
+
+            generateRandomSignal() {
+                const types = ['buy', 'sell'];
+                const strategies = ['Momentum Scalp', 'Breakout Pattern', 'Volume Spike'];
+                
+                const signal = {
+                    id: Date.now(),
+                    type: types[Math.floor(Math.random() * types.length)],
+                    strategy: strategies[Math.floor(Math.random() * strategies.length)],
+                    price: 50000 + (Math.random() - 0.5) * 1000,
+                    score: Math.floor(Math.random() * 10) + 1,
+                    time: new Date().toLocaleTimeString()
+                };
+                
+                this.addSignal(signal);
+            }
+
+            addSignal(signal) {
+                this.signals.unshift(signal);
+                
+                // Limit signals to last 20
+                if (this.signals.length > 20) {
+                    this.signals = this.signals.slice(0, 20);
+                }
+                
+                this.updateSignalDisplay();
+                this.updatePerformance();
+            }
+
+            updateSignalDisplay() {
+                const signalContainer = document.getElementById('live-signals');
+                
+                if (this.signals.length === 0) {
+                    signalContainer.innerHTML = `
+                        <div style="padding: 20px; text-align: center; color: var(--text-secondary); font-size: 10px;">
+                            Henüz sinyal yok
+                        </div>
+                    `;
+                    return;
+                }
+                
+                signalContainer.innerHTML = this.signals.map(signal => `
+                    <div class="signal-item ${signal.type}">
+                        <div class="signal-meta">
+                            <div class="signal-price">$${signal.price.toFixed(2)}</div>
+                            <div class="signal-time">${signal.time}</div>
+                            <div style="font-size: 9px; color: var(--text-secondary);">${signal.strategy}</div>
+                        </div>
+                        <div class="signal-score">${signal.score}</div>
+                    </div>
+                `).join('');
+            }
+
+            updatePerformance() {
+                this.performance.totalSignals = this.signals.length;
+                this.performance.successfulSignals = Math.floor(this.signals.length * 0.7); // 70% success rate simulation
+                
+                this.updatePerformanceDisplay();
+            }
+
+            updatePerformanceDisplay() {
+                document.getElementById('total-signals').textContent = this.performance.totalSignals;
+                
+                const successRate = this.performance.totalSignals > 0 
+                    ? ((this.performance.successfulSignals / this.performance.totalSignals) * 100).toFixed(1)
+                    : 0;
+                document.getElementById('success-rate').textContent = `${successRate}%`;
+                
+                document.getElementById('active-positions').textContent = this.performance.activePositions;
+                document.getElementById('daily-pnl').textContent = `${this.performance.dailyPnL.toFixed(2)}%`;
+            }
+
+            clearSignals() {
+                this.signals = [];
+                this.updateSignalDisplay();
+                this.updatePerformance();
+                console.log('🗑️ Signals cleared');
+            }
+
+            closeAllPositions() {
+                this.performance.activePositions = 0;
+                this.updatePerformanceDisplay();
+                console.log('🚪 All positions closed');
+            }
+
+            emergencyExit() {
+                this.stopSystem();
+                this.closeAllPositions();
+                this.clearSignals();
+                console.log('🚨 EMERGENCY EXIT EXECUTED');
+            }
+
+            exportSignals() {
+                const csvContent = "data:text/csv;charset=utf-8," 
+                    + "Time,Type,Strategy,Price,Score\n"
+                    + this.signals.map(s => `${s.time},${s.type},${s.strategy},${s.price},${s.score}`).join("\n");
+                
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "osiris_signals.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                console.log('📊 Signals exported');
+            }
+
+            onSymbolChange() {
+                const symbol = document.getElementById('symbol-input').value;
+                console.log('Symbol changed to:', symbol);
+                // Here you would implement symbol change logic
+            }
+
+            onTimeframeChange() {
+                const timeframe = document.getElementById('timeframe-select').value;
+                console.log('Timeframe changed to:', timeframe);
+                // Here you would implement timeframe change logic
+            }
+        }
+
+        // Initialize OSIRIS SENTINEL
+        document.addEventListener('DOMContentLoaded', () => {
+            window.osiris = new OSIRISSentinel();
+        });
+    </script>
+</body>
+</html>
