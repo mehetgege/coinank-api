@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panteon Sistemi - Cosmic Trading Powers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --background-dark: #0d1117;
+            --panel-bg-dark: #161b22;
+            --text-main-dark: #c9d1d9;
+            --text-secondary-dark: #8b949e;
+            --border-color-dark: #30363d;
+            --input-bg-dark: #010409;
+            --hover-bg-dark: #21262d;
+            --primary-dark: #58a6ff;
+            
+            /* Cosmic Pantheon Colors */
+            --metatron-color: #3b82f6;
+            --metatron-glow: rgba(59, 130, 246, 0.4);
+            --metatron-bg: rgba(59, 130, 246, 0.1);
+            
+            --uriel-color: #f59e0b;
+            --uriel-glow: rgba(245, 158, 11, 0.4);
+            --uriel-bg: rgba(245, 158, 11, 0.1);
+            
+            --raphael-color: #10b981;
+            --raphael-glow: rgba(16, 185, 129, 0.4);
+            --raphael-bg: rgba(16, 185, 129, 0.1);
+            
+            --gabriel-color: #8b5cf6;
+            --gabriel-glow: rgba(139, 92, 246, 0.4);
+            --gabriel-bg: rgba(139, 92, 246, 0.1);
+            
+            --michael-color: #ef4444;
+            --michael-glow: rgba(239, 68, 68, 0.4);
+            --michael-bg: rgba(239, 68, 68, 0.1);
+            
+            --cosmic-gradient: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(16, 185, 129, 0.1) 100%);
+        }
+        
+        [data-theme="dark"] {
+            --background: var(--background-dark);
+            --panel-bg: var(--panel-bg-dark);
+            --text-main: var(--text-main-dark);
+            --text-secondary: var(--text-secondary-dark);
+            --border-color: var(--border-color-dark);
+            --input-bg: var(--input-bg-dark);
+            --hover-bg: var(--hover-bg-dark);
+            --primary: var(--primary-dark);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 12px;
+            background: var(--background);
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+            animation: cosmic-float 20s ease-in-out infinite;
+        }
+
+        @keyframes cosmic-float {
+            0%, 100% { background-position: 0% 0%, 0% 0%, 0% 0%; }
+            50% { background-position: 100% 100%, 100% 100%, 100% 100%; }
+        }
+
+        /* Panteon Header */
+        .panteon-header {
+            background: var(--cosmic-gradient);
+            border-bottom: 2px solid var(--border-color);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panteon-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: cosmic-sweep 3s ease-in-out infinite;
+        }
+
+        @keyframes cosmic-sweep {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
+        }
+
+        .panteon-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--metatron-color), var(--gabriel-color), var(--raphael-color));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .panteon-subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Main Pantheon Grid */
+        .pantheon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Angel Cards */
+        .angel-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .angel-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--cosmic-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+        }
+
+        .angel-card:hover::before {
+            opacity: 1;
+        }
+
+        .angel-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .angel-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .angel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .angel-icon {
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .angel-name {
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .angel-status {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: auto;
+        }
+
+        /* Angel-specific styling */
+        .metatron .angel-icon {
+            background: var(--metatron-bg);
+            color: var(--metatron-color);
+            box-shadow: 0 0 20px var(--metatron-glow);
+        }
+        .metatron .angel-name { color: var(--metatron-color); }
+        .metatron .angel-status { background: var(--metatron-bg); color: var(--metatron-color); }
+
+        .uriel .angel-icon {
+            background: var(--uriel-bg);
+            color: var(--uriel-color);
+            box-shadow: 0 0 20px var(--uriel-glow);
+        }
+        .uriel .angel-name { color: var(--uriel-color); }
+        .uriel .angel-status { background: var(--uriel-bg); color: var(--uriel-color); }
+
+        .raphael .angel-icon {
+            background: var(--raphael-bg);
+            color: var(--raphael-color);
+            box-shadow: 0 0 20px var(--raphael-glow);
+        }
+        .raphael .angel-name { color: var(--raphael-color); }
+        .raphael .angel-status { background: var(--raphael-bg); color: var(--raphael-color); }
+
+        .gabriel .angel-icon {
+            background: var(--gabriel-bg);
+            color: var(--gabriel-color);
+            box-shadow: 0 0 20px var(--gabriel-glow);
+        }
+        .gabriel .angel-name { color: var(--gabriel-color); }
+        .gabriel .angel-status { background: var(--gabriel-bg); color: var(--gabriel-color); }
+
+        .michael .angel-icon {
+            background: var(--michael-bg);
+            color: var(--michael-color);
+            box-shadow: 0 0 20px var(--michael-glow);
+        }
+        .michael .angel-name { color: var(--michael-color); }
+        .michael .angel-status { background: var(--michael-bg); color: var(--michael-color); }
+
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Power Meter */
+        .power-meter {
+            margin: 15px 0;
+        }
+
+        .power-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .power-bar {
+            height: 8px;
+            background: var(--input-bg);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .power-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.8s ease-out;
+            position: relative;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2));
+        }
+
+        .power-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: power-sweep 2s linear infinite;
+        }
+
+        @keyframes power-sweep {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Angel Abilities */
+        .angel-abilities {
+            margin-top: 15px;
+        }
+
+        .ability-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            font-size: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .ability-item:last-child {
+            border-bottom: none;
+        }
+
+        .ability-icon {
+            width: 16px;
+            text-align: center;
+            opacity: 0.7;
+        }
+
+        .ability-name {
+            flex-grow: 1;
+        }
+
+        .ability-status {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: 600;
+        }
+
+        .ability-status.active {
+            background: var(--raphael-bg);
+            color: var(--raphael-color);
+        }
+
+        .ability-status.cooldown {
+            background: var(--michael-bg);
+            color: var(--michael-color);
+        }
+
+        .ability-status.ready {
+            background: var(--uriel-bg);
+            color: var(--uriel-color);
+        }
+
+        /* Prophecy Section */
+        .prophecy-section {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin: 20px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prophecy-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--metatron-color), var(--gabriel-color), var(--raphael-color), var(--uriel-color), var(--michael-color));
+            animation: prophecy-flow 3s linear infinite;
+        }
+
+        @keyframes prophecy-flow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        .prophecy-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gabriel-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .prophecy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .prophecy-card {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .prophecy-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--gabriel-color);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.2);
+        }
+
+        .prophecy-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .prophecy-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gabriel-color);
+            margin-bottom: 5px;
+        }
+
+        .prophecy-desc {
+            font-size: 9px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin: 20px;
+            padding: 20px;
+        }
+
+        .control-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            background: var(--panel-bg);
+            color: var(--text-main);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 10px;
+            font-family: 'Roboto Mono', monospace;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: var(--hover-bg);
+            transform: translateY(-1px);
+        }
+
+        .btn-pantheon {
+            background: linear-gradient(45deg, var(--metatron-color), var(--gabriel-color));
+            color: white;
+            border: none;
+        }
+
+        .btn-pantheon:hover {
+            background: linear-gradient(45deg, var(--gabriel-color), var(--metatron-color));
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .pantheon-grid {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            
+            .prophecy-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .cosmic-spinner {
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--metatron-color);
+            border-right: 2px solid var(--gabriel-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: cosmic-spin 1s linear infinite;
+            margin-right: 15px;
+        }
+
+        @keyframes cosmic-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Panteon Header -->
+    <header class="panteon-header">
+        <h1 class="panteon-title">🔮 PANTEON SİSTEMİ</h1>
+        <p class="panteon-subtitle">Cosmic Trading Angels - Divine Market Guidance</p>
+    </header>
+
+    <!-- Main Pantheon Grid -->
+    <section class="pantheon-grid">
+        <!-- Metatron - Wisdom & Insight -->
+        <div class="angel-card metatron" data-angel="metatron">
+            <div class="angel-content">
+                <div class="angel-header">
+                    <div class="angel-icon">👁️</div>
+                    <div class="angel-name">Metatron</div>
+                    <div class="angel-status" id="metatron-status">HAZIR</div>
+                </div>
+                <div class="power-meter">
+                    <div class="power-label">
+                        <span>Bilgelik Gücü</span>
+                        <span id="metatron-power">0%</span>
+                    </div>
+                    <div class="power-bar">
+                        <div class="power-fill" id="metatron-fill" style="width: 0%; background: var(--metatron-color);"></div>
+                    </div>
+                </div>
+                <div class="angel-abilities">
+                    <div class="ability-item">
+                        <div class="ability-icon">🔍</div>
+                        <div class="ability-name">Market Analysis</div>
+                        <div class="ability-status ready">READY</div>
+                    </div>
+                    <div class="ability-item">
+                        <div class="ability-icon">📊</div>
+                        <div class="ability-name">Pattern Recognition</div>
+                        <div class="ability-status active">ACTIVE</div>
+                    </div>
+                    <div class="ability-item">
+                        <div class="ability-icon">🎯</div>
+                        <div class="ability-name">Precision Strike</div>
+                        <div class="ability-status cooldown">COOLDOWN</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Uriel - Strength & War -->
+        <div class="angel-card uriel" data-angel="uriel">
+            <div class="angel-content">
+                <div class="angel-header">
+                    <div class="angel-icon">⚔️</div>
+                    <div class="angel-name">Uriel</div>
+                    <div class="angel-status" id="uriel-status">AKTİF</div>
+                </div>
+                <div class="power-meter">
+                    <div class="power-label">
+                        <span>Savaş Gücü</span>
+                        <span id="uriel-power">0%</span>
+                    </div>
+                    <div class="power-bar">
+                        <div class="power-fill" id="uriel-fill" style="width: 0%; background: var(--uriel-color);"></div>
+                    </div>
+                </div>
+                <div class="angel-abilities">
+                    <div class="ability-item">
+                        <div class="ability-icon">⚡</div>
+                        <div class="ability-name">Lightning Strike</div>
+                        <div class="ability-status active">ACTIVE</div>
+                    </div>
+                    <div class="ability-item">
+                        <div class="ability-icon">🛡️</div>
+                        <div class="ability-name">Divine Protection</div>
+                        <div class="ability-status ready">READY</div>
+                    </div>
+                    <div class="ability-item">
+                        <div class="ability-icon">🔥</div>
+                        <div class="ability-name">Berserker Mode</div>
+                        <div class="ability-status ready">READY</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Raphael - Healing & Recovery -->
+        <div class="angel-card raphael" data-angel="raphael">
+            <div class="angel-content">
+                <div class="angel-header">
+                    <div class="angel-icon">💊</div>
+                    <div class="angel-name">Raphael</div>
+                    <div class="angel-status" id="raphael-status">İYİLEŞTİRİYOR</div>
+                </div>
+                <div class="power-meter">
+                    <div class="power-label">
+                        <span>İyileştirme Gücü</span>
+                        <span id="raphael-power">0%</span>
+                    </div>
+                    <div class="power-bar">
+                        <div class="power-fill" id="raphael-fill" style="width: 0%; background: var(--raphael-color);"></div>
+                    </div>
+                </div>
+                <div class="angel-abilities">
+                    <div class="ability-item">
+                        <div class="ability-icon">💚</div>
+                        <div class="ability-name">Loss Recovery</div>
+                        <div class="ability-status active">ACTIVE</div>
+                    </div>
+                    <div class="ability-item">
+                        <div class="ability-icon">🔄</div>
+                        <div class="ability-name">Position Healing</div>
+                        <div class="ability-status ready">READY</div>
+                    </div>
+                    <div class="ability-item">
+                        <div class="ability-icon">✨</div>
+                        <div class="ability-name">Divine Reversal</div>
+                        <div class="ability-status cooldown">COOLDOWN</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gabriel - Communication & Signals -->
+        <div class="angel-card gabriel" data-angel="gabriel">
+            <div class="angel-content">
+                <div class="angel-header">
+                    <div class="angel-icon">📢</div>
+                    <div class="angel-name">Gabriel</div>
+                    <div class="angel-status" id="gabriel-status">SINYAL VERİYOR</div>
+                </div>
+                <div class="power-meter">
+                    <div class="power-label">
+                        <span>İletişim Gücü</span>
+                        <span id="gabriel-power">0%</span>
+                    </div>
+                    <div class="power-bar">
+                        <div class="power-fill" id="gabriel-fill" style="width: 0%; background: var(--gabriel-color);"></div>
+                    </div>
+                </div>
+                <div class="angel-abilities">
+                    <div class="ability-item">
+                        <div class="ability-icon">📡</div>
+                        <div class="ability-name">Signal Broadcast</div>
+                        <div class="ability-status active">ACTIVE</div>
+                    </div>
+                    <div class="ability-item">
+                        <div class="ability-icon">🔮</div>
+                        <div class="ability-name">Future Vision</div>
+                        <div class="ability-status ready">READY</div>
+                    </div>
+                    <div class="ability-item">
+                        <div class="ability-icon">📻</div>
+                        <div class="ability-name">Cosmic Channel</div>
+                        <div class="ability-status active">ACTIVE</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Michael - Justice & Balance -->
+        <div class="angel-card michael" data-angel="michael">
+            <div class="angel-content">
+                <div class="angel-header">
+                    <div class="angel-icon">⚖️</div>
+                    <div class="angel-name">Michael</div>
+                    <div class="angel-status" id="michael-status">DENGE KURUYOR</div>
+                </div>
+                <div class="power-meter">
+                    <div class="power-label">
+                        <span>Adalet Gücü</span>
+                        <span id="michael-power">0%</span>
+                    </div>
+                    <div class="power-bar">
+                        <div class="power-fill" id="michael-fill" style="width: 0%; background: var(--michael-color);"></div>
+                    </div>
+                </div>
+                <div class="angel-abilities">
+                    <div class="ability-item">
+                        <div class="ability-icon">⚖️</div>
+                        <div class="ability-name">Market Justice</div>
+                        <div class="ability-status active">ACTIVE</div>
+                    </div>
+                    <div class="ability-item">
+                        <div class="ability-icon">🗡️</div>
+                        <div class="ability-name">Liquidation Sword</div>
+                        <div class="ability-status ready">READY</div>
+                    </div>
+                    <div class="ability-item">
+                        <div class="ability-icon">🛡️</div>
+                        <div class="ability-name">Portfolio Shield</div>
+                        <div class="ability-status active">ACTIVE</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Prophecy Section -->
+    <section class="prophecy-section">
+        <h2 class="prophecy-title">🌟 Kehanet Sistemi</h2>
+        <div class="prophecy-grid">
+            <div class="prophecy-card" data-prophecy="trend">
+                <div class="prophecy-icon">📈</div>
+                <div class="prophecy-name">Trend Kehaneti</div>
+                <div class="prophecy-desc">Gelecek trend yönünü önceden görür</div>
+            </div>
+            <div class="prophecy-card" data-prophecy="volume">
+                <div class="prophecy-icon">🌊</div>
+                <div class="prophecy-name">Hacim Kehaneti</div>
+                <div class="prophecy-desc">Volume patlamalarını öngörür</div>
+            </div>
+            <div class="prophecy-card" data-prophecy="reversal">
+                <div class="prophecy-icon">🔄</div>
+                <div class="prophecy-name">Geri Dönüş Kehaneti</div>
+                <div class="prophecy-desc">Major reversalleri tespit eder</div>
+            </div>
+            <div class="prophecy-card" data-prophecy="breakout">
+                <div class="prophecy-icon">💥</div>
+                <div class="prophecy-name">Kırılım Kehaneti</div>
+                <div class="prophecy-desc">Büyük breakoutları önceden bildirir</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Control Panel -->
+    <section class="control-panel">
+        <h2 class="control-title">⚙️ Panteon Kontrolü</h2>
+        <div class="control-grid">
+            <button class="btn btn-pantheon" id="activate-all">Tüm Melekleri Aktifleştir</button>
+            <button class="btn" id="reset-powers">Güçleri Sıfırla</button>
+            <button class="btn" id="sync-angels">Melekleri Senkronize Et</button>
+            <button class="btn" id="boost-mode">Güçlendirme Modu</button>
+            <button class="btn" id="emergency-call">Acil Durum Çağrısı</button>
+            <button class="btn" id="cosmic-alignment">Kozmik Hizalama</button>
+        </div>
+    </section>
+
+    <script>
+        class PanteonSystem {
+            constructor() {
+                this.angels = {
+                    metatron: { power: 0, status: 'HAZIR', abilities: ['analysis', 'pattern', 'precision'] },
+                    uriel: { power: 0, status: 'AKTİF', abilities: ['lightning', 'protection', 'berserker'] },
+                    raphael: { power: 0, status: 'İYİLEŞTİRİYOR', abilities: ['recovery', 'healing', 'reversal'] },
+                    gabriel: { power: 0, status: 'SINYAL VERİYOR', abilities: ['broadcast', 'vision', 'channel'] },
+                    michael: { power: 0, status: 'DENGE KURUYOR', abilities: ['justice', 'sword', 'shield'] }
+                };
+                
+                this.prophecies = ['trend', 'volume', 'reversal', 'breakout'];
+                this.isActive = false;
+                this.cosmicAlignment = false;
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.startPowerAnimation();
+                this.startCosmicCycle();
+                
+                console.log('🔮 Panteon Sistemi initialized');
+            }
+
+            setupEventListeners() {
+                // Angel card clicks
+                document.querySelectorAll('.angel-card').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        const angelName = card.dataset.angel;
+                        this.activateAngel(angelName);
+                    });
+                });
+
+                // Prophecy clicks
+                document.querySelectorAll('.prophecy-card').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        const prophecyType = card.dataset.prophecy;
+                        this.activateProphecy(prophecyType);
+                    });
+                });
+
+                // Control buttons
+                document.getElementById('activate-all').addEventListener('click', () => {
+                    this.activateAllAngels();
+                });
+
+                document.getElementById('reset-powers').addEventListener('click', () => {
+                    this.resetAllPowers();
+                });
+
+                document.getElementById('sync-angels').addEventListener('click', () => {
+                    this.syncAngels();
+                });
+
+                document.getElementById('boost-mode').addEventListener('click', () => {
+                    this.activateBoostMode();
+                });
+
+                document.getElementById('emergency-call').addEventListener('click', () => {
+                    this.emergencyCall();
+                });
+
+                document.getElementById('cosmic-alignment').addEventListener('click', () => {
+                    this.cosmicAlignment();
+                });
+            }
+
+            startPowerAnimation() {
+                // Animate angel powers continuously
+                setInterval(() => {
+                    Object.keys(this.angels).forEach(angelName => {
+                        const angel = this.angels[angelName];
+                        const targetPower = Math.random() * 100;
+                        this.updateAngelPower(angelName, targetPower);
+                    });
+                }, 3000);
+            }
+
+            startCosmicCycle() {
+                // Cosmic events cycle
+                setInterval(() => {
+                    if (Math.random() < 0.3) {
+                        this.triggerCosmicEvent();
+                    }
+                }, 10000);
+            }
+
+            updateAngelPower(angelName, power) {
+                const angel = this.angels[angelName];
+                angel.power = Math.max(0, Math.min(100, power));
+                
+                const fillElement = document.getElementById(`${angelName}-fill`);
+                const powerElement = document.getElementById(`${angelName}-power`);
+                
+                if (fillElement && powerElement) {
+                    fillElement.style.width = `${angel.power}%`;
+                    powerElement.textContent = `${Math.round(angel.power)}%`;
+                }
+            }
+
+            activateAngel(angelName) {
+                const angel = this.angels[angelName];
+                
+                // Boost power temporarily
+                this.updateAngelPower(angelName, 100);
+                
+                // Update status
+                const statusElement = document.getElementById(`${angelName}-status`);
+                if (statusElement) {
+                    statusElement.textContent = 'AKTİFLEŞTİRİLDİ';
+                    setTimeout(() => {
+                        statusElement.textContent = angel.status;
+                    }, 3000);
+                }
+                
+                console.log(`🔮 ${angelName.toUpperCase()} activated!`);
+                this.showCosmicEffect(angelName);
+            }
+
+            activateProphecy(prophecyType) {
+                const prophecyCard = document.querySelector(`[data-prophecy="${prophecyType}"]`);
+                
+                if (prophecyCard) {
+                    prophecyCard.style.transform = 'scale(1.05)';
+                    prophecyCard.style.boxShadow = '0 10px 30px rgba(139, 92, 246, 0.5)';
+                    
+                    setTimeout(() => {
+                        prophecyCard.style.transform = '';
+                        prophecyCard.style.boxShadow = '';
+                    }, 2000);
+                }
+                
+                console.log(`🌟 ${prophecyType.toUpperCase()} prophecy activated!`);
+                this.generateProphecy(prophecyType);
+            }
+
+            generateProphecy(type) {
+                const prophecies = {
+                    trend: ['Büyük bir yükseliş yaklaşıyor...', 'Bearish pattern forming...', 'Sideways movement detected...'],
+                    volume: ['Volume explosion incoming!', 'Whale movement detected...', 'Accumulation phase detected...'],
+                    reversal: ['Major reversal at key level...', 'Support turning resistance...', 'Momentum shift detected...'],
+                    breakout: ['Breakout imminent...', 'Consolidation ending...', 'Explosive move coming...']
+                };
+                
+                const messages = prophecies[type];
+                const message = messages[Math.floor(Math.random() * messages.length)];
+                
+                this.showProphecyMessage(message);
+            }
+
+            showProphecyMessage(message) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: linear-gradient(45deg, var(--gabriel-color), var(--metatron-color));
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+                    z-index: 1000;
+                    font-family: 'Roboto Mono', monospace;
+                    font-size: 12px;
+                    font-weight: 600;
+                    opacity: 0;
+                    transform: translateX(100%);
+                    transition: all 0.3s ease;
+                `;
+                notification.textContent = `🔮 Kehanet: ${message}`;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.opacity = '1';
+                    notification.style.transform = 'translateX(0)';
+                }, 100);
+                
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 5000);
+            }
+
+            showCosmicEffect(angelName) {
+                const card = document.querySelector(`.angel-card.${angelName}`);
+                if (!card) return;
+                
+                const effect = document.createElement('div');
+                effect.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: radial-gradient(circle, var(--${angelName}-glow) 0%, transparent 70%);
+                    opacity: 0;
+                    animation: cosmic-burst 1s ease-out;
+                    pointer-events: none;
+                    z-index: 2;
+                `;
+                
+                // Add keyframe animation
+                if (!document.getElementById('cosmic-burst-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'cosmic-burst-style';
+                    style.textContent = `
+                        @keyframes cosmic-burst {
+                            0% { opacity: 0; transform: scale(0.8); }
+                            50% { opacity: 1; transform: scale(1.2); }
+                            100% { opacity: 0; transform: scale(1); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                card.appendChild(effect);
+                
+                setTimeout(() => {
+                    card.removeChild(effect);
+                }, 1000);
+            }
+
+            activateAllAngels() {
+                Object.keys(this.angels).forEach(angelName => {
+                    this.activateAngel(angelName);
+                });
+                
+                this.showProphecyMessage('Tüm melekler aktifleştirildi! Kozmik güç maksimumda!');
+            }
+
+            resetAllPowers() {
+                Object.keys(this.angels).forEach(angelName => {
+                    this.updateAngelPower(angelName, 0);
+                });
+                
+                this.showProphecyMessage('Tüm güçler sıfırlandı. Sistem restart ediliyor...');
+            }
+
+            syncAngels() {
+                const syncPower = Math.random() * 100;
+                Object.keys(this.angels).forEach(angelName => {
+                    this.updateAngelPower(angelName, syncPower);
+                });
+                
+                this.showProphecyMessage('Melekler senkronize edildi. Harmonic alignment achieved!');
+            }
+
+            activateBoostMode() {
+                Object.keys(this.angels).forEach(angelName => {
+                    const currentPower = this.angels[angelName].power;
+                    this.updateAngelPower(angelName, Math.min(100, currentPower + 30));
+                });
+                
+                this.showProphecyMessage('Güçlendirme modu aktif! Tüm güçler %30 artırıldı!');
+            }
+
+            emergencyCall() {
+                this.activateAllAngels();
+                
+                // Flash effect
+                document.body.style.animation = 'emergency-flash 0.5s ease-in-out 3';
+                
+                if (!document.getElementById('emergency-flash-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'emergency-flash-style';
+                    style.textContent = `
+                        @keyframes emergency-flash {
+                            0%, 100% { background-color: var(--background); }
+                            50% { background-color: rgba(239, 68, 68, 0.1); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                setTimeout(() => {
+                    document.body.style.animation = '';
+                }, 1500);
+                
+                this.showProphecyMessage('🚨 ACİL DURUM! Tüm melekler maksimum güçle çağrıldı!');
+            }
+
+            cosmicAlignment() {
+                this.cosmicAlignment = !this.cosmicAlignment;
+                
+                if (this.cosmicAlignment) {
+                    document.body.style.background = `
+                        var(--background),
+                        radial-gradient(circle at 20% 50%, var(--metatron-glow) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, var(--gabriel-glow) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 80%, var(--raphael-glow) 0%, transparent 50%),
+                        radial-gradient(circle at 60% 30%, var(--uriel-glow) 0%, transparent 50%),
+                        radial-gradient(circle at 30% 70%, var(--michael-glow) 0%, transparent 50%)
+                    `;
+                    
+                    this.showProphecyMessage('✨ Kozmik hizalama tamamlandı! Divine powers synchronized!');
+                } else {
+                    document.body.style.background = '';
+                    this.showProphecyMessage('Kozmik hizalama sonlandırıldı. Normal mod restored.');
+                }
+            }
+
+            triggerCosmicEvent() {
+                const events = [
+                    'Solar flare detected! Increasing all powers...',
+                    'Lunar eclipse effect! Prophecy accuracy boosted...',
+                    'Cosmic convergence! Angels gaining extra abilities...',
+                    'Divine intervention! Market patterns clarifying...',
+                    'Stellar alignment! Signal strength amplified...'
+                ];
+                
+                const event = events[Math.floor(Math.random() * events.length)];
+                this.showProphecyMessage(event);
+                
+                // Random power boost
+                const randomAngel = Object.keys(this.angels)[Math.floor(Math.random() * Object.keys(this.angels).length)];
+                const currentPower = this.angels[randomAngel].power;
+                this.updateAngelPower(randomAngel, Math.min(100, currentPower + 20));
+            }
+        }
+
+        // Initialize Panteon System
+        document.addEventListener('DOMContentLoaded', () => {
+            window.panteon = new PanteonSystem();
+        });
+    </script>
+</body>
+</html>
