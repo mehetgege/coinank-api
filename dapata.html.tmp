@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="tr" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ULTIMATE TRADING WAR ROOM — NeonGlass</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+  /* ===========================
+     ⚡ NeonGlass UI Theme (minimal, single source)
+     =========================== */
+  :root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --secondary: #ec4899;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --dark: #0f172a;
+    --light: #f8fafc;
+    --card: rgba(255,255,255,0.95);
+    --border: rgba(255,255,255,0.14);
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --radius: 16px;
+    --shadow: 0 20px 40px rgba(2,6,23,0.6);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:'Roboto Mono',system-ui,Arial;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:var(--text);}
+
+  /* Background decorations */
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(circle,rgba(255,255,255,0.06) 1px,transparent 1px);background-size:60px 60px;z-index:0;pointer-events:none}
+
+  .app {position:relative;z-index:1;min-height:100vh;padding:36px;display:flex;align-items:flex-start;justify-content:center}
+  .panel {width:100%;max-width:1100px;background:var(--card);backdrop-filter:blur(12px);border-radius:20px;padding:28px;border:1px solid var(--border);box-shadow:var(--shadow)}
+
+  .header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{font-family:'Orbitron',sans-serif;font-weight:700;color:var(--primary);font-size:20px;letter-spacing:1px}
+  .subtitle{color:var(--text-muted);font-size:13px}
+
+  .grid{display:grid;grid-template-columns:1fr 360px;gap:20px;margin-top:18px}
+  @media (max-width:980px){.grid{grid-template-columns:1fr}}
+
+  .card{background:rgba(255,255,255,0.98);border-radius:14px;padding:18px;border:1px solid rgba(0,0,0,0.04)}
+  .card h3{margin:0 0 8px 0;color:var(--primary);font-size:16px}
+  .stats{display:flex;gap:12px;flex-wrap:wrap}
+  .stat{flex:1;min-width:120px;background:linear-gradient(180deg,rgba(255,255,255,0.6),rgba(255,255,255,0.45));border-radius:10px;padding:12px;text-align:center}
+  .stat .value{font-weight:800;color:var(--primary);font-size:18px}
+  .actions{display:flex;gap:10px;align-items:center}
+
+  .btn{background:linear-gradient(45deg,var(--secondary),var(--primary));color:#fff;padding:10px 14px;border-radius:12px;border:none;cursor:pointer;font-weight:700}
+  .btn.ghost{background:transparent;color:var(--primary);border:1px solid rgba(0,0,0,0.06)}
+
+  .history{max-height:220px;overflow:auto;font-size:13px;color:var(--text-muted)}
+  .history .row{display:flex;justify-content:space-between;padding:8px 6px;border-bottom:1px dashed rgba(0,0,0,0.04)}
+
+  .right-col{display:flex;flex-direction:column;gap:14px}
+  .notifications{max-height:220px;overflow:auto}
+  .notification{padding:10px;border-radius:10px;margin-bottom:8px;background:linear-gradient(90deg,rgba(99,102,241,0.08),rgba(236,72,153,0.04));border:1px solid rgba(99,102,241,0.06)}
+
+  .settings label{display:block;font-size:13px;color:var(--text-muted);margin-bottom:8px}
+  .settings select,input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);margin-top:6px}
+
+  .toast{position:fixed;right:30px;bottom:30px;background:linear-gradient(90deg,var(--success),#059669);color:#fff;padding:12px 18px;border-radius:999px;transform:translateX(340px);transition:transform .36s ease;z-index:999}
+  .toast.show{transform:translateX(0)}
+
+  footer{margin-top:18px;text-align:center;color:var(--text-muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="panel" role="main">
+      <div class="header">
+        <div>
+          <div class="brand">ULTIMATE TRADING WAR ROOM</div>
+          <div class="subtitle">NeonGlass — AI destekli piyasa içgörü paneli</div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="predictBtn">Tahmin Al</button>
+          <button class="btn ghost" id="openSettings">Ayarlar</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <div class="card">
+            <h3>Piyasa Özeti</h3>
+            <div class="stats">
+              <div class="stat"><div class="label">Fiyat</div><div class="value" id="stat-price">--</div></div>
+              <div class="stat"><div class="label">Hacim</div><div class="value" id="stat-volume">--</div></div>
+              <div class="stat"><div class="label">Trend</div><div class="value" id="stat-trend">--</div></div>
+              <div class="stat"><div class="label">Likidite</div><div class="value" id="stat-liquidity">--</div></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:14px">
+            <h3>İşlem Geçmişi</h3>
+            <div class="history" id="trade-history">
+              <div style="padding:12px;color:var(--text-muted)">Henüz işlem yok.</div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="right-col">
+          <div class="card notifications">
+            <h3>Bildirimler</h3>
+            <div id="notifications"></div>
+          </div>
+
+          <div class="card settings">
+            <h3>Ayarlar</h3>
+            <form id="settingsForm">
+              <label>Risk Seviyesi
+                <select id="riskLevel"><option>Düşük</option><option>Orta</option><option>Yüksek</option></select>
+              </label>
+              <label>Strateji
+                <select id="strategyMode"><option>Otomatik</option><option>Manuel</option></select>
+              </label>
+              <div style="display:flex;gap:8px;margin-top:8px"><button class="btn" type="submit">Kaydet</button><button class="btn ghost" type="button" id="resetBtn">Sıfırla</button></div>
+            </form>
+          </div>
+        </aside>
+      </div>
+
+      <footer>v3.0 — Hazır demo arayüz. Veri entegrasyonu için API bağlayın.</footer>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" aria-live="polite"></div>
+
+  <script>
+  // Basit, modüler JS iskeleti — mantık burada tutulur
+  (function(){
+    const $ = id => document.getElementById(id);
+
+    function showToast(msg, type='info'){
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      if(type==='error') t.style.background = 'linear-gradient(90deg,var(--error),#dc2626)';
+      setTimeout(()=>t.classList.remove('show'), 3200);
+    }
+
+    // Dummy veri güncelleyici (kullanıcı entegrasyonu için kolay nokta)
+    function updateDummyData(){
+      $('stat-price').textContent = (20000 + Math.round(Math.random()*1000)).toLocaleString();
+      $('stat-volume').textContent = Math.round(Math.random()*10000).toLocaleString();
+      const trends = ['↗️ Yükseliş','↘️ Düşüş','↔️ Yatay'];
+      $('stat-trend').textContent = trends[Math.floor(Math.random()*trends.length)];
+      $('stat-liquidity').textContent = (Math.random()*100).toFixed(1) + '%';
+    }
+
+    // Basit bildirim ekleme
+    function pushNotification(text, type='info'){
+      const n = document.createElement('div'); n.className='notification card'; n.textContent = text;
+      document.getElementById('notifications').prepend(n);
+    }
+
+    // Ayarlar kaydet
+    document.getElementById('settingsForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const risk = document.getElementById('riskLevel').value;
+      const strat = document.getElementById('strategyMode').value;
+      localStorage.setItem('warroom.risk', risk);
+      localStorage.setItem('warroom.strategy', strat);
+      showToast('Ayarlar kaydedildi', 'success');
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', function(){
+      localStorage.removeItem('warroom.risk');
+      localStorage.removeItem('warroom.strategy');
+      showToast('Ayarlar sıfırlandı', 'info');
+    });
+
+    document.getElementById('predictBtn').addEventListener('click', function(){
+      showToast('Tahmin özelliği yakında!','info');
+      pushNotification('Tahmin isteği gönderildi — demo modu');
+    });
+
+    document.getElementById('openSettings').addEventListener('click', function(){
+      document.querySelector('.panel').scrollIntoView({behavior:'smooth'});
+      showToast('Ayarları düzenleyin ve Kaydet tuşuna basın');
+    });
+
+    // Başlangıç
+    updateDummyData();
+    setInterval(updateDummyData, 4000);
+    pushNotification('Hoşgeldiniz! NeonGlass arayüzüne hoşgeldiniz.');
+
+    // Expose for debugging
+    window.WarRoom = { showToast, pushNotification };
+  })();
+  </script>
+</body>
+</html>
