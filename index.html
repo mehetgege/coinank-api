@@ -503,7 +503,7 @@ class App {
     // Period based on TF
     _scanPeriodMs(){
         const tf = this.inputs.timeframe.value;
-        const map = { '1m': 15000, '5m': 60000, '15m': 180000, '1h': 600000, '4h': 1800000 };
+        const map = { '1m': 1500, '5m': 6000, '15m': 18000, '1h': 6000, '4h': 18000 };
         return map[tf] || 60000;
     }
 
