@@ -1,1 +1,899 @@
-hello dünya 
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,minimum-scale=1.0,maximum-scale=1.0" />
+    <title>Gelişmiş Sinyal Tarayıcı</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-color: #121212; --panel-bg: #1e1e1e; --card-bg: #2d2d2d; --text-main: #f0f0f0; --text-secondary: #a0a0a0; --border-color: #383838; --primary-color: #bb86fc; --success-color: #03dac6; --danger-color: #cf6679; --glow: #5aa7ff55; }
+        body.high-contrast { --success-color: #00ffbb; --danger-color: #ff3b3b; --primary-color: #9d8cff; --text-main: #ffffff; --text-secondary: #d0d0d0; --glow: #00aaff55; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        a { color: inherit; text-decoration: none; }
+        #app { display: flex; flex-direction: column; height: 100%; }
+        .hidden { display: none !important; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--panel-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+        .topbar { display: flex; align-items: center; justify-content: space-between; min-height: 56px; padding: 0 12px; background: var(--panel-bg); border-bottom: 1px solid var(--border-color); }
+        .left, .right { display: flex; align-items: center; gap: 8px; }
+        .brand { font-weight: 800; font-size: 18px; color: var(--primary-color); }
+        .icon-btn { display: inline-flex; align-items: center; justify-content: center; height: 40px; width: 40px; border-radius: 8px; border: none; background: transparent; color: var(--text-main); cursor: pointer; font-size: 20px; transition: background .2s; }
+        .icon-btn:hover { background: var(--card-bg); }
+        .pill { height: 32px; display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; border-radius: 999px; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-secondary); font-size: 13px; user-select: none; cursor: pointer; }
+        .pill.active { background: rgba(3,218,198,.12); color: var(--success-color); border-color: var(--success-color); }
+        select.tf { height: 32px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); padding: 0 8px; }
+
+        .content { flex: 1; overflow: auto; padding: 12px 12px 76px; }
+        .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+        .search-box { flex: 1; min-width: 180px; height: 38px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); padding: 0 12px; }
+        .stats-pill, .status-pill { white-space: nowrap; }
+        .status-pill { margin-left: auto; }
+        .signals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 10px 30px var(--glow); }
+        .card-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .sym { font-weight: 800; font-size: 18px; letter-spacing: .3px; }
+        .chip { font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border-color); background: var(--panel-bg); display: inline-flex; align-items: center; gap: 6px; }
+        .buy { color: var(--success-color); border-color: var(--success-color); }
+        .sell { color: var(--danger-color); border-color: var(--danger-color); }
+        .price-row { display: flex; align-items: flex-end; justify-content: space-between; }
+        .price { font-size: 22px; font-weight: 700; }
+        .age-chip { font-size: 12px; color: var(--text-secondary); background: var(--panel-bg); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 999px; }
+        .cool { height: 6px; border-radius: 999px; background: #202338; overflow: hidden; border: 1px solid #2a2f59; }
+        .fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--success-color), var(--primary-color)); transition: width .3s ease; }
+        .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .mini-btn { display: inline-flex; align-items: center; justify-content: center; height: 36px; border-radius: 8px; border: none; background: var(--panel-bg); color: var(--text-main); cursor: pointer; font-size: 16px; transition: background .2s; }
+        .mini-btn:hover { background: var(--border-color); }
+        .mini-btn.tv { background: var(--primary-color); color: #121212; }
+        .mini-btn.binance { background: #f3ba2f; color: #121212; }
+        .mini-btn.mexc { background: #28b16d; color: #121212; }
+        .mini-btn.dismiss { background: #3a3f5c; }
+        .empty { text-align: center; margin-top: 20px; font-size: 15px; color: var(--text-secondary); }
+
+        .bottombar { position: fixed; bottom: 0; left: 0; right: 0; height: 64px; z-index: 10; display: flex; align-items: center; justify-content: space-around; padding: 0 12px; background: var(--panel-bg); border-top: 1px solid var(--border-color); }
+        .bottombar .icon-btn { width: 48px; height: 48px; border-radius: 50%; font-size: 22px; }
+
+        .panel { position: fixed; top: 0; left: 0; height: 100%; width: 92%; max-width: 340px; transform: translateX(-105%); background: var(--panel-bg); border-right: 1px solid var(--border-color); z-index: 1000; transition: transform .25s ease; display: flex; flex-direction: column; padding: 14px; }
+        .panel.open { transform: translateX(0); }
+        .panel-header { font-weight: 800; font-size: 18px; color: var(--primary-color); display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .panel-content { flex: 1; overflow-y: auto; padding-right: 8px; margin-right: -8px; display: flex; flex-direction: column; gap: 12px; }
+        .fg label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+        .fg input, .fg select { width: 100%; height: 40px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); padding: 0 12px; font-size: 14px; }
+        .fg .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        #btnSaveSettings { margin-top: 12px; }
+
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 999; opacity: 0; visibility: hidden; transition: all .2s ease; }
+        .overlay.active { opacity: 1; visibility: visible; }
+
+        @supports(padding:max(0px)) {
+            .content { padding-bottom: max(76px, env(safe-area-inset-bottom)); }
+            .bottombar { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); padding-bottom: env(safe-area-inset-bottom); }
+            .topbar { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
+        }
+
+        @media (max-width: 480px) {
+            .signals-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header class="topbar">
+            <div class="left">
+                <button id="btnSettings" class="icon-btn" title="Ayarlar">⚙️</button>
+                <div class="brand">Sinyal Tarayıcı</div>
+            </div>
+            <div class="right">
+                <span id="toggleAppLinks" class="pill active" title="Uygulamada Aç">📱</span>
+                <select id="chartTimeframe" class="tf" title="TV Zaman Dilimi">
+                    <option value="1m">1m</option>
+                    <option value="5m" selected>5m</option>
+                    <option value="15m">15m</option>
+                    <option value="1h">1h</option>
+                    <option value="4h">4h</option>
+                </select>
+                <button id="btnTheme" class="icon-btn" title="Tema (Yüksek Kontrast)">🌗</button>
+                <button id="btnClear" class="icon-btn" title="Sinyalleri Temizle">🧹</button>
+                <button id="btnSound" class="icon-btn" title="Ses Aç/Kapat"><span id="soundIcon">🔊</span></button>
+                <button id="btnVoiceTest" class="icon-btn" title="Ses Testi">🗣️</button>
+            </div>
+        </header>
+        <main class="content">
+            <div class="toolbar">
+                <input id="searchInput" class="search-box" placeholder="Sembol ara (örn. BTCUSDT)" />
+                <div id="statsPill" class="pill stats-pill">📊 0 Buy / 0 Sell | Toplam 0</div>
+                <div class="pill status-pill">Durum: <strong id="statusText" style="margin-left:6px;">Beklemede</strong></div>
+            </div>
+            <div id="signalsGrid" class="signals-grid"></div>
+            <div id="emptyState" class="empty hidden">Şu an aktif sinyal yok.</div>
+        </main>
+        <div class="bottombar">
+            <button id="btnStart" class="icon-btn" title="Başlat">▶️</button>
+            <button id="btnStop" class="icon-btn hidden" title="Durdur">⏹</button>
+        </div>
+    </div>
+
+    <div id="settingsPanel" class="panel">
+        <div class="panel-header">
+            <span>Ayarlar</span>
+            <button id="btnCloseSettings" class="icon-btn" title="Kapat" style="font-size: 18px;">✖️</button>
+        </div>
+        <div class="panel-content">
+            <div class="fg">
+                <label for="scanDirection">Tarama Yönü</label>
+                <select id="scanDirection">
+                    <option value="both">Her İkisi de</option>
+                    <option value="buy">Sadece Alış</option>
+                    <option value="sell">Sadece Satış</option>
+                </select>
+            </div>
+            <div class="fg">
+                <label for="customSymbols">Taranacak Coinler (Boş ise hepsi)</label>
+                <input id="customSymbols" type="text" placeholder="örn: BTCUSDT,ETHUSDT" />
+            </div>
+            <div class="fg row">
+                <div>
+                    <label for="scanLimit">Coin Limiti (0=Hepsi)</label>
+                    <input id="scanLimit" type="number" value="0" />
+                </div>
+                <div>
+                    <label for="timeframe">Tarama TF</label>
+                    <select id="timeframe">
+                        <option value="1m">1m</option>
+                        <option value="5m" selected>5m</option>
+                        <option value="15m">15m</option>
+                        <option value="1h">1h</option>
+                        <option value="4h">4h</option>
+                    </select>
+                </div>
+            </div>
+            <div class="fg row">
+                <div>
+                    <label for="slowEma">EMA</label>
+                    <input id="slowEma" type="number" value="21" />
+                </div>
+                <div>
+                    <label for="vwma">VWMA</label>
+                    <input id="vwma" type="number" value="34" />
+                </div>
+            </div>
+            <div class="fg row">
+                <div>
+                    <label for="signalLookback">Lookback (mum)</label>
+                    <input id="signalLookback" type="number" value="3" />
+                </div>
+                <div>
+                    <label for="batchDelay">Sembol Bekleme (ms)</label>
+                    <input id="batchDelay" type="number" value="200" />
+                </div>
+            </div>
+            <div class="fg row">
+                <div>
+                    <label for="notificationVolume">Ses Seviyesi</label>
+                    <input id="notificationVolume" type="range" min="0" max="100" value="100" />
+                </div>
+                <div>
+                    <label for="keepAwake">Ekranı Açık Tut</label>
+                    <select id="keepAwake">
+                        <option value="off">Kapalı</option>
+                        <option value="on">Açık</option>
+                    </select>
+                </div>
+            </div>
+            <div class="fg row">
+                <div>
+                    <label for="vibrate">Titreşim</label>
+                    <select id="vibrate">
+                        <option value="on">Açık</option>
+                        <option value="off" selected>Kapalı</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="openInApp">Uygulamada Aç</label>
+                    <select id="openInApp">
+                        <option value="on" selected>Evet</option>
+                        <option value="off">Hayır</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <button id="btnSaveSettings" class="mini-btn" style="background:var(--success-color); color:var(--bg-color);">Kaydet</button>
+    </div>
+    <div id="overlay" class="overlay"></div>
+
+<script>
+class TTS {
+    constructor(){
+        this.voice = null; this.ready = false; this.unlocked = false;
+        this.rate = 1.0; this.pitch = 1.0; this.volume = 1.0;
+        this._loadVoices();
+        window.speechSynthesis.onvoiceschanged = () => this._loadVoices();
+    }
+    _loadVoices(){
+        const voices = window.speechSynthesis.getVoices() || [];
+        const tr = voices.find(v => (v.lang||'').toLowerCase().startsWith('tr')) || voices.find(v => (v.name||'').toLowerCase().includes('turk')) || voices[0];
+        if (tr){ this.voice = tr; this.ready = true; }
+    }
+    unlock(){
+        if(this.unlocked) return;
+        const u = new SpeechSynthesisUtterance('Ses hazır.');
+        if(this.voice) u.voice = this.voice;
+        u.rate = this.rate; u.pitch = this.pitch; u.volume = 0.0;
+        try { window.speechSynthesis.speak(u); this.unlocked = true; } catch(_) {}
+    }
+    speak(text, opts={}){
+        if(!this.ready) this._loadVoices();
+        const u = new SpeechSynthesisUtterance(text);
+        if(this.voice) u.voice = this.voice;
+        u.rate = opts.rate ?? this.rate;
+        u.pitch = opts.pitch ?? this.pitch;
+        u.volume = opts.volume ?? this.volume;
+        window.speechSynthesis.speak(u);
+    }
+}
+
+class App {
+    constructor(){
+        // UI
+        this.grid = document.getElementById('signalsGrid');
+        this.empty = document.getElementById('emptyState');
+        this.statusText = document.getElementById('statusText');
+        this.soundIcon = document.getElementById('soundIcon');
+        this.btnStart = document.getElementById('btnStart');
+        this.btnStop = document.getElementById('btnStop');
+        this.btnSettings = document.getElementById('btnSettings');
+        this.btnTheme = document.getElementById('btnTheme');
+        this.btnClear = document.getElementById('btnClear');
+        this.btnSound = document.getElementById('btnSound');
+        this.btnVoiceTest = document.getElementById('btnVoiceTest');
+        this.overlay = document.getElementById('overlay');
+        this.settingsPanel = document.getElementById('settingsPanel');
+        this.statsPill = document.getElementById('statsPill');
+        this.searchInput = document.getElementById('searchInput');
+        this.toggleAppLinksEl = document.getElementById('toggleAppLinks');
+        this.btnCloseSettings = document.getElementById('btnCloseSettings');
+
+        // Inputs
+        this.inputs = {
+            scanDirection: document.getElementById('scanDirection'),
+            customSymbols: document.getElementById('customSymbols'),
+            scanLimit: document.getElementById('scanLimit'),
+            timeframe: document.getElementById('timeframe'),
+            slowEma: document.getElementById('slowEma'),
+            vwma: document.getElementById('vwma'),
+            signalLookback: document.getElementById('signalLookback'),
+            chartTimeframe: document.getElementById('chartTimeframe'),
+            notificationVolume: document.getElementById('notificationVolume'),
+            batchDelay: document.getElementById('batchDelay'),
+            keepAwake: document.getElementById('keepAwake'),
+            vibrate: document.getElementById('vibrate'),
+            openInApp: document.getElementById('openInApp')
+        };
+
+        // TTS
+        this.tts = new TTS();
+        this.isSoundOn = this._load('isSoundOn', true);
+        this.tts.volume = (this._load('notificationVolume', 100))/100;
+        this.ttsCooldownMs = 1400;
+        this.lastTtsAt = 0;
+
+        // State
+        this.dismissedIds = new Set(this._load('dismissedIds', []));
+        this.visibleSignals = new Map();
+        this.allSymbols = [];
+        this.running = false;
+        this.scanInterval = null;
+        this.ageUpdateInterval = null;
+        this.currentScanTf = this.inputs.timeframe.value;
+        this.useAppLinks = this._load('useAppLinks', true);
+        if(!this.useAppLinks) this.toggleAppLinksEl.classList.remove('active');
+        this.keepAwakeHandle = null;
+        this.isVisible = document.visibilityState === 'visible';
+
+        // New: guards & backoff & cursor
+        this._scanning = false;       // re-entrancy guard
+        this._scanCursor = 0;         // which symbol to continue from
+        this._backoffMs = 0;          // dynamic backoff
+
+        // Init
+        this._bindEvents();
+        this._applySavedSettingsToUI();
+        this._updateSoundIcon();
+        this._bindVisibility();
+        this._ensureWorker();
+        this._networkEvents();
+        this._loadSymbols();
+        this._startAgeTimer();
+    }
+
+    // LocalStorage helpers
+    _load(key, fallback=null){ try { const v = localStorage.getItem(key); return v!==null ? JSON.parse(v) : fallback; } catch { return fallback; } }
+    _save(key, val){ try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
+
+    // Events
+    _bindEvents(){
+        this.btnSettings.addEventListener('click', ()=> this._openSettings());
+        this.overlay.addEventListener('click', ()=> this._closeSettings());
+        this.btnCloseSettings.addEventListener('click', () => this._closeSettings());
+        document.getElementById('btnSaveSettings').addEventListener('click', ()=>{
+            const oldTf = this.currentScanTf;
+            this._saveSettings();
+            this._closeSettings();
+            this._loadSymbols();
+            if (this.running && this.inputs.timeframe.value !== oldTf) {
+                this._resetScanTimers(); // timeframe değiştiyse periyotları güncelle
+            }
+        });
+        this.btnTheme.addEventListener('click', ()=> document.body.classList.toggle('high-contrast'));
+        this.btnClear.addEventListener('click', ()=> this._clearAllSignals());
+        this.btnSound.addEventListener('click', ()=>{
+            this.isSoundOn = !this.isSoundOn;
+            this._save('isSoundOn', this.isSoundOn);
+            this._updateSoundIcon();
+            if(this.isSoundOn) this.tts.unlock();
+        });
+        this.btnVoiceTest.addEventListener('click', ()=>{
+            this.tts.unlock();
+            if(!this.isSoundOn) return;
+            this.tts.speak("Ses testi tamam. Sistem hazır.");
+        });
+        this.toggleAppLinksEl.addEventListener('click', ()=>{
+            this.useAppLinks = !this.useAppLinks;
+            this._save('useAppLinks', this.useAppLinks);
+            this.toggleAppLinksEl.classList.toggle('active', this.useAppLinks);
+        });
+        this.btnStart.addEventListener('click', ()=> { this.tts.unlock(); this.startScanner(); });
+        this.btnStop.addEventListener('click', ()=> this.stopScanner());
+        this.searchInput.addEventListener('input', (e)=> this._filterCards(e.target.value.trim().toLowerCase()));
+        this.inputs.notificationVolume.addEventListener('input', (e)=> {
+            const v = parseInt(e.target.value,10);
+            this.tts.volume = v/100; this._save('notificationVolume', v);
+        });
+        // TF değiştirilince periyotları güncelle
+        this.inputs.timeframe.addEventListener('change', ()=>{
+            if (this.running) this._resetScanTimers();
+        });
+
+        document.addEventListener('pointerdown', ()=> this.tts.unlock(), { once:true });
+    }
+
+    _bindVisibility(){
+        document.addEventListener('visibilitychange', ()=>{
+            this.isVisible = document.visibilityState === 'visible';
+            if (!this.running) return;
+            // görünürlük değişiminde tetikleyicileri senkronize et
+            if (this.isVisible) {
+                // görünürken setInterval çalışsın, worker dursun
+                this.worker.postMessage({ action: 'stop' });
+            } else {
+                // arka planda worker çalışsın
+                this.worker.postMessage({ action: 'start', ms: this._scanPeriodMs() });
+            }
+        });
+    }
+
+    _networkEvents(){
+        window.addEventListener('online', ()=> this.statusText.textContent = 'Çevrimiçi');
+        window.addEventListener('offline', ()=> this.statusText.textContent = '⚠️ İnternet yok');
+    }
+
+    _ensureWorker(){
+        const blob = new Blob([`
+            let t=null;
+            self.onmessage = e => {
+                if (e.data.action === 'start') {
+                    clearInterval(t);
+                    const ms = e.data.ms || 30000;
+                    t = setInterval(()=> postMessage({a:'tick'}), ms);
+                }
+                if (e.data.action === 'stop') {
+                    clearInterval(t); t=null;
+                }
+            };
+        `], {type:'application/javascript'});
+        this.worker = new Worker(URL.createObjectURL(blob));
+        this.worker.onmessage = (e)=>{
+            if(e.data && e.data.a==='tick' && this.running){
+                if(!this.isVisible){ this._scanOnce(true); }
+            }
+        };
+    }
+
+    async _loadSymbols(){
+        const custom = this.inputs.customSymbols.value.trim();
+        if(custom){
+            this.allSymbols = custom.split(',').map(s=> s.trim().toUpperCase()).filter(Boolean);
+            this.statusText.textContent = `Özel liste: ${this.allSymbols.length} sembol`;
+            return;
+        }
+        try{
+            const res = await fetch('https://fapi.binance.com/fapi/v1/exchangeInfo');
+            if(!res.ok) throw new Error(`API Error: ${res.status}`);
+            const j = await res.json();
+            this.allSymbols = (j.symbols||[])
+                .filter(s => s.contractType === 'PERPETUAL' && s.status === 'TRADING' && s.quoteAsset === 'USDT')
+                .map(s => s.symbol);
+            this.statusText.textContent = `Toplam ${this.allSymbols.length} sembol bulundu`;
+        }catch(e){
+            console.error('Sembol listesi alınamadı', e);
+            this.allSymbols = [];
+            this.statusText.textContent = 'Sembol listesi alınamadı';
+        }
+    }
+
+    // Settings
+    _saveSettings(){
+        const s = {};
+        Object.keys(this.inputs).forEach(k=>{
+            const el = this.inputs[k];
+            s[k] = el.type==='checkbox' ? el.checked : el.value;
+        });
+        this._save('scannerSettings', s);
+        this._save('useAppLinks', this.useAppLinks);
+        this._save('isSoundOn', this.isSoundOn);
+        this.tts.volume = (parseInt(this.inputs.notificationVolume.value,10)/100);
+        this.statusText.textContent = 'Ayarlar kaydedildi';
+    }
+    _applySavedSettingsToUI(){
+        const s = this._load('scannerSettings', null);
+        if(!s) return;
+        Object.keys(this.inputs).forEach(k=>{
+            if(s[k] !== undefined) this.inputs[k].value = s[k];
+        });
+    }
+    _openSettings(){ this.settingsPanel.classList.add('open'); this.overlay.classList.add('active'); }
+    _closeSettings(){ this.settingsPanel.classList.remove('open'); this.overlay.classList.remove('active'); }
+
+    // Start/Stop
+    startScanner(){
+        if(this.running) return;
+        this.running = true;
+        this.btnStart.classList.add('hidden');
+        this.btnStop.classList.remove('hidden');
+        this.statusText.textContent = 'Tarayıcı başlatıldı';
+        this._applyWakeLock();
+        this._resetScanTimers();
+        if (document.visibilityState === 'visible') this._scanOnce(); // görünürken ilk batch
+    }
+
+    stopScanner(){
+        if(!this.running) return;
+        this.running = false;
+        this.btnStart.classList.remove('hidden');
+        this.btnStop.classList.add('hidden');
+        if(this.scanInterval) clearInterval(this.scanInterval);
+        this.worker.postMessage({action:'stop'});
+        this._releaseWakeLock();
+        this.statusText.textContent = 'Durduruldu';
+    }
+
+    _resetScanTimers(){
+        if(this.scanInterval) clearInterval(this.scanInterval);
+        const period = this._scanPeriodMs();
+        // görünürken setInterval, arka planda worker
+        if (document.visibilityState === 'visible') {
+            this.scanInterval = setInterval(()=> {
+                if (document.visibilityState !== 'visible') return;
+                this._scanOnce();
+            }, period);
+            this.worker.postMessage({ action: 'stop' });
+        } else {
+            this.worker.postMessage({ action: 'start', ms: period });
+        }
+    }
+
+    async _applyWakeLock(){
+        try{
+            if(this.inputs.keepAwake.value === 'on' && 'wakeLock' in navigator){
+                this.keepAwakeHandle = await navigator.wakeLock.request('screen');
+                this.keepAwakeHandle.addEventListener('release', ()=>{ this.keepAwakeHandle=null; });
+            }
+        }catch(_){}
+    }
+    async _releaseWakeLock(){
+        try{ if(this.keepAwakeHandle){ await this.keepAwakeHandle.release(); this.keepAwakeHandle=null; } }catch(_){}
+    }
+
+    // Period based on TF
+    _scanPeriodMs(){
+        const tf = this.inputs.timeframe.value;
+        const map = { '1m': 15000, '5m': 60000, '15m': 180000, '1h': 600000, '4h': 1800000 };
+        return map[tf] || 60000;
+    }
+
+    // Safe fetch with backoff
+    async _fetchJsonSafe(url){
+        const res = await fetch(url, { cache: 'no-store' }).catch(e => { throw e; });
+
+        // IP ban
+        if (res.status === 418) {
+            this.statusText.textContent = 'Binance 418: IP banlandı. 5–60 dk bekleyin veya IP değiştirin.';
+            this.stopScanner();
+            throw new Error('IP banned (418)');
+        }
+        // Too many requests -> backoff
+        if (res.status === 429) {
+            const hdrRetry = parseInt(res.headers.get('Retry-After') || '0', 10) * 1000;
+            const retry = hdrRetry || Math.max(this._backoffMs, 15000);
+            this._backoffMs = Math.min(Math.max(this._backoffMs * 1.5, retry), 60000);
+            await this._sleep(this._backoffMs);
+            return this._fetchJsonSafe(url);
+        }
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        // Ağırlık başlıklarıyla gerekirse ek gecikme yapılabilir
+        return res.json();
+    }
+
+    // Dynamic limit = lookback + 10, but at least P+5 (P=max(EMA,VWMA))
+    _computeKlineLimit(s){
+        const L = parseInt(s.signalLookback, 10) || 3;
+        const emaP = parseInt(s.slowEma, 10) || 21;
+        const vwmaP = parseInt(s.vwma, 10) || 34;
+        const P = Math.max(emaP, vwmaP);
+        let limit = Math.max(L + 10, P + 5);
+        limit = Math.max(20, Math.min(limit, 1000)); // güvenli sınırlar
+        return limit;
+    }
+
+    // Drop open candle to reduce repaint risk
+    _dropOpenCandleIfAny(candles, tf){
+        const tfMs = this._tfToSec(tf) * 1000;
+        const last = candles[candles.length - 1];
+        if (last && (last.time + tfMs) > Date.now()){
+            return candles.slice(0, -1);
+        }
+        return candles;
+    }
+
+    async _scanOnce(background=false){
+        if (!this.running || this._scanning) return;
+        this._scanning = true;
+
+        try {
+            // global backoff varsa uygula
+            if (this._backoffMs > 0) await this._sleep(this._backoffMs);
+
+            const s = this._collectSettings();
+            this.currentScanTf = s.timeframe;
+
+            const src = s.scanLimit > 0 ? this.allSymbols.slice(0, s.scanLimit) : this.allSymbols.slice();
+            if (src.length === 0){
+                this.statusText.textContent = 'Sembol yok';
+                return;
+            }
+
+            // Per-tick kaç sembol? period/delay'a göre tahmin
+            const delay = Math.max(50, Math.min(parseInt(s.batchDelay,10) || 200, 10000));
+            const period = this._scanPeriodMs();
+            const perTickGuess = Math.max(1, Math.min(60, Math.floor(period / delay)));
+            const start = this._scanCursor % src.length;
+            const end = Math.min(start + perTickGuess, src.length);
+            const batch = src.slice(start, end);
+            this._scanCursor = end % src.length;
+
+            let processed = 0;
+            const limit = this._computeKlineLimit(s);
+
+            for (const sym of batch){
+                if (!this.running) break;
+                if (!background) this.statusText.textContent = `Taranıyor: ${sym} (${processed+1}/${batch.length})`;
+
+                try {
+                    const klUrl = `https://fapi.binance.com/fapi/v1/klines?symbol=${sym}&interval=${s.timeframe}&limit=${limit}`;
+                    const data = await this._fetchJsonSafe(klUrl);
+
+                    let candles = data.map(d => ({
+                        time: parseInt(d[0],10),
+                        open: parseFloat(d[1]),
+                        high: parseFloat(d[2]),
+                        low: parseFloat(d[3]),
+                        close: parseFloat(d[4]),
+                        volume: parseFloat(d[5]),
+                        symbol: sym
+                    }));
+
+                    candles = this._dropOpenCandleIfAny(candles, s.timeframe);
+
+                    const ema = this._emaAligned(candles.map(c=>c.close), parseInt(s.slowEma,10), candles.length);
+                    const vwma = this._vwmaAligned(candles, parseInt(s.vwma,10), candles.length);
+
+                    const sig = this._findSignal(candles, ema, vwma, s);
+                    if (sig) this._handleSignal(sig);
+                } catch (e) {
+                    // 418 durumunda _fetchJsonSafe zaten stopScanner çağırdı
+                    console.error('Tarama hatası', sym, e);
+                }
+
+                processed++;
+                await this._sleep(delay);
+            }
+
+            if (!background) this.statusText.textContent = 'Tarama (batch) tamamlandı';
+        } finally {
+            this._scanning = false;
+        }
+    }
+
+    _collectSettings(){
+        const get = k => this.inputs[k].value;
+        return {
+            scanDirection: get('scanDirection'),
+            customSymbols: get('customSymbols'),
+            scanLimit: parseInt(get('scanLimit'),10) || 0,
+            timeframe: get('timeframe'),
+            slowEma: parseInt(get('slowEma'),10) || 21,
+            vwma: parseInt(get('vwma'),10) || 34,
+            signalLookback: parseInt(get('signalLookback'),10) || 3,
+            notificationVolume: parseInt(get('notificationVolume'),10) || 100,
+            batchDelay: parseInt(get('batchDelay'),10) || 200,
+            keepAwake: get('keepAwake'),
+            vibrate: get('vibrate'),
+            openInApp: get('openInApp')
+        };
+    }
+
+    _sleep(ms){ return new Promise(r=> setTimeout(r, ms)); }
+
+    _emaAligned(prices, period, len){
+        if(prices.length<period) return Array(len).fill(null);
+        const k = 2/(period+1);
+        const out = Array(len).fill(null);
+        let ema = prices.slice(0, period).reduce((a,b)=>a+b,0)/period;
+        out[period-1] = ema;
+        for(let i=period; i<len; i++){
+            ema = (prices[i]*k) + (ema*(1-k));
+            out[i] = ema;
+        }
+        return out;
+    }
+
+    _vwmaAligned(candles, period, len){
+        if(candles.length<period) return Array(len).fill(null);
+        const out = Array(len).fill(null);
+        let sumPV = 0, sumV = 0;
+        for(let i=0;i<period;i++){
+            sumPV += candles[i].close*candles[i].volume;
+            sumV += candles[i].volume;
+        }
+        out[period-1] = sumV ? sumPV/sumV : null;
+        for(let i=period;i<len;i++){
+            const add = candles[i];
+            const rem = candles[i-period];
+            sumPV += add.close*add.volume - rem.close*rem.volume;
+            sumV += add.volume - rem.volume;
+            out[i] = sumV ? sumPV/sumV : null;
+        }
+        return out;
+    }
+
+    _findSignal(candles, ema, vwma, s){
+        const L = candles.length;
+        const lookback = Math.max(1, s.signalLookback);
+        const start = Math.max(1, L - lookback - 1);
+        for(let i=L-1; i>=start; i--){
+            const prevE = ema[i-1], curE = ema[i];
+            const prevV = vwma[i-1], curV = vwma[i];
+            if(prevE==null || curE==null || prevV==null || curV==null) continue;
+            const c = candles[i];
+
+            const crossDown = (prevV > prevE) && (curV < curE);
+            const crossUp   = (prevV < prevE) && (curV > curE);
+            const priceAboveBoth = c.close > curE && c.close > curV;
+            const priceBelowBoth = c.close < curE && c.close < curV;
+
+            let type = null;
+            if(crossDown && priceBelowBoth && (s.scanDirection==='buy' || s.scanDirection==='both')) type='buy';
+            if(crossUp   && priceAboveBoth && (s.scanDirection==='sell' || s.scanDirection==='both')) type='sell';
+            if(!type) continue;
+
+            const tsSec = Math.floor(c.time/1000);
+            const id = `${c.symbol}:${type}:${tsSec}`;
+            return { symbol: c.symbol, type, price: c.close, ts: tsSec, id };
+        }
+        return null;
+    }
+
+    _handleSignal(sig){
+        if(this.dismissedIds.has(sig.id)) return;
+        if(this.visibleSignals.has(sig.id)){
+            const cur = this.visibleSignals.get(sig.id);
+            cur.price = sig.price;
+            cur.ts = sig.ts;
+        } else {
+            this.visibleSignals.set(sig.id, sig);
+            this._notify(sig);
+            this._speak(sig);
+            if(this.inputs.vibrate.value==='on' && 'vibrate' in navigator){
+                navigator.vibrate([40,40,40]);
+            }
+        }
+        this._renderSignals();
+    }
+
+    _renderSignals(){
+        const all = [...this.visibleSignals.values()].sort((a,b)=> b.ts - a.ts);
+        this.grid.innerHTML = '';
+        if(all.length===0){
+            this.empty.classList.remove('hidden');
+            this._updateStats(all);
+            return;
+        }
+        this.empty.classList.add('hidden');
+
+        for(const sig of all){
+            const typeClass = sig.type==='buy' ? 'buy' : 'sell';
+            const typeText = sig.type==='buy' ? 'ALIŞ' : 'SATIŞ';
+            const card = document.createElement('div');
+            card.className='card';
+            card.dataset.id = sig.id;
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="sym">${sig.symbol.replace('USDT','')}</div>
+                    <div class="chip ${typeClass}">● ${typeText}</div>
+                </div>
+                <div class="price-row">
+                    <div class="price">${(sig.price||0).toFixed(4)}</div>
+                    <div class="age-chip" data-ts="${sig.ts}">...</div>
+                </div>
+                <div class="cool"><div class="fill"></div></div>
+                <div class="actions">
+                    <a href="${this._tvUrl(sig.symbol)}" target="_blank" rel="noopener" class="mini-btn tv" title="TradingView">📈</a>
+                    <a href="${this._binanceUrl(sig.symbol)}" target="_blank" rel="noopener" class="mini-btn binance" title="Binance">🟡</a>
+                    <a href="${this._mexcUrl(sig.symbol)}" target="_blank" rel="noopener" class="mini-btn mexc" title="MEXC">🟢</a>
+                    <button class="mini-btn dismiss" title="Gizle">🗑️</button>
+                </div>
+            `;
+            card.querySelector('.dismiss').addEventListener('click', ()=>{
+                this.dismissedIds.add(sig.id);
+                this._save('dismissedIds', [...this.dismissedIds]);
+                this.visibleSignals.delete(sig.id);
+                card.remove();
+                if(this.grid.children.length===0) this.empty.classList.remove('hidden');
+                this._updateStats([...this.visibleSignals.values()]);
+            });
+            this.grid.appendChild(card);
+        }
+        this._updateAgeTimers();
+        this._updateStats(all);
+        this._filterCards(this.searchInput.value.trim().toLowerCase());
+    }
+
+    _clearAllSignals(){
+        const ids = [...this.visibleSignals.keys()];
+        ids.forEach(id => this.dismissedIds.add(id));
+        this._save('dismissedIds', [...this.dismissedIds]);
+        this.visibleSignals.clear();
+        this.grid.innerHTML='';
+        this.empty.classList.remove('hidden');
+        this._updateStats([]);
+    }
+
+    _updateStats(arr){
+        const buy = arr.filter(x=>x.type==='buy').length;
+        const sell = arr.filter(x=>x.type==='sell').length;
+        const tot = arr.length;
+        const freshest = arr[0] ? arr[0].symbol.replace('USDT','') : '-';
+        this.statsPill.textContent = `📊 ${buy} Buy / ${sell} Sell | Toplam ${tot} | En Taze: ${freshest}`;
+    }
+
+    _filterCards(q){
+        const cards = [...this.grid.children];
+        let visibleCount = 0;
+        for(const c of cards){
+            const sym = c.querySelector('.sym').textContent.toLowerCase();
+            const show = !q || sym.includes(q);
+            c.classList.toggle('hidden', !show);
+            if(show) visibleCount++;
+        }
+        this.empty.classList.toggle('hidden', visibleCount === 0);
+    }
+
+    _startAgeTimer(){
+        if(this.ageUpdateInterval) clearInterval(this.ageUpdateInterval);
+        this.ageUpdateInterval = setInterval(()=>this._updateAgeTimers(), 1000);
+    }
+
+    _updateAgeTimers(){
+        const now = Math.floor(Date.now()/1000);
+        const lb = parseInt(this.inputs.signalLookback.value,10)||3;
+        const secPerBar = this._tfToSec(this.currentScanTf);
+        document.querySelectorAll('.age-chip').forEach(el=>{
+            const ts = parseInt(el.dataset.ts,10)||0;
+            const elapsed = Math.max(0, now-ts);
+            const bars = Math.floor(elapsed/secPerBar);
+            const m = Math.floor(elapsed/60), s = elapsed%60;
+            el.textContent = `${m}d ${s}s • ${bars} mum`;
+            const prog = el.closest('.card')?.querySelector('.fill');
+            if(prog){ prog.style.width = Math.min(100,(bars/lb)*100)+'%'; }
+        });
+    }
+
+    _tvUrl(symbol){
+        const map = {'1m':'1','5m':'5','15m':'15','1h':'60','4h':'240'};
+        const interval = map[this.inputs.chartTimeframe.value]||'5';
+        const tvSym = encodeURIComponent(`BINANCE:${symbol}.P`);
+        return `https://www.tradingview.com/chart/?symbol=${tvSym}&interval=${interval}`;
+    }
+    _binanceUrl(symbol){
+        const host = this.useAppLinks ? 'app.binance.com' : 'www.binance.com';
+        return `https://${host}/en/futures/${symbol}`;
+    }
+    _mexcUrl(symbol){
+        const base = symbol.endsWith('USDT') ? symbol.slice(0,-4) : symbol;
+        return `https://www.mexc.com/futures/contract?contractName=${encodeURIComponent(base)}_USDT`;
+    }
+
+    _notify(sig){
+        if('Notification' in window && Notification.permission !== 'denied'){
+            if(Notification.permission !== 'granted'){
+                Notification.requestPermission();
+            } else {
+                new Notification(`${sig.type.toUpperCase()} • ${sig.symbol}`, { body: `Fiyat: ${sig.price.toFixed(4)}`, silent: true });
+            }
+        }
+    }
+
+    _speak(sig){
+        if(!this.isSoundOn) return;
+        const now = Date.now();
+        if(now - this.lastTtsAt < this.ttsCooldownMs) return;
+        const line = this._pickLine(sig.type, sig.symbol.replace('USDT',''), sig.price);
+        this.tts.speak(line, { volume: this.tts.volume });
+        this.lastTtsAt = now;
+    }
+
+    _pickLine(type, symbol, price){
+        const buyLines = [
+            "{symbol} için alış sinyali: fiyat {price}. Risk yönetimini gözden geçirin.",
+            "Yeni alış fırsatı: {symbol}, güncel {price}.",
+            "{symbol} alım bölgesinde. Fiyat {price}.",
+            "Alış sinyali teyit edildi: {symbol}, {price}.",
+            "Dikkat: {symbol} için olumlu görünüm. {price}.",
+            "{symbol} destek çevresinde; alış aktif. {price}.",
+            "Güçlenen görünüm: {symbol}, {price}.",
+            "Alış tetiklendi: {symbol}, {price}.",
+            "Fırsat: {symbol} alış sinyali. {price}.",
+            "Onaylı sinyal: {symbol} alış, {price}."
+        ];
+        const sellLines = [
+            "{symbol} için satış sinyali: fiyat {price}. Karı güvenceye alın.",
+            "Yeni satış uyarısı: {symbol}, {price}.",
+            "{symbol} direnç bölgesinde; satış aktif. {price}.",
+            "Satış sinyali teyit edildi: {symbol}, {price}.",
+            "Dikkat: {symbol} için zayıflama. {price}.",
+            "{symbol} tepe çevresinde; satış değerlendirin. {price}.",
+            "Zayıf görünüm: {symbol}, {price}.",
+            "Satış tetiklendi: {symbol}, {price}.",
+            "Uyarı: {symbol} satış sinyali. {price}.",
+            "Onaylı sinyal: {symbol} satış, {price}."
+        ];
+        const L = type==='buy' ? buyLines : sellLines;
+        if(!this._lastBuyIdx) this._lastBuyIdx = -1;
+        if(!this._lastSellIdx) this._lastSellIdx = -1;
+        let idx;
+        do { idx = Math.floor(Math.random()*L.length); }
+        while((type==='buy' ? idx===this._lastBuyIdx : idx===this._lastSellIdx) && L.length>1);
+        if(type==='buy') this._lastBuyIdx = idx; else this._lastSellIdx = idx;
+        return L[idx].replace('{symbol}', symbol).replace('{price}', Number(price).toFixed(3));
+    }
+
+    _updateSoundIcon(){ this.soundIcon.textContent = this.isSoundOn ? '🔊' : '🔇'; }
+    _tfToSec(tf){ const m = {'1m':60, '5m':300, '15m':900, '1h':3600, '4h':14400}; return m[tf] || 300; }
+}
+
+window.addEventListener('DOMContentLoaded', ()=>{
+    if('Notification' in window && Notification.permission==='default'){
+        Notification.requestPermission();
+    }
+    window.app = new App();
+});
+</script>
+</body>
+</html>
